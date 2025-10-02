@@ -105,41 +105,72 @@ const App: React.FC = () => {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-gray-900 dark:bg-black rounded-b-xl z-20"></div>
 
         {/* Header */}
-        <header className="flex items-center justify-between p-4 pt-8 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm z-10">
-          <h1 className="text-xl font-bold text-red-600 dark:text-red-400">
-            Access by KAI
-          </h1>
-          <button
-            onClick={toggleTheme}
-            className="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-          >
-            {theme === "light" ? (
-              <MoonIcon className="w-6 h-6" />
-            ) : (
-              <SunIcon className="w-6 h-6" />
-            )}
-          </button>
+        <header className="relative flex items-center justify-between p-4 pt-8 bg-gradient-to-r from-red-500 via-red-600 to-red-700 dark:from-red-700 dark:via-red-800 dark:to-red-900 backdrop-blur-sm z-10 shadow-lg">
+          {/* Background decoration */}
+          <div className="absolute inset-0 bg-gradient-to-r from-red-500/20 to-red-700/20 dark:from-red-700/20 dark:to-red-900/20"></div>
+          <div className="absolute top-0 left-0 w-full h-full opacity-20">
+            <div className="absolute top-4 left-4 w-2 h-2 bg-white rounded-full"></div>
+            <div className="absolute top-8 right-8 w-1 h-1 bg-white rounded-full"></div>
+            <div className="absolute bottom-6 left-12 w-1.5 h-1.5 bg-white rounded-full"></div>
+            <div className="absolute bottom-4 right-16 w-2 h-2 bg-white rounded-full"></div>
+          </div>
+          
+          <div className="relative z-10 flex items-center space-x-3">
+            <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+              <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-white drop-shadow-lg">
+                Access by KAI
+              </h1>
+              <p className="text-xs text-white/80">Your Travel Companion</p>
+            </div>
+          </div>
+          
+          <div className="relative z-10 flex items-center space-x-3">
+            {/* Voice Command Toggle Button */}
+            <button
+              onClick={browserSupportsSpeechRecognition ? () => {
+                if (listening) {
+                  SpeechRecognition.stopListening();
+                } else {
+                  SpeechRecognition.startListening({ continuous: true, language: "id-ID" });
+                }
+              } : undefined}
+              disabled={!browserSupportsSpeechRecognition}
+              className={`p-3 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 ${
+                browserSupportsSpeechRecognition
+                  ? listening
+                    ? 'bg-green-500 hover:bg-green-600'
+                    : 'bg-red-500 hover:bg-red-600'
+                  : 'bg-gray-400 cursor-not-allowed'
+              }`}
+              title={browserSupportsSpeechRecognition 
+                ? (listening ? 'Stop Voice Command' : 'Start Voice Command')
+                : 'Voice recognition not supported'
+              }
+            >
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+              </svg>
+            </button>
+            
+            {/* Theme Toggle Button */}
+            <button
+              onClick={toggleTheme}
+              className="p-3 rounded-full bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-all duration-300 hover:scale-110 shadow-lg"
+            >
+              {theme === "light" ? (
+                <MoonIcon className="w-5 h-5" />
+              ) : (
+                <SunIcon className="w-5 h-5" />
+              )}
+            </button>
+          </div>
         </header>
 
-        {/* Voice Command Status */}
-        <div className="px-4 pb-2 text-xs text-gray-500 dark:text-gray-400">
-          <span>Voice Command: </span>
-          {browserSupportsSpeechRecognition ? (
-            <span className={listening ? "text-green-600" : "text-red-600"}>
-              {listening ? "Mendengarkan..." : "Tidak aktif"}
-            </span>
-          ) : (
-            <span className="text-red-600">Browser tidak mendukung</span>
-          )}
-          <br />
-          <span>Perintah terakhir: "{transcript}"</span>
-          <button
-            className="ml-2 px-2 py-1 bg-gray-200 dark:bg-gray-800 rounded text-xs"
-            onClick={resetTranscript}
-          >
-            Reset
-          </button>
-        </div>
 
         {/* Screen Content */}
         <main className="flex-grow overflow-y-auto pb-20">
