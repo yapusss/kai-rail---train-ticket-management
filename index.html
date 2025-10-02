@@ -13,6 +13,17 @@
       }
     </script>
     <style>
+      /* Hide scrollbars globally */
+      * {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      
+      *::-webkit-scrollbar {
+        display: none;
+      }
+      
+      /* Keep the utility class for specific use cases */
       .scrollbar-hide {
         -ms-overflow-style: none;
         scrollbar-width: none;

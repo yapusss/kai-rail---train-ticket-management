@@ -2,14 +2,33 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Ticket, TrainClass } from '../types';
 import { interpretSearchQuery } from '../services/geminiService';
 import { SearchIcon, MicrophoneIcon, FilterIcon, DownloadIcon, RebookIcon, ArrowRightIcon } from '../components/icons/FeatureIcons';
+import { TrainDataService } from '../services/trainDataService';
 
-// Mock Data
-const MOCK_TICKETS: Ticket[] = [
-  { id: '1', bookingCode: 'TIX-1A2B', trainName: 'Argo Bromo', trainClass: TrainClass.Executive, route: { from: 'Jakarta', to: 'Surabaya' }, departure: { station: 'Gambir', time: new Date('2023-09-15T08:00:00') }, arrival: { station: 'Pasar Turi', time: new Date('2023-09-15T16:30:00') }, passengers: [{ name: 'User', id: '1' }], price: 600000, isActive: false },
-  { id: '2', bookingCode: 'TIX-3C4D', trainName: 'Jayabaya', trainClass: TrainClass.Economy, route: { from: 'Jakarta', to: 'Malang' }, departure: { station: 'Pasar Senen', time: new Date('2023-11-20T16:45:00') }, arrival: { station: 'Malang', time: new Date('2023-11-21T05:50:00') }, passengers: [{ name: 'User', id: '1' }], price: 450000, isActive: false },
-  { id: '3', bookingCode: 'TIX-5E6F', trainName: 'Taksaka', trainClass: TrainClass.Luxury, route: { from: 'Jakarta', to: 'Yogyakarta' }, departure: { station: 'Gambir', time: new Date('2024-01-10T21:00:00') }, arrival: { station: 'Tugu', time: new Date('2024-01-11T04:30:00') }, passengers: [{ name: 'User', id: '1' }], price: 550000, isActive: false },
-  { id: '4', bookingCode: 'TIX-7G8H', trainName: 'Serayu', trainClass: TrainClass.Economy, route: { from: 'Jakarta', to: 'Purwokerto' }, departure: { station: 'Pasar Senen', time: new Date('2024-03-05T09:15:00') }, arrival: { station: 'Purwokerto', time: new Date('2024-03-05T15:30:00') }, passengers: [{ name: 'User', id: '1' }], price: 70000, isActive: false },
-];
+// Generate mock tickets from centralized train data
+const generateMockTickets = (): Ticket[] => {
+    const trains = TrainDataService.getInterCityTrains().concat(TrainDataService.getLocalTrains());
+    return trains.slice(0, 4).map((train, index) => ({
+        id: (index + 1).toString(),
+        bookingCode: `TIX-${(index + 1)}${String.fromCharCode(65 + index)}${(index + 2)}${String.fromCharCode(66 + index)}`,
+        trainName: train.name,
+        trainClass: train.classes[0]?.name === 'Executive' ? TrainClass.Executive : 
+                   train.classes[0]?.name === 'Business' ? TrainClass.Luxury : TrainClass.Economy,
+        route: { from: train.route.from.city, to: train.route.to.city },
+        departure: { 
+            station: train.route.from.name, 
+            time: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000) 
+        },
+        arrival: { 
+            station: train.route.to.name, 
+            time: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000 + 8 * 60 * 60 * 1000) 
+        },
+        passengers: [{ name: 'User', id: '1' }],
+        price: train.classes[0]?.price || 100000,
+        isActive: false
+    }));
+};
+
+const MOCK_TICKETS: Ticket[] = generateMockTickets();
 
 const TicketCard: React.FC<{ ticket: Ticket }> = ({ ticket }) => (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden transition-transform transform hover:scale-105 hover:shadow-lg">
@@ -78,15 +97,109 @@ const TicketsScreen: React.FC = () => {
         };
     }, [recognition]);
 
+    const parseSearchQuery = (query: string) => {
+        const lowerQuery = query.toLowerCase();
+        
+        // Extract month names
+        const monthMap: { [key: string]: number } = {
+            'januari': 1, 'january': 1, 'jan': 1,
+            'februari': 2, 'february': 2, 'feb': 2,
+            'maret': 3, 'march': 3, 'mar': 3,
+            'april': 4, 'apr': 4,
+            'mei': 5, 'may': 5,
+            'juni': 6, 'june': 6, 'jun': 6,
+            'juli': 7, 'july': 7, 'jul': 7,
+            'agustus': 8, 'august': 8, 'aug': 8,
+            'september': 9, 'sep': 9, 'sept': 9,
+            'oktober': 10, 'october': 10, 'oct': 10,
+            'november': 11, 'nov': 11,
+            'desember': 12, 'december': 12, 'dec': 12
+        };
+
+        // Extract year
+        const yearMatch = lowerQuery.match(/(\d{4})/);
+        const year = yearMatch ? parseInt(yearMatch[1]) : null;
+
+        // Extract month
+        let month: number | undefined;
+        for (const [monthName, monthNum] of Object.entries(monthMap)) {
+            if (lowerQuery.includes(monthName)) {
+                month = monthNum;
+                break;
+            }
+        }
+
+        // Extract train names
+        const trainKeywords = ['argo', 'jayabaya', 'taksaka', 'serayu', 'bromo', 'anggrek'];
+        const trainName = trainKeywords.find(keyword => lowerQuery.includes(keyword));
+
+        // Extract routes
+        const routeKeywords = ['jakarta', 'surabaya', 'yogyakarta', 'malang', 'purwokerto', 'bandung'];
+        const fromLocation = routeKeywords.find(location => 
+            lowerQuery.includes(`dari ${location}`) || 
+            lowerQuery.includes(`${location} ke`)
+        );
+        const toLocation = routeKeywords.find(location => 
+            lowerQuery.includes(`ke ${location}`) || 
+            lowerQuery.includes(`tujuan ${location}`)
+        );
+
+        // Extract booking code
+        const bookingCodeMatch = lowerQuery.match(/(tix-[a-z0-9]+)/i);
+        const bookingCode = bookingCodeMatch ? bookingCodeMatch[1].toUpperCase() : null;
+
+        // Extract price range
+        const priceMatch = lowerQuery.match(/(\d+)\s*(?:rb|ribu|k|000)/);
+        const maxPrice = priceMatch ? parseInt(priceMatch[1]) * 1000 : null;
+
+        return {
+            month,
+            year,
+            trainName,
+            fromLocation,
+            toLocation,
+            bookingCode,
+            maxPrice,
+            originalQuery: query
+        };
+    };
+
     const handleAISearch = async (query: string) => {
         if (!query.trim()) {
             setFilters({});
             return;
         }
-        const interpretedFilters = await interpretSearchQuery(query);
-        if (interpretedFilters) {
-            setFilters(interpretedFilters);
+
+        // Try AI interpretation first
+        try {
+            const interpretedFilters = await interpretSearchQuery(query);
+            if (interpretedFilters) {
+                setFilters(interpretedFilters);
+                return;
+            }
+        } catch (error) {
+            console.log('AI interpretation failed, using local parsing');
         }
+
+        // Fallback to local natural language parsing
+        const parsed = parseSearchQuery(query);
+        const newFilters: { month?: number; year?: number; text?: string } = {};
+
+        if (parsed.month) newFilters.month = parsed.month;
+        if (parsed.year) newFilters.year = parsed.year;
+        
+        // Build text filter from various components
+        const textComponents = [];
+        if (parsed.trainName) textComponents.push(parsed.trainName);
+        if (parsed.fromLocation) textComponents.push(parsed.fromLocation);
+        if (parsed.toLocation) textComponents.push(parsed.toLocation);
+        if (parsed.bookingCode) textComponents.push(parsed.bookingCode);
+        
+        if (textComponents.length > 0) {
+            newFilters.text = textComponents.join(' ');
+        }
+
+        setFilters(newFilters);
     };
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,26 +217,49 @@ const TicketsScreen: React.FC = () => {
 
     const filteredTickets = useMemo(() => {
         return MOCK_TICKETS.filter(ticket => {
-            const matchMonth = !filters.month || ticket.departure.time.getMonth() + 1 === filters.month;
-            const matchYear = !filters.year || ticket.departure.time.getFullYear() === filters.year;
+            // If no search query and no filters, show all tickets
+            if (!searchQuery && Object.keys(filters).length === 0) {
+                return true;
+            }
+
+            // Parse current query for additional filtering
+            const parsedQuery = searchQuery ? parseSearchQuery(searchQuery) : null;
+
+            // Date filters
+            const matchMonth = !filters.month && !parsedQuery?.month || 
+                ticket.departure.time.getMonth() + 1 === (filters.month || parsedQuery?.month);
+            const matchYear = !filters.year && !parsedQuery?.year || 
+                ticket.departure.time.getFullYear() === (filters.year || parsedQuery?.year);
             
+            // Text filters
             const lowerCaseText = filters.text?.toLowerCase() || '';
             const matchText = !filters.text ||
                 ticket.trainName.toLowerCase().includes(lowerCaseText) ||
                 ticket.route.from.toLowerCase().includes(lowerCaseText) ||
                 ticket.route.to.toLowerCase().includes(lowerCaseText) ||
                 ticket.bookingCode.toLowerCase().includes(lowerCaseText);
-            
-            // If AI filters are active, use them
-            if (Object.keys(filters).length > 0) {
-                 return matchMonth && matchYear && matchText;
-            }
 
-            // Fallback to simple text search if no AI filters
-            const lowerQuery = searchQuery.toLowerCase();
-            return ticket.trainName.toLowerCase().includes(lowerQuery) ||
-                ticket.route.from.toLowerCase().includes(lowerQuery) ||
-                ticket.route.to.toLowerCase().includes(lowerQuery);
+            // Specific train name filter
+            const matchTrainName = !parsedQuery?.trainName ||
+                ticket.trainName.toLowerCase().includes(parsedQuery.trainName.toLowerCase());
+
+            // Route filters
+            const matchFromLocation = !parsedQuery?.fromLocation ||
+                ticket.route.from.toLowerCase().includes(parsedQuery.fromLocation.toLowerCase());
+            const matchToLocation = !parsedQuery?.toLocation ||
+                ticket.route.to.toLowerCase().includes(parsedQuery.toLocation.toLowerCase());
+
+            // Booking code filter
+            const matchBookingCode = !parsedQuery?.bookingCode ||
+                ticket.bookingCode.toLowerCase().includes(parsedQuery.bookingCode.toLowerCase());
+
+            // Price filter
+            const matchPrice = !parsedQuery?.maxPrice ||
+                ticket.price <= parsedQuery.maxPrice;
+
+            // Combine all filters
+            return matchMonth && matchYear && matchText && matchTrainName && 
+                   matchFromLocation && matchToLocation && matchBookingCode && matchPrice;
         });
     }, [filters, searchQuery]);
 
@@ -131,23 +267,40 @@ const TicketsScreen: React.FC = () => {
         <div className="p-4 space-y-4">
             <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Riwayat Tiket</h2>
             
-            <form onSubmit={handleSearchSubmit} className="relative flex items-center">
-                <input
-                    type="text"
-                    placeholder="Cari 'tiket bulan september'..."
-                    value={searchQuery}
-                    onChange={handleSearchChange}
-                    className="w-full pl-10 pr-16 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
-                />
-                <SearchIcon className="absolute left-3 w-5 h-5 text-gray-400" />
-                <div className="absolute right-3 flex items-center space-x-1">
-                    <button type="button" onClick={handleVoiceSearch} className={`p-2 rounded-full ${isListening ? 'bg-red-500 text-white' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'}`}>
-                        <MicrophoneIcon className="w-5 h-5" />
-                    </button>
-                    <button type="button" className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full">
-                        <FilterIcon className="w-5 h-5" />
-                    </button>
+            <form onSubmit={handleSearchSubmit} className="space-y-3">
+                <div className="relative flex items-center">
+                    <input
+                        type="text"
+                        placeholder="Cari tiket..."
+                        value={searchQuery}
+                        onChange={handleSearchChange}
+                        className="w-full pl-10 pr-16 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
+                    />
+                    <SearchIcon className="absolute left-3 w-5 h-5 text-gray-400" />
+                    <div className="absolute right-3 flex items-center space-x-1">
+                        <button type="button" onClick={handleVoiceSearch} className={`p-2 rounded-full ${isListening ? 'bg-red-500 text-white animate-pulse' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'}`}>
+                            <MicrophoneIcon className="w-5 h-5" />
+                        </button>
+                        <button type="button" className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full">
+                            <FilterIcon className="w-5 h-5" />
+                        </button>
+                    </div>
                 </div>
+
+                {/* Voice Recognition Status */}
+                {recognition && (
+                    <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center space-x-2">
+                        <span>Voice Search:</span>
+                        <span className={isListening ? "text-green-600" : "text-red-600"}>
+                            {isListening ? "Mendengarkan..." : "Tidak aktif"}
+                        </span>
+                        {searchQuery && (
+                            <span className="text-gray-400">
+                                "{searchQuery}"
+                            </span>
+                        )}
+                    </div>
+                )}
             </form>
 
             <div className="space-y-4">

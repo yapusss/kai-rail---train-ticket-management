@@ -1,0 +1,1001 @@
+{
+  "stations": {
+    "jakarta": [
+      {
+        "code": "GMR",
+        "name": "Stasiun Gambir",
+        "city": "Jakarta",
+        "province": "DKI Jakarta"
+      },
+      {
+        "code": "PSN",
+        "name": "Stasiun Pasar Senen",
+        "city": "Jakarta",
+        "province": "DKI Jakarta"
+      },
+      {
+        "code": "MGR",
+        "name": "Stasiun Manggarai",
+        "city": "Jakarta",
+        "province": "DKI Jakarta"
+      },
+      {
+        "code": "JKT",
+        "name": "Stasiun Jakarta Kota",
+        "city": "Jakarta",
+        "province": "DKI Jakarta"
+      },
+      {
+        "code": "TNG",
+        "name": "Stasiun Tanjung Priok",
+        "city": "Jakarta",
+        "province": "DKI Jakarta"
+      },
+      {
+        "code": "CGK",
+        "name": "Stasiun Bandara Soekarno-Hatta",
+        "city": "Jakarta",
+        "province": "DKI Jakarta"
+      }
+    ],
+    "bandung": [
+      {
+        "code": "BD",
+        "name": "Stasiun Bandung",
+        "city": "Bandung",
+        "province": "Jawa Barat"
+      },
+      {
+        "code": "KAC",
+        "name": "Stasiun Kiaracondong",
+        "city": "Bandung",
+        "province": "Jawa Barat"
+      }
+    ],
+    "surabaya": [
+      {
+        "code": "PSE",
+        "name": "Stasiun Pasar Turi",
+        "city": "Surabaya",
+        "province": "Jawa Timur"
+      },
+      {
+        "code": "SGU",
+        "name": "Stasiun Surabaya Gubeng",
+        "city": "Surabaya",
+        "province": "Jawa Timur"
+      },
+      {
+        "code": "SBI",
+        "name": "Stasiun Surabaya Kota",
+        "city": "Surabaya",
+        "province": "Jawa Timur"
+      }
+    ],
+    "yogyakarta": [
+      {
+        "code": "TUG",
+        "name": "Stasiun Yogyakarta",
+        "city": "Yogyakarta",
+        "province": "DI Yogyakarta"
+      },
+      {
+        "code": "LPN",
+        "name": "Stasiun Lempuyangan",
+        "city": "Yogyakarta",
+        "province": "DI Yogyakarta"
+      }
+    ],
+    "malang": [
+      {
+        "code": "ML",
+        "name": "Stasiun Malang",
+        "city": "Malang",
+        "province": "Jawa Timur"
+      },
+      {
+        "code": "KTB",
+        "name": "Stasiun Malang Kotalama",
+        "city": "Malang",
+        "province": "Jawa Timur"
+      }
+    ],
+    "purwokerto": [
+      {
+        "code": "PWT",
+        "name": "Stasiun Purwokerto",
+        "city": "Purwokerto",
+        "province": "Jawa Tengah"
+      }
+    ],
+    "semarang": [
+      {
+        "code": "SMC",
+        "name": "Stasiun Semarang Tawang",
+        "city": "Semarang",
+        "province": "Jawa Tengah"
+      },
+      {
+        "code": "SMT",
+        "name": "Stasiun Semarang Poncol",
+        "city": "Semarang",
+        "province": "Jawa Tengah"
+      }
+    ],
+    "solo": [
+      {
+        "code": "SLO",
+        "name": "Stasiun Solo Balapan",
+        "city": "Solo",
+        "province": "Jawa Tengah"
+      }
+    ],
+    "medan": [
+      {
+        "code": "MDN",
+        "name": "Stasiun Medan",
+        "city": "Medan",
+        "province": "Sumatera Utara"
+      }
+    ],
+    "palembang": [
+      {
+        "code": "PLB",
+        "name": "Stasiun Palembang",
+        "city": "Palembang",
+        "province": "Sumatera Selatan"
+      }
+    ]
+  },
+  "trainServices": {
+    "intercity": {
+      "id": "intercity",
+      "name": "Inter City",
+      "description": "Kereta antarkota untuk perjalanan jarak jauh",
+      "icon": "🚄",
+      "bgColor": "bg-blue-500",
+      "trains": [
+        {
+          "id": "argo-bromo",
+          "name": "Argo Bromo Anggrek",
+          "code": "AB",
+          "route": {
+            "from": {
+              "code": "GMR",
+              "name": "Stasiun Gambir",
+              "city": "Jakarta"
+            },
+            "to": {
+              "code": "PSE",
+              "name": "Stasiun Pasar Turi",
+              "city": "Surabaya"
+            }
+          },
+          "duration": "8h 30m",
+          "distance": "821 km",
+          "classes": [
+            {
+              "name": "Executive",
+              "price": 600000,
+              "facilities": ["AC", "Reclining Seat", "Meal", "Entertainment"]
+            },
+            {
+              "name": "Business",
+              "price": 450000,
+              "facilities": ["AC", "Reclining Seat", "Meal"]
+            }
+          ],
+          "schedule": [
+            {
+              "departure": "08:00",
+              "arrival": "16:30",
+              "days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+            }
+          ]
+        },
+        {
+          "id": "taksaka",
+          "name": "Taksaka",
+          "code": "TK",
+          "route": {
+            "from": {
+              "code": "GMR",
+              "name": "Stasiun Gambir",
+              "city": "Jakarta"
+            },
+            "to": {
+              "code": "TUG",
+              "name": "Stasiun Yogyakarta",
+              "city": "Yogyakarta"
+            }
+          },
+          "duration": "7h 30m",
+          "distance": "512 km",
+          "classes": [
+            {
+              "name": "Executive",
+              "price": 550000,
+              "facilities": ["AC", "Reclining Seat", "Meal", "Entertainment"]
+            },
+            {
+              "name": "Business",
+              "price": 400000,
+              "facilities": ["AC", "Reclining Seat", "Meal"]
+            }
+          ],
+          "schedule": [
+            {
+              "departure": "21:00",
+              "arrival": "04:30",
+              "days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+            }
+          ]
+        },
+        {
+          "id": "argo-wilis",
+          "name": "Argo Wilis",
+          "code": "AW",
+          "route": {
+            "from": {
+              "code": "GMR",
+              "name": "Stasiun Gambir",
+              "city": "Jakarta"
+            },
+            "to": {
+              "code": "ML",
+              "name": "Stasiun Malang",
+              "city": "Malang"
+            }
+          },
+          "duration": "10h 45m",
+          "distance": "845 km",
+          "classes": [
+            {
+              "name": "Executive",
+              "price": 580000,
+              "facilities": ["AC", "Reclining Seat", "Meal", "Entertainment"]
+            }
+          ],
+          "schedule": [
+            {
+              "departure": "19:15",
+              "arrival": "06:00",
+              "days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+            }
+          ]
+        },
+        {
+          "id": "bima",
+          "name": "Bima",
+          "code": "BM",
+          "route": {
+            "from": {
+              "code": "GMR",
+              "name": "Stasiun Gambir",
+              "city": "Jakarta"
+            },
+            "to": {
+              "code": "SGU",
+              "name": "Stasiun Surabaya Gubeng",
+              "city": "Surabaya"
+            }
+          },
+          "duration": "9h 15m",
+          "distance": "821 km",
+          "classes": [
+            {
+              "name": "Executive",
+              "price": 620000,
+              "facilities": ["AC", "Reclining Seat", "Meal", "Entertainment"]
+            }
+          ],
+          "schedule": [
+            {
+              "departure": "18:45",
+              "arrival": "04:00",
+              "days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+            }
+          ]
+        },
+        {
+          "id": "gajayana",
+          "name": "Gajayana",
+          "code": "GJ",
+          "route": {
+            "from": {
+              "code": "GMR",
+              "name": "Stasiun Gambir",
+              "city": "Jakarta"
+            },
+            "to": {
+              "code": "ML",
+              "name": "Stasiun Malang",
+              "city": "Malang"
+            }
+          },
+          "duration": "11h 5m",
+          "distance": "845 km",
+          "classes": [
+            {
+              "name": "Executive",
+              "price": 590000,
+              "facilities": ["AC", "Reclining Seat", "Meal", "Entertainment"]
+            }
+          ],
+          "schedule": [
+            {
+              "departure": "20:30",
+              "arrival": "07:35",
+              "days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+            }
+          ]
+        }
+      ]
+    },
+    "local": {
+      "id": "local",
+      "name": "Local",
+      "description": "Kereta lokal untuk perjalanan jarak menengah",
+      "icon": "🚂",
+      "bgColor": "bg-orange-500",
+      "trains": [
+        {
+          "id": "jayabaya",
+          "name": "Jayabaya",
+          "code": "JB",
+          "route": {
+            "from": {
+              "code": "PSN",
+              "name": "Stasiun Pasar Senen",
+              "city": "Jakarta"
+            },
+            "to": {
+              "code": "ML",
+              "name": "Stasiun Malang",
+              "city": "Malang"
+            }
+          },
+          "duration": "13h 5m",
+          "distance": "845 km",
+          "classes": [
+            {
+              "name": "Economy",
+              "price": 450000,
+              "facilities": ["AC", "Seat"]
+            }
+          ],
+          "schedule": [
+            {
+              "departure": "16:45",
+              "arrival": "05:50",
+              "days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+            }
+          ]
+        },
+        {
+          "id": "serayu",
+          "name": "Serayu",
+          "code": "SY",
+          "route": {
+            "from": {
+              "code": "PSN",
+              "name": "Stasiun Pasar Senen",
+              "city": "Jakarta"
+            },
+            "to": {
+              "code": "PWT",
+              "name": "Stasiun Purwokerto",
+              "city": "Purwokerto"
+            }
+          },
+          "duration": "6h 15m",
+          "distance": "365 km",
+          "classes": [
+            {
+              "name": "Economy",
+              "price": 70000,
+              "facilities": ["AC", "Seat"]
+            }
+          ],
+          "schedule": [
+            {
+              "departure": "09:15",
+              "arrival": "15:30",
+              "days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+            }
+          ]
+        },
+        {
+          "id": "bengawan",
+          "name": "Bengawan",
+          "code": "BW",
+          "route": {
+            "from": {
+              "code": "PSN",
+              "name": "Stasiun Pasar Senen",
+              "city": "Jakarta"
+            },
+            "to": {
+              "code": "SLO",
+              "name": "Stasiun Solo Balapan",
+              "city": "Solo"
+            }
+          },
+          "duration": "8h 30m",
+          "distance": "538 km",
+          "classes": [
+            {
+              "name": "Economy",
+              "price": 150000,
+              "facilities": ["AC", "Seat"]
+            }
+          ],
+          "schedule": [
+            {
+              "departure": "21:00",
+              "arrival": "05:30",
+              "days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+            }
+          ]
+        },
+        {
+          "id": "mataram",
+          "name": "Mataram",
+          "code": "MT",
+          "route": {
+            "from": {
+              "code": "PSN",
+              "name": "Stasiun Pasar Senen",
+              "city": "Jakarta"
+            },
+            "to": {
+              "code": "SLO",
+              "name": "Stasiun Solo Balapan",
+              "city": "Solo"
+            }
+          },
+          "duration": "8h 45m",
+          "distance": "538 km",
+          "classes": [
+            {
+              "name": "Economy",
+              "price": 145000,
+              "facilities": ["AC", "Seat"]
+            }
+          ],
+          "schedule": [
+            {
+              "departure": "22:15",
+              "arrival": "07:00",
+              "days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+            }
+          ]
+        },
+        {
+          "id": "gaya-baru-malam",
+          "name": "Gaya Baru Malam Selatan",
+          "code": "GB",
+          "route": {
+            "from": {
+              "code": "PSN",
+              "name": "Stasiun Pasar Senen",
+              "city": "Jakarta"
+            },
+            "to": {
+              "code": "SGU",
+              "name": "Stasiun Surabaya Gubeng",
+              "city": "Surabaya"
+            }
+          },
+          "duration": "11h 30m",
+          "distance": "821 km",
+          "classes": [
+            {
+              "name": "Economy",
+              "price": 350000,
+              "facilities": ["AC", "Seat"]
+            }
+          ],
+          "schedule": [
+            {
+              "departure": "19:30",
+              "arrival": "07:00",
+              "days": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+            }
+          ]
+        }
+      ]
+    },
+    "commuter": {
+      "id": "commuter",
+      "name": "Commuter Line",
+      "description": "Kereta komuter untuk perjalanan harian",
+      "icon": "🚇",
+      "bgColor": "bg-red-500",
+      "lines": [
+        {
+          "id": "bogor-line",
+          "name": "Bogor Line",
+          "code": "BO",
+          "route": {
+            "from": {
+              "code": "JKT",
+              "name": "Stasiun Jakarta Kota",
+              "city": "Jakarta"
+            },
+            "to": {
+              "code": "BGR",
+              "name": "Stasiun Bogor",
+              "city": "Bogor"
+            }
+          },
+          "duration": "1h 15m",
+          "distance": "56 km",
+          "price": 4000,
+          "facilities": ["AC", "Seat"],
+          "schedule": {
+            "weekdays": {
+              "first": "05:00",
+              "last": "22:30",
+              "frequency": "10-15 minutes"
+            },
+            "weekends": {
+              "first": "05:30",
+              "last": "22:00",
+              "frequency": "15-20 minutes"
+            }
+          }
+        },
+        {
+          "id": "depok-line",
+          "name": "Depok Line",
+          "code": "DP",
+          "route": {
+            "from": {
+              "code": "JKT",
+              "name": "Stasiun Jakarta Kota",
+              "city": "Jakarta"
+            },
+            "to": {
+              "code": "DPK",
+              "name": "Stasiun Depok",
+              "city": "Depok"
+            }
+          },
+          "duration": "45m",
+          "distance": "35 km",
+          "price": 3000,
+          "facilities": ["AC", "Seat"],
+          "schedule": {
+            "weekdays": {
+              "first": "05:15",
+              "last": "22:15",
+              "frequency": "8-12 minutes"
+            },
+            "weekends": {
+              "first": "05:45",
+              "last": "21:45",
+              "frequency": "12-15 minutes"
+            }
+          }
+        },
+        {
+          "id": "tangerang-line",
+          "name": "Tangerang Line",
+          "code": "TG",
+          "route": {
+            "from": {
+              "code": "TNG",
+              "name": "Stasiun Tanjung Priok",
+              "city": "Jakarta"
+            },
+            "to": {
+              "code": "TGR",
+              "name": "Stasiun Tangerang",
+              "city": "Tangerang"
+            }
+          },
+          "duration": "50m",
+          "distance": "42 km",
+          "price": 3500,
+          "facilities": ["AC", "Seat"],
+          "schedule": {
+            "weekdays": {
+              "first": "05:30",
+              "last": "21:30",
+              "frequency": "15-20 minutes"
+            },
+            "weekends": {
+              "first": "06:00",
+              "last": "21:00",
+              "frequency": "20-25 minutes"
+            }
+          }
+        }
+      ]
+    },
+    "lrt": {
+      "id": "lrt",
+      "name": "LRT",
+      "description": "Light Rail Transit untuk perjalanan dalam kota",
+      "icon": "🚈",
+      "bgColor": "bg-purple-500",
+      "systems": [
+        {
+          "id": "lrt-jakarta",
+          "name": "LRT Jakarta",
+          "code": "LJ",
+          "route": {
+            "from": {
+              "code": "KG",
+              "name": "Stasiun Kelapa Gading",
+              "city": "Jakarta"
+            },
+            "to": {
+              "code": "VLD",
+              "name": "Stasiun Velodrome",
+              "city": "Jakarta"
+            }
+          },
+          "duration": "35m",
+          "distance": "15.7 km",
+          "price": 5000,
+          "facilities": ["AC", "Modern Train"],
+          "schedule": {
+            "weekdays": {
+              "first": "05:00",
+              "last": "23:00",
+              "frequency": "5-8 minutes"
+            },
+            "weekends": {
+              "first": "05:30",
+              "last": "22:30",
+              "frequency": "8-12 minutes"
+            }
+          }
+        },
+        {
+          "id": "lrt-palembang",
+          "name": "LRT Palembang",
+          "code": "LP",
+          "route": {
+            "from": {
+              "code": "BDA",
+              "name": "Stasiun Bandara",
+              "city": "Palembang"
+            },
+            "to": {
+              "code": "JKR",
+              "name": "Stasiun Jakabaring",
+              "city": "Palembang"
+            }
+          },
+          "duration": "45m",
+          "distance": "23.4 km",
+          "price": 3000,
+          "facilities": ["AC", "Modern Train"],
+          "schedule": {
+            "weekdays": {
+              "first": "05:30",
+              "last": "22:00",
+              "frequency": "10-15 minutes"
+            },
+            "weekends": {
+              "first": "06:00",
+              "last": "21:30",
+              "frequency": "15-20 minutes"
+            }
+          }
+        }
+      ]
+    },
+    "airport": {
+      "id": "airport",
+      "name": "Airport Train",
+      "description": "Kereta bandara untuk akses ke/dari bandara",
+      "icon": "✈️",
+      "bgColor": "bg-blue-400",
+      "services": [
+        {
+          "id": "soekarno-hatta-express",
+          "name": "Soekarno-Hatta Express",
+          "code": "SHE",
+          "route": {
+            "from": {
+              "code": "MGR",
+              "name": "Stasiun Manggarai",
+              "city": "Jakarta"
+            },
+            "to": {
+              "code": "CGK",
+              "name": "Stasiun Bandara Soekarno-Hatta",
+              "city": "Jakarta"
+            }
+          },
+          "duration": "55m",
+          "distance": "35 km",
+          "price": 40000,
+          "facilities": ["AC", "Luggage Space", "Airport Transfer"],
+          "schedule": {
+            "weekdays": {
+              "first": "04:30",
+              "last": "23:30",
+              "frequency": "30 minutes"
+            },
+            "weekends": {
+              "first": "05:00",
+              "last": "23:00",
+              "frequency": "30 minutes"
+            }
+          }
+        },
+        {
+          "id": "skytrain",
+          "name": "Skytrain",
+          "code": "SKY",
+          "route": {
+            "from": {
+              "code": "T1",
+              "name": "Terminal 1",
+              "city": "Jakarta"
+            },
+            "to": {
+              "code": "T3",
+              "name": "Terminal 3",
+              "city": "Jakarta"
+            }
+          },
+          "duration": "5m",
+          "distance": "2 km",
+          "price": 0,
+          "facilities": ["Free", "Airport Internal"],
+          "schedule": {
+            "daily": {
+              "first": "24/7",
+              "last": "24/7",
+              "frequency": "5-10 minutes"
+            }
+          }
+        },
+        {
+          "id": "airport-train-bandung",
+          "name": "Airport Train Bandung",
+          "code": "ATB",
+          "route": {
+            "from": {
+              "code": "BD",
+              "name": "Stasiun Bandung",
+              "city": "Bandung"
+            },
+            "to": {
+              "code": "BDO",
+              "name": "Stasiun Bandara Husein Sastranegara",
+              "city": "Bandung"
+            }
+          },
+          "duration": "30m",
+          "distance": "18 km",
+          "price": 15000,
+          "facilities": ["AC", "Luggage Space"],
+          "schedule": {
+            "weekdays": {
+              "first": "06:00",
+              "last": "21:00",
+              "frequency": "45 minutes"
+            },
+            "weekends": {
+              "first": "06:30",
+              "last": "20:30",
+              "frequency": "60 minutes"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "hotels": {
+    "jakarta": [
+      {
+        "id": "hotel-mulia",
+        "name": "Hotel Mulia Senayan",
+        "location": "Jakarta",
+        "price": 850000,
+        "rating": 4.8,
+        "amenities": ["WiFi", "Pool", "Spa", "Restaurant", "Parking"],
+        "address": "Jl. Asia Afrika, Senayan, Jakarta",
+        "phone": "+62-21-5747777"
+      },
+      {
+        "id": "hotel-aston",
+        "name": "Aston Hotel Jakarta",
+        "location": "Jakarta",
+        "price": 580000,
+        "rating": 4.4,
+        "amenities": ["WiFi", "Pool", "Restaurant", "Spa"],
+        "address": "Jl. Senen Raya, Jakarta",
+        "phone": "+62-21-3456789"
+      },
+      {
+        "id": "hotel-grand-mercure",
+        "name": "Hotel Grand Mercure Jakarta",
+        "location": "Jakarta",
+        "price": 650000,
+        "rating": 4.7,
+        "amenities": ["WiFi", "Spa", "Restaurant", "Parking"],
+        "address": "Jl. Thamrin, Jakarta",
+        "phone": "+62-21-1234567"
+      }
+    ],
+    "bandung": [
+      {
+        "id": "hotel-santika",
+        "name": "Hotel Santika Bandung",
+        "location": "Bandung",
+        "price": 450000,
+        "rating": 4.5,
+        "amenities": ["WiFi", "Parking", "Restaurant"],
+        "address": "Jl. Asia Afrika, Bandung",
+        "phone": "+62-22-4234567"
+      },
+      {
+        "id": "hotel-ibis",
+        "name": "Ibis Styles Bandung",
+        "location": "Bandung",
+        "price": 380000,
+        "rating": 4.2,
+        "amenities": ["WiFi", "Pool", "Breakfast"],
+        "address": "Jl. Braga, Bandung",
+        "phone": "+62-22-5678901"
+      },
+      {
+        "id": "hotel-harris",
+        "name": "Harris Hotel Bandung",
+        "location": "Bandung",
+        "price": 420000,
+        "rating": 4.1,
+        "amenities": ["WiFi", "Restaurant", "Parking"],
+        "address": "Jl. Setiabudi, Bandung",
+        "phone": "+62-22-7890123"
+      }
+    ],
+    "yogyakarta": [
+      {
+        "id": "hotel-fave",
+        "name": "Favehotel Yogyakarta",
+        "location": "Yogyakarta",
+        "price": 320000,
+        "rating": 4.0,
+        "amenities": ["WiFi", "Restaurant"],
+        "address": "Jl. Malioboro, Yogyakarta",
+        "phone": "+62-274-123456"
+      }
+    ],
+    "surabaya": [
+      {
+        "id": "hotel-tunjungan",
+        "name": "Hotel Tunjungan Surabaya",
+        "location": "Surabaya",
+        "price": 520000,
+        "rating": 4.3,
+        "amenities": ["WiFi", "Pool", "Parking"],
+        "address": "Jl. Tunjungan, Surabaya",
+        "phone": "+62-31-4567890"
+      }
+    ]
+  },
+  "carRentals": {
+    "jakarta": [
+      {
+        "id": "avis-jakarta",
+        "name": "Avis Car Rental",
+        "location": "Jakarta",
+        "price": 250000,
+        "type": "Sedan",
+        "rating": 4.4,
+        "address": "Jl. Sudirman, Jakarta",
+        "phone": "+62-21-1234567"
+      },
+      {
+        "id": "sixt-jakarta",
+        "name": "Sixt Car Rental",
+        "location": "Jakarta",
+        "price": 290000,
+        "type": "Sedan",
+        "rating": 4.3,
+        "address": "Jl. Thamrin, Jakarta",
+        "phone": "+62-21-2345678"
+      }
+    ],
+    "bandung": [
+      {
+        "id": "hertz-bandung",
+        "name": "Hertz Indonesia",
+        "location": "Bandung",
+        "price": 280000,
+        "type": "SUV",
+        "rating": 4.6,
+        "address": "Jl. Asia Afrika, Bandung",
+        "phone": "+62-22-3456789"
+      }
+    ],
+    "yogyakarta": [
+      {
+        "id": "budget-yogyakarta",
+        "name": "Budget Car Rental",
+        "location": "Yogyakarta",
+        "price": 200000,
+        "type": "Hatchback",
+        "rating": 4.1,
+        "address": "Jl. Malioboro, Yogyakarta",
+        "phone": "+62-274-4567890"
+      }
+    ],
+    "surabaya": [
+      {
+        "id": "enterprise-surabaya",
+        "name": "Enterprise Rent-A-Car",
+        "location": "Surabaya",
+        "price": 320000,
+        "type": "SUV",
+        "rating": 4.5,
+        "address": "Jl. Tunjungan, Surabaya",
+        "phone": "+62-31-5678901"
+      }
+    ]
+  },
+  "logistics": [
+    {
+      "id": "kai-logistics-express",
+      "name": "KAI Logistics Express",
+      "route": "Jakarta - Surabaya",
+      "price": 150000,
+      "duration": "1 day",
+      "type": "Express",
+      "description": "Pengiriman cepat untuk barang penting"
+    },
+    {
+      "id": "kai-logistics-standard",
+      "name": "KAI Logistics Standard",
+      "route": "Jakarta - Bandung",
+      "price": 75000,
+      "duration": "2 days",
+      "type": "Standard",
+      "description": "Pengiriman standar dengan harga terjangkau"
+    },
+    {
+      "id": "kai-logistics-heavy",
+      "name": "KAI Logistics Heavy",
+      "route": "Jakarta - Yogyakarta",
+      "price": 180000,
+      "duration": "1 day",
+      "type": "Heavy Cargo",
+      "description": "Pengiriman barang berat dan besar"
+    }
+  ],
+  "insurance": [
+    {
+      "id": "travel-insurance-premium",
+      "name": "Travel Insurance Premium",
+      "coverage": "Medical + Trip Cancellation",
+      "price": 150000,
+      "duration": "30 days",
+      "description": "Perlindungan lengkap untuk perjalanan Anda"
+    },
+    {
+      "id": "basic-travel-insurance",
+      "name": "Basic Travel Insurance",
+      "coverage": "Medical Only",
+      "price": 75000,
+      "duration": "30 days",
+      "description": "Perlindungan medis dasar"
+    },
+    {
+      "id": "family-travel-insurance",
+      "name": "Family Travel Insurance",
+      "coverage": "Family Package",
+      "price": 300000,
+      "duration": "30 days",
+      "description": "Perlindungan untuk seluruh keluarga"
+    }
+  ]
+}
