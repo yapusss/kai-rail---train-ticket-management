@@ -9,6 +9,7 @@ import PlannerScreen from "./screens/PlannerScreen";
 import TrainServicesScreen from "./screens/TrainServicesScreen";
 import TicketsScreen from "./screens/TicketsScreen";
 import AccountScreen from "./screens/AccountScreen";
+import { XIcon, MicrophoneIcon } from "./components/icons/FeatureIcons";
 import { SunIcon, MoonIcon } from "./components/icons/ThemeIcons";
 
 const App: React.FC = () => {
@@ -131,11 +132,15 @@ const App: React.FC = () => {
             <div className="absolute bottom-6 left-12 w-1.5 h-1.5 bg-white rounded-full"></div>
             <div className="absolute bottom-4 right-16 w-2 h-2 bg-white rounded-full"></div>
           </div>
-          
+
           <div className="relative z-10 flex items-center space-x-3">
             <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-              <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              <svg
+                className="w-5 h-5 text-white"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
               </svg>
             </div>
             <div>
@@ -145,35 +150,43 @@ const App: React.FC = () => {
               <p className="text-xs text-white/80">Your Travel Companion</p>
             </div>
           </div>
-          
+
           <div className="relative z-10 flex items-center space-x-3">
             {/* Voice Command Toggle Button */}
             <button
-              onClick={browserSupportsSpeechRecognition ? () => {
-                if (listening) {
-                  SpeechRecognition.stopListening();
-                } else {
-                  SpeechRecognition.startListening({ continuous: true, language: "id-ID" });
-                }
-              } : undefined}
+              onClick={
+                browserSupportsSpeechRecognition
+                  ? () => {
+                      if (listening) {
+                        SpeechRecognition.stopListening();
+                      } else {
+                        SpeechRecognition.startListening({
+                          continuous: true,
+                          language: "id-ID",
+                        });
+                      }
+                    }
+                  : undefined
+              }
               disabled={!browserSupportsSpeechRecognition}
-              className={`p-3 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 ${
+                className={`p-3 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 ${
+                  browserSupportsSpeechRecognition
+                    ? listening
+                      ? "bg-green-500 hover:bg-green-600"
+                      : "bg-gray-500 hover:bg-gray-600"
+                    : "bg-gray-400 cursor-not-allowed"
+                }`}
+              title={
                 browserSupportsSpeechRecognition
                   ? listening
-                    ? 'bg-green-500 hover:bg-green-600'
-                    : 'bg-red-500 hover:bg-red-600'
-                  : 'bg-gray-400 cursor-not-allowed'
-              }`}
-              title={browserSupportsSpeechRecognition 
-                ? (listening ? 'Stop Voice Command' : 'Start Voice Command')
-                : 'Voice recognition not supported'
+                    ? "Stop Voice Command"
+                    : "Start Voice Command"
+                  : "Voice recognition not supported"
               }
             >
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-              </svg>
+              <MicrophoneIcon className="w-5 h-5 text-white" />
             </button>
-            
+
             {/* Theme Toggle Button */}
             <button
               onClick={toggleTheme}
@@ -187,7 +200,6 @@ const App: React.FC = () => {
             </button>
           </div>
         </header>
-
 
         {/* Screen Content */}
         <main className="flex-grow overflow-y-auto pb-20">

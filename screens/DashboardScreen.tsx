@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Ticket, TrainClass, NavigationTab } from '../types';
 import { 
-    TrainIcon, BuildingIcon, PackageIcon, MoreIcon, TrophyIcon, SparklesIcon
+    TrainIcon, BuildingIcon, PackageIcon, MoreIcon, TrophyIcon, SparklesIcon, InterCityTrainIcon
 } from '../components/icons/FeatureIcons';
 import { TrainDataService } from '../services/trainDataService';
 
@@ -333,8 +333,8 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                                     onClick={isListening ? stopListening : startListening}
                                     className={`p-2 rounded-full transition-colors ${
                                         isListening 
-                                            ? 'bg-red-500 text-white animate-pulse' 
-                                            : 'text-white/70 hover:text-white hover:bg-white/20'
+                                            ? 'bg-green-500 text-white' 
+                                            : 'bg-gray-500 text-white hover:bg-gray-600'
                                     } ${!browserSupportsSpeechRecognition ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     title={browserSupportsSpeechRecognition 
                                         ? (isListening ? 'Stop listening' : 'Start voice search')
@@ -342,15 +342,9 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                                     }
                                     disabled={!browserSupportsSpeechRecognition}
                                 >
-                                    {isListening ? (
-                                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                            <path d="M6 6h12v12H6z"/>
-                                        </svg>
-                                    ) : (
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                                        </svg>
-                                    )}
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                                    </svg>
                                 </button>
                                 {searchQuery && (
                                     <button
@@ -419,14 +413,14 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                         <div className="flex space-x-4 overflow-x-auto pb-2 scrollbar-hide">
                             <div className="flex space-x-4 min-w-max">
                                 <ServiceButton 
-                                    Icon={TrainIcon} 
-                                    label="Inter City" 
+                                    Icon={InterCityTrainIcon} 
+                                    label="Antar Kota" 
                                     onClick={() => setActiveTab(NavigationTab.TrainServices)}
                                     bgColor="bg-blue-500"
                                 />
                                 <ServiceButton 
                                     Icon={TrainIcon} 
-                                    label="Local" 
+                                    label="Lokal" 
                                     onClick={() => setActiveTab(NavigationTab.TrainServices)}
                                     bgColor="bg-orange-500"
                                 />
@@ -444,9 +438,15 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                                 />
                                 <ServiceButton 
                                     Icon={TrainIcon} 
-                                    label="Airport" 
+                                    label="Bandara" 
                                     onClick={() => setActiveTab(NavigationTab.TrainServices)}
                                     bgColor="bg-blue-400"
+                                />
+                                <ServiceButton 
+                                    Icon={TrainIcon} 
+                                    label="Whoosh" 
+                                    onClick={() => setActiveTab(NavigationTab.TrainServices)}
+                                    bgColor="bg-red-400"
                                 />
                             </div>
                         </div>

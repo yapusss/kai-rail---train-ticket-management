@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavigationTab } from '../types';
-import { TrainIcon, ArrowLeftIcon } from '../components/icons/FeatureIcons';
+import { TrainIcon, ArrowLeftIcon, LocationIcon, CalendarIcon, RouteIcon, PriceTagIcon } from '../components/icons/FeatureIcons';
 import { TrainDataService } from '../services/trainDataService';
 
 // Get train services from centralized data
@@ -40,6 +40,102 @@ const TrainServicesScreen: React.FC<TrainServicesScreenProps> = ({ setActiveTab 
         const service = TrainDataService.getTrainServiceById(selectedService);
         if (!service) return null;
 
+        // Special layout for Commuter Line
+        if (selectedService === 'commuter-line') {
+            return (
+                <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+                    {/* Header with Pink Gradient */}
+                    <div className="bg-gradient-to-r from-pink-500 to-red-500 text-white p-4 rounded-b-3xl">
+                        <div className="flex items-center justify-between">
+                            <button 
+                                onClick={() => setSelectedService(null)}
+                                className="p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
+                            >
+                                <ArrowLeftIcon className="w-6 h-6" />
+                            </button>
+                            <h1 className="text-xl font-bold">Commuter Line</h1>
+                            <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="p-4 space-y-4">
+                        {/* Main Commuter Line Card */}
+                        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                            <div className="flex items-center space-x-4 mb-4">
+                                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center">
+                                    <TrainIcon className="w-6 h-6 text-white" />
+                                </div>
+                                <div className="flex-1">
+                                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">Commuter Line</h2>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                                        Pesan tiket kereta commuter line anda sekarang menjadi lebih mudah.
+                                    </p>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={() => handleBookTicket('Commuter Line', 'Jabodetabek')}
+                                className="w-full py-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition-colors"
+                            >
+                                PESAN TIKET
+                            </button>
+                        </div>
+
+                        {/* Feature Grid */}
+                        <div className="grid grid-cols-2 gap-4">
+                            {/* Cek Posisi Kereta */}
+                            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md">
+                                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-3">
+                                    <LocationIcon className="w-6 h-6 text-blue-500" />
+                                </div>
+                                <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Cek Posisi Kereta</h3>
+                                <p className="text-xs text-gray-600 dark:text-gray-400">
+                                    Informasi posisi kereta saat ini.
+                                </p>
+                            </div>
+
+                            {/* Jadwal Kereta */}
+                            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md">
+                                <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-3">
+                                    <CalendarIcon className="w-6 h-6 text-green-500" />
+                                </div>
+                                <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Jadwal Kereta</h3>
+                                <p className="text-xs text-gray-600 dark:text-gray-400">
+                                    Informasi jadwal perjalanan KRL.
+                                </p>
+                            </div>
+
+                            {/* Rute dan Jalur */}
+                            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md">
+                                <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-3">
+                                    <RouteIcon className="w-6 h-6 text-purple-500" />
+                                </div>
+                                <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Rute dan Jalur</h3>
+                                <p className="text-xs text-gray-600 dark:text-gray-400">
+                                    Informasi Rute dan Jalur KRL.
+                                </p>
+                            </div>
+
+                            {/* Cek Tarif */}
+                            <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md">
+                                <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mb-3">
+                                    <PriceTagIcon className="w-6 h-6 text-orange-500" />
+                                </div>
+                                <h3 className="font-semibold text-gray-900 dark:text-white mb-1">Cek Tarif</h3>
+                                <p className="text-xs text-gray-600 dark:text-gray-400">
+                                    Informasi tarif perjalanan KRL.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Default layout for other services
         return (
             <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
                 {/* Header */}

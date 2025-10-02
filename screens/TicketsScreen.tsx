@@ -278,7 +278,7 @@ const TicketsScreen: React.FC = () => {
                     />
                     <SearchIcon className="absolute left-3 w-5 h-5 text-gray-400" />
                     <div className="absolute right-3 flex items-center space-x-1">
-                        <button type="button" onClick={handleVoiceSearch} className={`p-2 rounded-full ${isListening ? 'bg-red-500 text-white animate-pulse' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'}`}>
+                        <button type="button" onClick={handleVoiceSearch} className={`p-2 rounded-full ${isListening ? 'bg-green-500 text-white' : 'bg-gray-500 text-white hover:bg-gray-600'}`}>
                             <MicrophoneIcon className="w-5 h-5" />
                         </button>
                         <button type="button" className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full">
