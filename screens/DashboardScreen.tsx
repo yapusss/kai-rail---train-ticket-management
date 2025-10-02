@@ -4,12 +4,45 @@ import { Ticket, TrainClass, NavigationTab } from '../types';
 import { 
     ShoppingCartIcon, MessageIcon, FlagIcon, BellIcon, QRIcon, MoneyIcon, ClockIcon,
     TrainIcon, BuildingIcon, PackageIcon, MoreIcon, TrophyIcon, CoinIcon, SparklesIcon,
-    ArrowRightIcon
+    ArrowRightIcon, ArrowLeftIcon
 } from '../components/icons/FeatureIcons';
+import { TRAIN_SERVICES } from './TrainServicesScreen';
+
 
 // Mock data for the new dashboard
 const MOCK_RAILPOIN = 1250;
 const MOCK_NOTIFICATION_COUNT = 52;
+
+// Mock data untuk berbagai layanan
+const MOCK_SERVICES = {
+    hotels: [
+        { name: "Hotel Santika Bandung", location: "Bandung", price: 450000, rating: 4.5, amenities: ["WiFi", "Parking", "Restaurant"] },
+        { name: "Ibis Styles Bandung", location: "Bandung", price: 380000, rating: 4.2, amenities: ["WiFi", "Pool", "Breakfast"] },
+        { name: "Hotel Grand Mercure Jakarta", location: "Jakarta", price: 650000, rating: 4.7, amenities: ["WiFi", "Spa", "Restaurant", "Parking"] },
+        { name: "Favehotel Yogyakarta", location: "Yogyakarta", price: 320000, rating: 4.0, amenities: ["WiFi", "Restaurant"] },
+        { name: "Hotel Tunjungan Surabaya", location: "Surabaya", price: 520000, rating: 4.3, amenities: ["WiFi", "Pool", "Parking"] },
+        { name: "Aston Hotel Jakarta", location: "Jakarta", price: 580000, rating: 4.4, amenities: ["WiFi", "Pool", "Restaurant", "Spa"] },
+        { name: "Harris Hotel Bandung", location: "Bandung", price: 420000, rating: 4.1, amenities: ["WiFi", "Restaurant", "Parking"] },
+        { name: "Hotel Mulia Senayan", location: "Jakarta", price: 850000, rating: 4.8, amenities: ["WiFi", "Pool", "Spa", "Restaurant", "Parking"] },
+    ],
+    carRentals: [
+        { name: "Avis Car Rental", location: "Jakarta", price: 250000, type: "Sedan", rating: 4.4 },
+        { name: "Hertz Indonesia", location: "Bandung", price: 280000, type: "SUV", rating: 4.6 },
+        { name: "Budget Car Rental", location: "Yogyakarta", price: 200000, type: "Hatchback", rating: 4.1 },
+        { name: "Enterprise Rent-A-Car", location: "Surabaya", price: 320000, type: "SUV", rating: 4.5 },
+        { name: "Sixt Car Rental", location: "Jakarta", price: 290000, type: "Sedan", rating: 4.3 },
+    ],
+    logistics: [
+        { name: "KAI Logistics Express", route: "Jakarta - Surabaya", price: 150000, duration: "1 day", type: "Express" },
+        { name: "KAI Logistics Standard", route: "Jakarta - Bandung", price: 75000, duration: "2 days", type: "Standard" },
+        { name: "KAI Logistics Heavy", route: "Jakarta - Yogyakarta", price: 180000, duration: "1 day", type: "Heavy Cargo" },
+    ],
+    insurance: [
+        { name: "Travel Insurance Premium", coverage: "Medical + Trip Cancellation", price: 150000, duration: "30 days" },
+        { name: "Basic Travel Insurance", coverage: "Medical Only", price: 75000, duration: "30 days" },
+        { name: "Family Travel Insurance", coverage: "Family Package", price: 300000, duration: "30 days" },
+    ]
+};
 
 // Service Button Component
 const ServiceButton: React.FC<{ 
@@ -81,6 +114,15 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
         notifications: false
     });
 
+    // State untuk tracking service yang dipilih
+    const [selectedService, setSelectedService] = useState<string | null>(null);
+    
+    // State untuk search functionality
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState<any[]>([]);
+    const [isSearching, setIsSearching] = useState(false);
+    const [showSearchResults, setShowSearchResults] = useState(false);
+
     // Fungsi untuk header icons
     const handleMessages = () => {
         alert('💬 Messages\n\nAnda memiliki 3 pesan baru.\nBuka untuk melihat pesan dari KAI Access.');
@@ -99,56 +141,25 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
         alert(`🔔 Notifications ${serviceStates.notifications ? 'Disabled' : 'Enabled'}\n\nAnda ${serviceStates.notifications ? 'tidak akan' : 'akan'} menerima notifikasi dari KAI Access.`);
     };
 
-    // Fungsi untuk KAI PAY
-    const handleKAIPayActivation = () => {
-        setServiceStates(prev => ({
-            ...prev,
-            kaipayActivated: !prev.kaipayActivated
-        }));
-        
-        alert(`💳 KAI PAY ${serviceStates.kaipayActivated ? 'Deactivated' : 'Activated'}\n\nKAI PAY Anda telah ${serviceStates.kaipayActivated ? 'dinonaktifkan' : 'diaktifkan'}.`);
-    };
-
-    const handleScanQR = () => {
-        alert('📱 QR Code Scanner\n\nArahkan kamera ke QR code untuk melakukan pembayaran atau mendapatkan informasi.');
-    };
-
-    const handleTopUp = () => {
-        alert('💰 Top Up Balance\n\nPilih metode top up:\n• Bank Transfer\n• Credit Card\n• E-Wallet\n• Mini Market');
-    };
-
-    const handleHistory = () => {
-        alert('📋 Transaction History\n\nRiwayat transaksi KAI PAY Anda akan ditampilkan di sini.');
-    };
-
-    const handleBecomeMember = () => {
-        alert('👑 Become Basic Member\n\nNikmati berbagai keuntungan dengan menjadi member KAI Access!\n\n• Poin reward 2x lipat\n• Prioritas customer service\n• Diskon khusus member');
-    };
-
-    // Fungsi untuk service buttons
+    // Fungsi untuk service buttons - langsung menampilkan detail service
     const handleInterCity = () => {
-        alert('🚄 Inter City Train\n\nPesan tiket kereta antarkota dengan mudah.\nDestinasi: Jakarta, Surabaya, Yogyakarta, dll.');
-        setActiveTab(NavigationTab.Planner);
+        setSelectedService('intercity');
     };
 
     const handleLocal = () => {
-        alert('🚂 Local Train\n\nPesan tiket kereta lokal untuk perjalanan jarak dekat.');
-        setActiveTab(NavigationTab.Planner);
+        setSelectedService('local');
     };
 
     const handleCommuterLine = () => {
-        alert('🚇 Commuter Line\n\nPesan tiket commuter line untuk perjalanan harian.');
-        setActiveTab(NavigationTab.Planner);
+        setSelectedService('commuter');
     };
 
     const handleLRT = () => {
-        alert('🚈 LRT (Light Rail Transit)\n\nPesan tiket LRT untuk perjalanan cepat di dalam kota.');
-        setActiveTab(NavigationTab.Planner);
+        setSelectedService('lrt');
     };
 
     const handleAirport = () => {
-        alert('✈️ Airport Train\n\nPesan tiket kereta bandara untuk perjalanan ke/dari bandara.');
-        setActiveTab(NavigationTab.Planner);
+        setSelectedService('airport');
     };
 
     const handleHotel = () => {
@@ -177,6 +188,410 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
         setActiveTab(NavigationTab.Planner);
     };
 
+    // Fungsi untuk kembali ke dashboard
+    const handleBackToDashboard = () => {
+        setSelectedService(null);
+    };
+
+    // Fungsi untuk booking tiket
+    const handleBookTicket = (serviceName: string, route: string) => {
+        alert(`🎫 Booking Tiket ${serviceName}\n\nRute: ${route}\n\nFitur booking akan segera tersedia. Silakan hubungi customer service untuk pemesanan.`);
+    };
+
+    // Fungsi untuk natural language processing dan search
+    const parseSearchQuery = (query: string) => {
+        const lowerQuery = query.toLowerCase();
+        
+        // Extract keywords
+        const serviceTypes = {
+            hotel: ['hotel', 'penginapan', 'akomodasi'],
+            train: ['kereta', 'train', 'tiket kereta', 'naik kereta'],
+            car: ['mobil', 'car', 'rental mobil', 'sewa mobil'],
+            logistics: ['kirim', 'logistik', 'kargo', 'paket'],
+            insurance: ['asuransi', 'insurance', 'perlindungan']
+        };
+
+        // Extract location
+        const locations = ['jakarta', 'bandung', 'yogyakarta', 'surabaya', 'malang', 'semarang', 'medan', 'palembang'];
+        const foundLocation = locations.find(loc => lowerQuery.includes(loc));
+
+        // Extract price range
+        const priceMatch = lowerQuery.match(/(\d+(?:\.\d+)?)\s*(?:ribu|rb|000|rupiah|rp)/);
+        const price = priceMatch ? parseFloat(priceMatch[1]) * 1000 : null;
+
+        // Extract date
+        const dateMatch = lowerQuery.match(/(\d{1,2})\s*(?:oktober|november|desember|januari|februari|maret|april|mei|juni|juli|agustus|september)/);
+        const date = dateMatch ? dateMatch[1] : null;
+
+        // Determine service type
+        let serviceType = 'all';
+        for (const [type, keywords] of Object.entries(serviceTypes)) {
+            if (keywords.some(keyword => lowerQuery.includes(keyword))) {
+                serviceType = type;
+                break;
+            }
+        }
+
+        return { serviceType, location: foundLocation, price, date, originalQuery: query };
+    };
+
+    // Fungsi untuk search
+    const handleSearch = async (query: string) => {
+        if (!query.trim()) {
+            setSearchResults([]);
+            setShowSearchResults(false);
+            return;
+        }
+
+        setIsSearching(true);
+        
+        // Simulate API delay
+        setTimeout(() => {
+            const parsed = parseSearchQuery(query);
+            let results: any[] = [];
+
+            // Search based on parsed query
+            switch (parsed.serviceType) {
+                case 'hotel':
+                    results = MOCK_SERVICES.hotels.filter(hotel => {
+                        let match = true;
+                        if (parsed.location && !hotel.location.toLowerCase().includes(parsed.location)) {
+                            match = false;
+                        }
+                        if (parsed.price && hotel.price > parsed.price * 1.2) { // Allow 20% tolerance
+                            match = false;
+                        }
+                        return match;
+                    }).map(hotel => ({ ...hotel, type: 'hotel' }));
+                    break;
+
+                case 'train':
+                    // Get all train variations from TRAIN_SERVICES
+                    results = TRAIN_SERVICES.flatMap(service => 
+                        service.variations.map(variation => ({
+                            ...variation,
+                            serviceName: service.name,
+                            serviceId: service.id,
+                            type: 'train'
+                        }))
+                    ).filter(train => {
+                        if (parsed.location) {
+                            return train.route.toLowerCase().includes(parsed.location);
+                        }
+                        return true;
+                    });
+                    break;
+
+                case 'car':
+                    results = MOCK_SERVICES.carRentals.filter(car => {
+                        let match = true;
+                        if (parsed.location && !car.location.toLowerCase().includes(parsed.location)) {
+                            match = false;
+                        }
+                        if (parsed.price && car.price > parsed.price * 1.2) {
+                            match = false;
+                        }
+                        return match;
+                    }).map(car => ({ ...car, type: 'car' }));
+                    break;
+
+                case 'logistics':
+                    results = MOCK_SERVICES.logistics.map(logistic => ({ ...logistic, type: 'logistics' }));
+                    break;
+
+                case 'insurance':
+                    results = MOCK_SERVICES.insurance.map(insurance => ({ ...insurance, type: 'insurance' }));
+                    break;
+
+                default:
+                    // Search all services
+                    results = [
+                        ...MOCK_SERVICES.hotels.map(hotel => ({ ...hotel, type: 'hotel' })),
+                        ...MOCK_SERVICES.carRentals.map(car => ({ ...car, type: 'car' })),
+                        ...MOCK_SERVICES.logistics.map(logistic => ({ ...logistic, type: 'logistics' })),
+                        ...MOCK_SERVICES.insurance.map(insurance => ({ ...insurance, type: 'insurance' })),
+                        ...TRAIN_SERVICES.flatMap(service => 
+                            service.variations.map(variation => ({
+                                ...variation,
+                                serviceName: service.name,
+                                serviceId: service.id,
+                                type: 'train'
+                            }))
+                        )
+                    ];
+            }
+
+            setSearchResults(results);
+            setShowSearchResults(true);
+            setIsSearching(false);
+        }, 1000);
+    };
+
+    // Fungsi untuk handle search input
+    const handleSearchInput = (value: string) => {
+        setSearchQuery(value);
+        if (value.trim()) {
+            handleSearch(value);
+        } else {
+            setShowSearchResults(false);
+            setSearchResults([]);
+        }
+    };
+
+    // Fungsi untuk clear search
+    const clearSearch = () => {
+        setSearchQuery('');
+        setSearchResults([]);
+        setShowSearchResults(false);
+    };
+
+    // Komponen untuk menampilkan hasil pencarian
+    const SearchResults = () => {
+        if (!showSearchResults || searchResults.length === 0) return null;
+
+        const renderResult = (result: any, index: number) => {
+            switch (result.type) {
+                case 'hotel':
+                    return (
+                        <div key={index} className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md">
+                            <div className="flex justify-between items-start mb-3">
+                                <div>
+                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">{result.name}</h3>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">{result.location}</p>
+                                    <div className="flex items-center mt-1">
+                                        <span className="text-yellow-500">⭐</span>
+                                        <span className="text-sm text-gray-600 dark:text-gray-400 ml-1">{result.rating}</span>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-lg font-bold text-green-600 dark:text-green-400">Rp {result.price.toLocaleString()}</p>
+                                    <p className="text-xs text-gray-500">per malam</p>
+                                </div>
+                            </div>
+                            <div className="flex flex-wrap gap-2 mb-3">
+                                {result.amenities.map((amenity: string, i: number) => (
+                                    <span key={i} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                                        {amenity}
+                                    </span>
+                                ))}
+                            </div>
+                            <button 
+                                onClick={() => alert(`🏨 Booking Hotel ${result.name}\n\nLokasi: ${result.location}\nHarga: Rp ${result.price.toLocaleString()}/malam\n\nFitur booking akan segera tersedia.`)}
+                                className="w-full py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition-colors"
+                            >
+                                Pesan Hotel
+                            </button>
+                        </div>
+                    );
+
+                case 'train':
+                    return (
+                        <div key={index} className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md">
+                            <div className="flex justify-between items-start mb-3">
+                                <div>
+                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">{result.name}</h3>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">{result.route}</p>
+                                    <p className="text-xs text-blue-600 dark:text-blue-400">{result.serviceName}</p>
+                                </div>
+                                <div className={`p-3 bg-blue-500 rounded-full`}>
+                                    <TrainIcon className="w-6 h-6 text-white" />
+                                </div>
+                            </div>
+                            <div className="flex justify-between items-center mb-3">
+                                <div className="text-center">
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">Durasi</p>
+                                    <p className="font-semibold text-gray-800 dark:text-gray-200">{result.duration}</p>
+                                </div>
+                                <div className="text-center">
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">Harga</p>
+                                    <p className="font-semibold text-green-600 dark:text-green-400">{result.price}</p>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={() => handleBookTicket(result.name, result.route)}
+                                className="w-full py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition-colors"
+                            >
+                                Pesan Tiket
+                            </button>
+                        </div>
+                    );
+
+                case 'car':
+                    return (
+                        <div key={index} className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md">
+                            <div className="flex justify-between items-start mb-3">
+                                <div>
+                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">{result.name}</h3>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">{result.location}</p>
+                                    <div className="flex items-center mt-1">
+                                        <span className="text-yellow-500">⭐</span>
+                                        <span className="text-sm text-gray-600 dark:text-gray-400 ml-1">{result.rating}</span>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-lg font-bold text-green-600 dark:text-green-400">Rp {result.price.toLocaleString()}</p>
+                                    <p className="text-xs text-gray-500">per hari</p>
+                                </div>
+                            </div>
+                            <div className="mb-3">
+                                <span className="px-3 py-1 bg-orange-100 text-orange-800 text-sm rounded-full">
+                                    {result.type}
+                                </span>
+                            </div>
+                            <button 
+                                onClick={() => alert(`🚗 Rental Mobil ${result.name}\n\nTipe: ${result.type}\nLokasi: ${result.location}\nHarga: Rp ${result.price.toLocaleString()}/hari\n\nFitur booking akan segera tersedia.`)}
+                                className="w-full py-2 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600 transition-colors"
+                            >
+                                Sewa Mobil
+                            </button>
+                        </div>
+                    );
+
+                case 'logistics':
+                    return (
+                        <div key={index} className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md">
+                            <div className="flex justify-between items-start mb-3">
+                                <div>
+                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">{result.name}</h3>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">{result.route}</p>
+                                    <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
+                                        {result.type}
+                                    </span>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-lg font-bold text-green-600 dark:text-green-400">Rp {result.price.toLocaleString()}</p>
+                                    <p className="text-xs text-gray-500">{result.duration}</p>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={() => alert(`📦 KAI Logistics ${result.name}\n\nRute: ${result.route}\nTipe: ${result.type}\nHarga: Rp ${result.price.toLocaleString()}\nDurasi: ${result.duration}\n\nFitur booking akan segera tersedia.`)}
+                                className="w-full py-2 bg-purple-500 text-white font-semibold rounded-lg hover:bg-purple-600 transition-colors"
+                            >
+                                Kirim Paket
+                            </button>
+                        </div>
+                    );
+
+                case 'insurance':
+                    return (
+                        <div key={index} className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md">
+                            <div className="flex justify-between items-start mb-3">
+                                <div>
+                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">{result.name}</h3>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">{result.coverage}</p>
+                                    <p className="text-xs text-green-600 dark:text-green-400">{result.duration}</p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-lg font-bold text-green-600 dark:text-green-400">Rp {result.price.toLocaleString()}</p>
+                                    <p className="text-xs text-gray-500">per periode</p>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={() => alert(`🛡️ Asuransi ${result.name}\n\nCoverage: ${result.coverage}\nDurasi: ${result.duration}\nHarga: Rp ${result.price.toLocaleString()}\n\nFitur booking akan segera tersedia.`)}
+                                className="w-full py-2 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition-colors"
+                            >
+                                Beli Asuransi
+                            </button>
+                        </div>
+                    );
+
+                default:
+                    return null;
+            }
+        };
+
+        return (
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 mb-6">
+                {/* Sticky Header */}
+                <div className="sticky top-0 bg-white dark:bg-gray-800 rounded-t-2xl border-b border-gray-200 dark:border-gray-700 px-4 py-3 z-10">
+                    <div className="flex justify-between items-center">
+                        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                            Hasil Pencarian ({searchResults.length})
+                        </h3>
+                        <button 
+                            onClick={clearSearch}
+                            className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+                        >
+                            ✕
+                        </button>
+                    </div>
+                </div>
+                
+                {/* Scrollable Content */}
+                <div className="max-h-96 overflow-y-auto px-4 pb-4">
+                    <div className="space-y-3 pt-4">
+                        {searchResults.map((result, index) => renderResult(result, index))}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    // Jika ada service yang dipilih, tampilkan detail service
+    if (selectedService) {
+        const service = TRAIN_SERVICES.find(s => s.id === selectedService);
+        if (!service) return null;
+
+        return (
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+                {/* Header */}
+                <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 rounded-b-3xl">
+                    <div className="flex items-center justify-between">
+                        <button 
+                            onClick={handleBackToDashboard}
+                            className="p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
+                        >
+                            <ArrowLeftIcon className="w-6 h-6" />
+                        </button>
+                        <h1 className="text-xl font-bold">{service.name}</h1>
+                        <div></div>
+                    </div>
+                    <p className="text-sm opacity-90 mt-2">{service.description}</p>
+                </div>
+
+                {/* Service Variations */}
+                <div className="p-4 space-y-4">
+                    <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Pilih Rute</h2>
+                    <div className="space-y-3">
+                        {service.variations.map((variation, index) => (
+                            <div key={index} className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md">
+                                <div className="flex justify-between items-start mb-3">
+                                    <div>
+                                        <h3 className="text-lg font-bold text-gray-900 dark:text-white">{variation.name}</h3>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400">{variation.route}</p>
+                                    </div>
+                                    <div className={`p-3 ${service.bgColor} rounded-full`}>
+                                        <TrainIcon className="w-6 h-6 text-white" />
+                                    </div>
+                                </div>
+                                
+                                <div className="flex justify-between items-center mb-4">
+                                    <div className="flex items-center space-x-4">
+                                        <div className="text-center">
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">Durasi</p>
+                                            <p className="font-semibold text-gray-800 dark:text-gray-200">{variation.duration}</p>
+                                        </div>
+                                        <div className="text-center">
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">Harga</p>
+                                            <p className="font-semibold text-green-600 dark:text-green-400">{variation.price}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button 
+                                    onClick={() => handleBookTicket(variation.name, variation.route)}
+                                    className={`w-full py-3 ${service.bgColor} text-white font-semibold rounded-lg hover:opacity-90 transition-opacity`}
+                                >
+                                    Pesan Tiket
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
             {/* Header Section with 3D Illustration Background */}
@@ -198,10 +613,67 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                         <HeaderIcon Icon={BellIcon} onClick={handleNotifications} badge={MOCK_NOTIFICATION_COUNT} />
                     </div>
                 </div>
+
+                {/* Search Bar */}
+                <div className="relative">
+                    <div className="relative">
+                        <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => handleSearchInput(e.target.value)}
+                            placeholder="Cari hotel, tiket kereta, rental mobil... (contoh: hotel 500000 bandung)"
+                            className="w-full px-4 py-3 pr-12 pl-12 bg-white/20 backdrop-blur-sm border border-white/30 rounded-2xl text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50"
+                        />
+                        <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
+                            {isSearching ? (
+                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                            ) : (
+                                <svg className="w-5 h-5 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            )}
+                        </div>
+                        {searchQuery && (
+                            <button
+                                onClick={clearSearch}
+                                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/70 hover:text-white transition-colors"
+                            >
+                                ✕
+                            </button>
+                        )}
+                    </div>
+                </div>
+
+                {/* Example Queries */}
+                {!searchQuery && (
+                    <div className="mt-4">
+                        <p className="text-sm text-white/80 mb-2">Contoh pencarian:</p>
+                        <div className="flex flex-wrap gap-2">
+                            {[
+                                "hotel 500000 bandung",
+                                "tiket kereta jakarta surabaya", 
+                                "rental mobil jakarta",
+                                "asuransi perjalanan",
+                                "kirim paket jakarta bandung"
+                            ].map((example, index) => (
+                                <button
+                                    key={index}
+                                    onClick={() => handleSearchInput(example)}
+                                    className="px-3 py-1 bg-white/20 backdrop-blur-sm border border-white/30 rounded-full text-xs text-white/90 hover:bg-white/30 transition-colors"
+                                >
+                                    {example}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Main Content */}
             <div className="p-4 space-y-6">
+                {/* Search Results */}
+                <SearchResults />
+                
                 {/* Service Grid - Horizontal Scrollable */}
                 <div className="space-y-4">
                     {/* Train Services - Horizontal Scroll */}
@@ -331,8 +803,8 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                         <div className="flex items-center space-x-4">
                             <div className="w-16 h-16 bg-purple-700 rounded-full flex items-center justify-center">
                                 <span className="text-2xl font-bold">P</span>
-                            </div>
-                            <div>
+            </div>
+            <div>
                                 <h3 className="text-xl font-bold">TRIP Planner</h3>
                                 <p className="text-sm opacity-90">Make the best plans for your trip.</p>
                             </div>
