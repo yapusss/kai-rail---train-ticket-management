@@ -138,99 +138,39 @@ const App: React.FC = () => {
           </button>
         </header>
 
-        {/* Voice Command Status */}
-        <div className="px-4 pb-2">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow flex flex-col items-center py-3 px-4 mb-2 border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="font-semibold text-sm text-gray-700 dark:text-gray-200">
-                Voice Command
-              </span>
-              {browserSupportsSpeechRecognition ? (
-                <span
-                  className={
-                    listening && voiceActive
-                      ? "flex items-center gap-1 text-green-600"
-                      : "flex items-center gap-1 text-red-600"
-                  }
-                >
-                  {listening && voiceActive ? (
-                    <>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4 inline"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 18v2m0-2a6 6 0 006-6V9a6 6 0 10-12 0v3a6 6 0 006 6zm0 0v2"
-                        />
-                      </svg>
-                      <span>Mendengarkan...</span>
-                    </>
-                  ) : (
-                    <>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4 inline"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 18v2m0-2a6 6 0 006-6V9a6 6 0 10-12 0v3a6 6 0 006 6zm0 0v2M9 9v3a3 3 0 006 0V9"
-                        />
-                      </svg>
-                      <span>Tidak aktif</span>
-                    </>
-                  )}
-                </span>
-              ) : (
-                <span className="text-red-600">Browser tidak mendukung</span>
-              )}
-            </div>
-            <div className="flex gap-2 w-full justify-center">
-              <button
-                className="flex items-center gap-1 px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded shadow text-xs transition"
-                onClick={() => {
+        {/* Voice Command Button - pojok kanan atas */}
+        <div className="absolute top-6 right-6 z-30">
+          {browserSupportsSpeechRecognition ? (
+            <button
+              className={`rounded-full w-14 h-14 flex items-center justify-center shadow-lg border-2 transition-colors duration-200 ${
+                listening && voiceActive
+                  ? "bg-red-500 border-red-600"
+                  : "bg-green-500 border-green-600"
+              } hover:scale-105`}
+              title={
+                listening && voiceActive
+                  ? "Matikan Voice Command"
+                  : "Aktifkan Voice Command"
+              }
+              onClick={() => {
+                if (listening && voiceActive) {
+                  setVoiceActive(false);
+                  SpeechRecognition.stopListening();
+                } else {
                   SpeechRecognition.stopListening();
                   setVoiceActive(true);
                   SpeechRecognition.startListening({
                     continuous: true,
                     language: "id-ID",
                   });
-                }}
-              >
+                }
+              }}
+            >
+              {listening && voiceActive ? (
+                // Ikon silang (matikan)
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-                Aktifkan
-              </button>
-              <button
-                className="flex items-center gap-1 px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded shadow text-xs transition"
-                onClick={() => setVoiceActive(false)}
-                disabled={!voiceActive}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4"
+                  className="h-7 w-7 text-white"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -242,10 +182,21 @@ const App: React.FC = () => {
                     d="M6 18L18 6M6 6l12 12"
                   />
                 </svg>
-                Matikan
-              </button>
-            </div>
-          </div>
+              ) : (
+                // Ikon mic Material Design (aktifkan)
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-7 w-7 text-white"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3zm5 9a1 1 0 0 1 2 0c0 3.31-2.69 6-6 6s-6-2.69-6-6a1 1 0 0 1 2 0c0 2.21 1.79 4 4 4s4-1.79 4-4zm-5 8v2h2v-2h-2z" />
+                </svg>
+              )}
+            </button>
+          ) : (
+            <span className="text-red-600">Browser tidak mendukung</span>
+          )}
         </div>
 
         {/* Screen Content */}
