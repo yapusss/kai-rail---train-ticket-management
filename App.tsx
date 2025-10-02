@@ -1,28 +1,78 @@
-
-import React, { useState, useEffect } from 'react';
-import { NavigationTab } from './types';
-import BottomNavBar from './components/BottomNavBar';
-import DashboardScreen from './screens/DashboardScreen';
-import PlannerScreen from './screens/PlannerScreen';
-import TrainServicesScreen from './screens/TrainServicesScreen';
-import TicketsScreen from './screens/TicketsScreen';
-import AccountScreen from './screens/AccountScreen';
-import { SunIcon, MoonIcon } from './components/icons/ThemeIcons';
+import React, { useState, useEffect } from "react";
+import SpeechRecognition, {
+  useSpeechRecognition,
+} from "react-speech-recognition";
+import { NavigationTab } from "./types";
+import BottomNavBar from "./components/BottomNavBar";
+import DashboardScreen from "./screens/DashboardScreen";
+import PlannerScreen from "./screens/PlannerScreen";
+import TrainServicesScreen from "./screens/TrainServicesScreen";
+import TicketsScreen from "./screens/TicketsScreen";
+import AccountScreen from "./screens/AccountScreen";
+import { SunIcon, MoonIcon } from "./components/icons/ThemeIcons";
 
 const App: React.FC = () => {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
-  const [activeTab, setActiveTab] = useState<NavigationTab>(NavigationTab.Dashboard);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [activeTab, setActiveTab] = useState<NavigationTab>(
+    NavigationTab.Dashboard
+  );
+
+  // Voice command setup
+  const commands = [
+    {
+      command: ["buka dashboard", "dashboard"],
+      callback: () => setActiveTab(NavigationTab.Dashboard),
+    },
+    {
+      command: ["buka planner", "planner"],
+      callback: () => setActiveTab(NavigationTab.Planner),
+    },
+    {
+      command: ["buka layanan kereta", "layanan kereta", "train services"],
+      callback: () => setActiveTab(NavigationTab.TrainServices),
+    },
+    {
+      command: ["buka tiket", "tiket", "tickets"],
+      callback: () => setActiveTab(NavigationTab.Tickets),
+    },
+    {
+      command: ["buka akun", "akun", "account"],
+      callback: () => setActiveTab(NavigationTab.Account),
+    },
+    {
+      command: ["buka promo", "promo", "promotion"],
+      callback: () => setActiveTab(NavigationTab.Promotion),
+    },
+    {
+      command: ["ganti tema", "ubah tema", "toggle theme"],
+      callback: () => toggleTheme(),
+    },
+  ];
+
+  const {
+    transcript,
+    listening,
+    resetTranscript,
+    browserSupportsSpeechRecognition,
+  } = useSpeechRecognition({ commands });
 
   useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
+    // Start listening automatically
+    if (browserSupportsSpeechRecognition) {
+      SpeechRecognition.startListening({ continuous: true, language: "id-ID" });
+    }
+  }, [browserSupportsSpeechRecognition]);
+
+  useEffect(() => {
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
     } else {
-      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.remove("dark");
     }
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
+    setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
   };
 
   const renderScreen = () => {
@@ -36,7 +86,11 @@ const App: React.FC = () => {
       case NavigationTab.Tickets:
         return <TicketsScreen />;
       case NavigationTab.Promotion:
-        return <div className="p-4 text-center text-gray-600 dark:text-gray-400">Promotion Screen - Coming Soon</div>;
+        return (
+          <div className="p-4 text-center text-gray-600 dark:text-gray-400">
+            Promotion Screen - Coming Soon
+          </div>
+        );
       case NavigationTab.Account:
         return <AccountScreen />;
       default:
@@ -52,11 +106,40 @@ const App: React.FC = () => {
 
         {/* Header */}
         <header className="flex items-center justify-between p-4 pt-8 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm z-10">
-          <h1 className="text-xl font-bold text-red-600 dark:text-red-400">Access by KAI</h1>
-          <button onClick={toggleTheme} className="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800">
-            {theme === 'light' ? <MoonIcon className="w-6 h-6" /> : <SunIcon className="w-6 h-6" />}
+          <h1 className="text-xl font-bold text-red-600 dark:text-red-400">
+            Access by KAI
+          </h1>
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+          >
+            {theme === "light" ? (
+              <MoonIcon className="w-6 h-6" />
+            ) : (
+              <SunIcon className="w-6 h-6" />
+            )}
           </button>
         </header>
+
+        {/* Voice Command Status */}
+        <div className="px-4 pb-2 text-xs text-gray-500 dark:text-gray-400">
+          <span>Voice Command: </span>
+          {browserSupportsSpeechRecognition ? (
+            <span className={listening ? "text-green-600" : "text-red-600"}>
+              {listening ? "Mendengarkan..." : "Tidak aktif"}
+            </span>
+          ) : (
+            <span className="text-red-600">Browser tidak mendukung</span>
+          )}
+          <br />
+          <span>Perintah terakhir: "{transcript}"</span>
+          <button
+            className="ml-2 px-2 py-1 bg-gray-200 dark:bg-gray-800 rounded text-xs"
+            onClick={resetTranscript}
+          >
+            Reset
+          </button>
+        </div>
 
         {/* Screen Content */}
         <main className="flex-grow overflow-y-auto pb-20">
