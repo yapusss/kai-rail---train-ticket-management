@@ -49,19 +49,36 @@ const App: React.FC = () => {
     },
   ];
 
-  const {
-    transcript,
-    listening,
-    resetTranscript,
-    browserSupportsSpeechRecognition,
-  } = useSpeechRecognition({ commands });
+  const { listening, browserSupportsSpeechRecognition } = useSpeechRecognition({
+    commands,
+  });
+
+  // State untuk mengontrol voice command
+  const [voiceActive, setVoiceActive] = useState(true);
 
   useEffect(() => {
-    // Start listening automatically
+    // Start/stop listening sesuai voiceActive
     if (browserSupportsSpeechRecognition) {
-      SpeechRecognition.startListening({ continuous: true, language: "id-ID" });
+      if (voiceActive) {
+        SpeechRecognition.startListening({
+          continuous: true,
+          language: "id-ID",
+        });
+      } else {
+        SpeechRecognition.stopListening();
+      }
     }
-  }, [browserSupportsSpeechRecognition]);
+  }, [browserSupportsSpeechRecognition, voiceActive]);
+
+  // Pastikan voice command aktif saat aplikasi pertama kali dibuka
+  useEffect(() => {
+    if (browserSupportsSpeechRecognition && !listening && voiceActive) {
+      SpeechRecognition.startListening({
+        continuous: true,
+        language: "id-ID",
+      });
+    }
+  }, [browserSupportsSpeechRecognition, listening, voiceActive]);
 
   useEffect(() => {
     if (theme === "dark") {
@@ -125,30 +142,35 @@ const App: React.FC = () => {
         <div className="px-4 pb-2 text-xs text-gray-500 dark:text-gray-400">
           <span>Voice Command: </span>
           {browserSupportsSpeechRecognition ? (
-            <span className={listening ? "text-green-600" : "text-red-600"}>
-              {listening ? "Mendengarkan..." : "Tidak aktif"}
+            <span
+              className={
+                listening && voiceActive ? "text-green-600" : "text-red-600"
+              }
+            >
+              {listening && voiceActive ? "Mendengarkan..." : "Tidak aktif"}
             </span>
           ) : (
             <span className="text-red-600">Browser tidak mendukung</span>
           )}
-          <br />
-          <span>Perintah terakhir: "{transcript}"</span>
-          <button
-            className="ml-2 px-2 py-1 bg-gray-200 dark:bg-gray-800 rounded text-xs"
-            onClick={resetTranscript}
-          >
-            Reset
-          </button>
           <button
             className="ml-2 px-2 py-1 bg-blue-200 dark:bg-blue-800 rounded text-xs"
-            onClick={() =>
+            onClick={() => {
+              SpeechRecognition.stopListening();
+              setVoiceActive(true);
               SpeechRecognition.startListening({
                 continuous: true,
                 language: "id-ID",
-              })
-            }
+              });
+            }}
           >
             Aktifkan Voice Command
+          </button>
+          <button
+            className="ml-2 px-2 py-1 bg-red-200 dark:bg-red-800 rounded text-xs"
+            onClick={() => setVoiceActive(false)}
+            disabled={!voiceActive}
+          >
+            Matikan Voice Command
           </button>
         </div>
 
