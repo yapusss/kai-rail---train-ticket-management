@@ -25,36 +25,75 @@ const App: React.FC = () => {
   const [bookingFormData, setBookingFormData] = useState<any>(null);
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
   const [bookedTicket, setBookedTicket] = useState<any>(null);
+  
+  // Voice command feedback state
+  const [voiceCommandFeedback, setVoiceCommandFeedback] = useState<string>('');
+
+  // Voice command callback functions
+  const showFeedback = (message: string) => {
+    setVoiceCommandFeedback(message);
+    setTimeout(() => setVoiceCommandFeedback(''), 2000);
+  };
+
+  const navigateWithFeedback = (tab: NavigationTab, message: string) => {
+    setActiveTab(tab);
+    showFeedback(message);
+  };
+
+  const toggleThemeWithFeedback = () => {
+    toggleTheme();
+    showFeedback(`Mengubah ke tema ${theme === 'light' ? 'gelap' : 'terang'}...`);
+  };
 
   // Voice command setup
   const commands = [
     {
       command: ["buka dashboard", "dashboard"],
-      callback: () => setActiveTab(NavigationTab.Dashboard),
+      callback: () => navigateWithFeedback(NavigationTab.Dashboard, "Membuka Dashboard..."),
     },
     {
       command: ["buka planner", "planner"],
-      callback: () => setActiveTab(NavigationTab.Planner),
+      callback: () => navigateWithFeedback(NavigationTab.Planner, "Membuka Planner..."),
     },
     {
       command: ["buka layanan kereta", "layanan kereta", "train services"],
-      callback: () => setActiveTab(NavigationTab.TrainServices),
+      callback: () => navigateWithFeedback(NavigationTab.TrainServices, "Membuka Layanan Kereta..."),
     },
     {
       command: ["buka tiket", "tiket", "tickets"],
-      callback: () => setActiveTab(NavigationTab.Tickets),
+      callback: () => navigateWithFeedback(NavigationTab.Tickets, "Membuka Tiket Saya..."),
     },
     {
       command: ["buka akun", "akun", "account"],
-      callback: () => setActiveTab(NavigationTab.Account),
+      callback: () => navigateWithFeedback(NavigationTab.Account, "Membuka Akun..."),
     },
     {
       command: ["buka promo", "promo", "promotion"],
-      callback: () => setActiveTab(NavigationTab.Promotion),
+      callback: () => navigateWithFeedback(NavigationTab.Promotion, "Membuka Promosi..."),
+    },
+    {
+      command: ["buka trip planner", "trip planner", "ai trip planner", "buka trip", "trip", "perencanaan perjalanan", "rencana perjalanan"],
+      callback: () => navigateWithFeedback(NavigationTab.Planner, "Membuka AI Trip Planner..."),
+    },
+    {
+      command: ["kembali ke dashboard", "buka dashboard", "dashboard", "home", "beranda"],
+      callback: () => navigateWithFeedback(NavigationTab.Dashboard, "Kembali ke Dashboard..."),
     },
     {
       command: ["ganti tema", "ubah tema", "toggle theme"],
-      callback: () => toggleTheme(),
+      callback: toggleThemeWithFeedback,
+    },
+    {
+      command: ["buat rencana perjalanan", "buat trip", "buat perjalanan", "rencana baru"],
+      callback: () => navigateWithFeedback(NavigationTab.Planner, "Membuka Trip Planner untuk rencana baru..."),
+    },
+    {
+      command: ["buka booking form", "booking form", "form pemesanan"],
+      callback: () => navigateWithFeedback(NavigationTab.BookingForm, "Membuka Form Pemesanan..."),
+    },
+    {
+      command: ["lihat daftar tiket", "daftar tiket", "list tiket"],
+      callback: () => navigateWithFeedback(NavigationTab.TicketList, "Membuka Daftar Tiket..."),
     },
   ];
 
@@ -186,6 +225,17 @@ const App: React.FC = () => {
           </div>
         </header>
 
+        {/* Voice Command Feedback */}
+        {voiceCommandFeedback && (
+          <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg animate-pulse">
+            <div className="flex items-center gap-2">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              <span className="text-sm font-medium">{voiceCommandFeedback}</span>
+            </div>
+          </div>
+        )}
 
         {/* Screen Content */}
         <main className="flex-grow overflow-y-auto pb-20">

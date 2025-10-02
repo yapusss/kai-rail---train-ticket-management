@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavigationTab } from '../types';
-import { HomeIcon, TrainIcon, TicketIcon, PromotionIcon, UserIcon } from './icons/NavIcons';
+import { HomeIcon, TrainIcon, TicketIcon, PromotionIcon, UserIcon, PlannerIcon } from './icons/NavIcons';
 
 interface BottomNavBarProps {
   activeTab: NavigationTab;
@@ -22,9 +22,9 @@ const NavItem: React.FC<{
   return (
     <button
       onClick={() => onClick(tab)}
-      className="flex flex-col items-center justify-center w-1/4 transition-transform duration-200 ease-in-out transform hover:scale-105"
+      className="flex flex-col items-center justify-center w-1/6 transition-transform duration-200 ease-in-out transform hover:scale-105"
     >
-      <Icon className={`w-7 h-7 mb-1 transition-colors ${isActive ? activeClasses : inactiveClasses}`} />
+      <Icon className={`w-6 h-6 mb-1 transition-colors ${isActive ? activeClasses : inactiveClasses}`} />
       <span className={`text-xs font-medium transition-colors ${isActive ? activeClasses : inactiveClasses}`}>
         {label}
       </span>
@@ -34,11 +34,12 @@ const NavItem: React.FC<{
 
 const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeTab, setActiveTab }) => {
   return (
-    <div className="absolute bottom-0 left-0 right-0 h-20 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-t border-gray-200 dark:border-gray-700 flex justify-around items-center px-2 rounded-b-3xl">
+    <div className="absolute bottom-0 left-0 right-0 h-20 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-t border-gray-200 dark:border-gray-700 flex justify-around items-center px-1 rounded-b-3xl">
       <NavItem tab={NavigationTab.Dashboard} activeTab={activeTab} onClick={setActiveTab} Icon={HomeIcon} label="Home" />
       <NavItem tab={NavigationTab.TrainServices} activeTab={activeTab} onClick={setActiveTab} Icon={TrainIcon} label="Train" />
-      <NavItem tab={NavigationTab.Tickets} activeTab={activeTab} onClick={setActiveTab} Icon={TicketIcon} label="My Ticket" />
-      <NavItem tab={NavigationTab.Promotion} activeTab={activeTab} onClick={setActiveTab} Icon={PromotionIcon} label="Promotion" />
+      <NavItem tab={NavigationTab.Planner} activeTab={activeTab} onClick={setActiveTab} Icon={PlannerIcon} label="Trip" />
+      <NavItem tab={NavigationTab.Tickets} activeTab={activeTab} onClick={setActiveTab} Icon={TicketIcon} label="Tickets" />
+      <NavItem tab={NavigationTab.Promotion} activeTab={activeTab} onClick={setActiveTab} Icon={PromotionIcon} label="Promo" />
       <NavItem tab={NavigationTab.Account} activeTab={activeTab} onClick={setActiveTab} Icon={UserIcon} label="Account" />
     </div>
   );

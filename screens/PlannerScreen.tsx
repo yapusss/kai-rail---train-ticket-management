@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { generateTripPlan } from '../services/geminiService';
 import type { TripPlan } from '../types';
 import { PlannerIcon, SparklesIcon } from '../components/icons/FeatureIcons';
@@ -11,6 +11,11 @@ const PlannerScreen: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedTrain, setSelectedTrain] = useState<any>(null);
   const [showModal, setShowModal] = useState(false);
+  
+  // Voice recognition state
+  const [isListening, setIsListening] = useState(false);
+  const [transcript, setTranscript] = useState('');
+  const [browserSupportsSpeechRecognition, setBrowserSupportsSpeechRecognition] = useState(false);
 
   const handleTrainClick = (train: any) => {
     setSelectedTrain(train);
@@ -20,6 +25,63 @@ const PlannerScreen: React.FC = () => {
   const closeModal = () => {
     setShowModal(false);
     setSelectedTrain(null);
+  };
+
+  // Initialize speech recognition
+  useEffect(() => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    
+    if (SpeechRecognition) {
+      setBrowserSupportsSpeechRecognition(true);
+    }
+  }, []);
+
+  // Handle transcript changes
+  useEffect(() => {
+    if (transcript) {
+      setPrompt(prev => prev + (prev ? ' ' : '') + transcript);
+      setTranscript('');
+    }
+  }, [transcript]);
+
+  // Voice recognition functions
+  const startListening = () => {
+    if (!browserSupportsSpeechRecognition) return;
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'id-ID';
+
+    recognition.onstart = () => {
+      setIsListening(true);
+    };
+
+    recognition.onresult = (event: any) => {
+      const current = event.resultIndex;
+      const transcriptText = event.results[current][0].transcript;
+      setTranscript(transcriptText);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error:', event.error);
+      setIsListening(false);
+    };
+
+    recognition.start();
+  };
+
+  const stopListening = () => {
+    if (!browserSupportsSpeechRecognition) return;
+    
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    SpeechRecognition.stopListening();
   };
 
   const handleGeneratePlan = async () => {
@@ -57,13 +119,63 @@ const PlannerScreen: React.FC = () => {
       </div>
 
       <div className="space-y-4">
-        <textarea
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          placeholder="Contoh: Saya ingin pergi dari Jakarta ke Yogyakarta untuk liburan akhir pekan depan. Saya berangkat Jumat malam dan kembali Minggu malam. Saya lebih suka kereta eksekutif."
-          className="w-full p-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors h-32 resize-none"
-          rows={4}
-        />
+        <div className="relative">
+          <textarea
+            value={transcript || prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder={isListening ? "Mendengarkan..." : "Contoh: Saya ingin pergi dari Jakarta ke Yogyakarta untuk liburan akhir pekan depan. Saya berangkat Jumat malam dan kembali Minggu malam. Saya lebih suka kereta eksekutif."}
+            className={`w-full p-3 pb-12 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors h-32 resize-none ${isListening ? 'animate-pulse' : ''}`}
+            rows={4}
+          />
+          
+          {/* Voice Recognition Button */}
+          <button
+            onClick={browserSupportsSpeechRecognition ? (isListening ? stopListening : startListening) : undefined}
+            disabled={!browserSupportsSpeechRecognition}
+            className={`absolute right-3 bottom-3 p-2 rounded-full transition-all duration-300 hover:scale-110 ${
+              browserSupportsSpeechRecognition
+                ? isListening
+                  ? 'bg-red-500 hover:bg-red-600 text-white'
+                  : 'bg-blue-500 hover:bg-blue-600 text-white'
+                : 'bg-gray-400 cursor-not-allowed text-white'
+            }`}
+            title={browserSupportsSpeechRecognition 
+              ? (isListening ? 'Stop Voice Input' : 'Start Voice Input')
+              : 'Voice recognition not supported'
+            }
+          >
+            {isListening ? (
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            ) : (
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" />
+              </svg>
+            )}
+          </button>
+        </div>
+
+        {/* Voice Status */}
+        {isListening && (
+          <div className="flex items-center justify-center gap-2 text-sm text-blue-600 dark:text-blue-400">
+            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+            <span>Mendengarkan... Bicaralah sekarang</span>
+          </div>
+        )}
+
+        {/* Voice Commands Examples */}
+        <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+          <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">
+            🎤 Contoh Voice Commands:
+          </h4>
+          <div className="text-xs text-blue-700 dark:text-blue-400 space-y-1">
+            <p>• "Saya ingin pergi dari Jakarta ke Yogyakarta akhir pekan depan"</p>
+            <p>• "Buatkan rencana perjalanan ke Bandung dengan kereta eksekutif"</p>
+            <p>• "Saya berangkat hari Jumat dan kembali hari Minggu"</p>
+            <p>• "Perjalanan ke Surabaya dengan budget lima ratus ribu"</p>
+          </div>
+        </div>
         <button
           onClick={handleGeneratePlan}
           disabled={isLoading}
