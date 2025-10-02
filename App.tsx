@@ -139,39 +139,113 @@ const App: React.FC = () => {
         </header>
 
         {/* Voice Command Status */}
-        <div className="px-4 pb-2 text-xs text-gray-500 dark:text-gray-400">
-          <span>Voice Command: </span>
-          {browserSupportsSpeechRecognition ? (
-            <span
-              className={
-                listening && voiceActive ? "text-green-600" : "text-red-600"
-              }
-            >
-              {listening && voiceActive ? "Mendengarkan..." : "Tidak aktif"}
-            </span>
-          ) : (
-            <span className="text-red-600">Browser tidak mendukung</span>
-          )}
-          <button
-            className="ml-2 px-2 py-1 bg-blue-200 dark:bg-blue-800 rounded text-xs"
-            onClick={() => {
-              SpeechRecognition.stopListening();
-              setVoiceActive(true);
-              SpeechRecognition.startListening({
-                continuous: true,
-                language: "id-ID",
-              });
-            }}
-          >
-            Aktifkan Voice Command
-          </button>
-          <button
-            className="ml-2 px-2 py-1 bg-red-200 dark:bg-red-800 rounded text-xs"
-            onClick={() => setVoiceActive(false)}
-            disabled={!voiceActive}
-          >
-            Matikan Voice Command
-          </button>
+        <div className="px-4 pb-2">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow flex flex-col items-center py-3 px-4 mb-2 border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="font-semibold text-sm text-gray-700 dark:text-gray-200">
+                Voice Command
+              </span>
+              {browserSupportsSpeechRecognition ? (
+                <span
+                  className={
+                    listening && voiceActive
+                      ? "flex items-center gap-1 text-green-600"
+                      : "flex items-center gap-1 text-red-600"
+                  }
+                >
+                  {listening && voiceActive ? (
+                    <>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4 inline"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 18v2m0-2a6 6 0 006-6V9a6 6 0 10-12 0v3a6 6 0 006 6zm0 0v2"
+                        />
+                      </svg>
+                      <span>Mendengarkan...</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4 inline"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 18v2m0-2a6 6 0 006-6V9a6 6 0 10-12 0v3a6 6 0 006 6zm0 0v2M9 9v3a3 3 0 006 0V9"
+                        />
+                      </svg>
+                      <span>Tidak aktif</span>
+                    </>
+                  )}
+                </span>
+              ) : (
+                <span className="text-red-600">Browser tidak mendukung</span>
+              )}
+            </div>
+            <div className="flex gap-2 w-full justify-center">
+              <button
+                className="flex items-center gap-1 px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded shadow text-xs transition"
+                onClick={() => {
+                  SpeechRecognition.stopListening();
+                  setVoiceActive(true);
+                  SpeechRecognition.startListening({
+                    continuous: true,
+                    language: "id-ID",
+                  });
+                }}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                Aktifkan
+              </button>
+              <button
+                className="flex items-center gap-1 px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded shadow text-xs transition"
+                onClick={() => setVoiceActive(false)}
+                disabled={!voiceActive}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+                Matikan
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Screen Content */}
