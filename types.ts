@@ -1,18 +1,18 @@
-
 export enum NavigationTab {
-  Dashboard = 'DASHBOARD',
-  Planner = 'PLANNER',
-  TrainServices = 'TRAIN_SERVICES',
-  Tickets = 'TICKETS',
-  Promotion = 'PROMOTION',
-  Account = 'ACCOUNT',
+  Dashboard = "DASHBOARD",
+  Planner = "PLANNER",
+  TrainServices = "TRAIN_SERVICES",
+  Tickets = "TICKETS",
+  Promotion = "PROMOTION",
+  Account = "ACCOUNT",
+  Payment = "PAYMENT",
 }
 
 export enum TrainClass {
-  Economy = 'Ekonomi',
-  Business = 'Bisnis',
-  Executive = 'Eksekutif',
-  Luxury = 'Luxury',
+  Economy = "Ekonomi",
+  Business = "Bisnis",
+  Executive = "Eksekutif",
+  Luxury = "Luxury",
 }
 
 export interface Ticket {
@@ -59,4 +59,14 @@ export interface TripPlan {
   planTitle: string;
   totalEstimatedPrice: number;
   steps: TripStep[];
+}
+
+export interface PaymentIntent {
+  fromStation: string;
+  toStation?: string;
+  lineId?: string;
+  serviceName: string;
+  date: string;
+  passengers: number;
+  amount: number;
 }

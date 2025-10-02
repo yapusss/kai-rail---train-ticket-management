@@ -9,6 +9,7 @@ import PlannerScreen from "./screens/PlannerScreen";
 import TrainServicesScreen from "./screens/TrainServicesScreen";
 import TicketsScreen from "./screens/TicketsScreen";
 import AccountScreen from "./screens/AccountScreen";
+import PaymentScreen from "./screens/PaymentScreen";
 import { XIcon, MicrophoneIcon } from "./components/icons/FeatureIcons";
 import { SunIcon, MoonIcon } from "./components/icons/ThemeIcons";
 
@@ -17,6 +18,18 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<NavigationTab>(
     NavigationTab.Dashboard
   );
+  const [selectedService, setSelectedService] = useState<string | null>(null);
+  const [paymentIntent, setPaymentIntent] = useState<any>(null);
+
+  // Listen to payment intent creation from child screens
+  useEffect(() => {
+    const handler = (e: any) => {
+      setPaymentIntent(e.detail);
+      setActiveTabWithService(NavigationTab.Payment);
+    };
+    window.addEventListener('create-payment', handler);
+    return () => window.removeEventListener('create-payment', handler);
+  }, []);
 
   // Voice command setup
   const commands = [
@@ -93,16 +106,23 @@ const App: React.FC = () => {
     setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
   };
 
+  const setActiveTabWithService = (tab: NavigationTab, serviceId?: string) => {
+    setActiveTab(tab);
+    setSelectedService(serviceId || null);
+  };
+
   const renderScreen = () => {
     switch (activeTab) {
       case NavigationTab.Dashboard:
-        return <DashboardScreen setActiveTab={setActiveTab} />;
+        return <DashboardScreen setActiveTab={setActiveTabWithService} />;
       case NavigationTab.Planner:
         return <PlannerScreen />;
       case NavigationTab.TrainServices:
-        return <TrainServicesScreen setActiveTab={setActiveTab} />;
+        return <TrainServicesScreen setActiveTab={setActiveTab} initialService={selectedService} />;
       case NavigationTab.Tickets:
         return <TicketsScreen />;
+      case NavigationTab.Payment:
+        return <PaymentScreen setActiveTab={setActiveTabWithService as any} payment={paymentIntent} />;
       case NavigationTab.Promotion:
         return (
           <div className="p-4 text-center text-gray-600 dark:text-gray-400">

@@ -36,7 +36,7 @@ const ServiceButton: React.FC<{
 );
 
 interface DashboardScreenProps {
-    setActiveTab: (tab: NavigationTab) => void;
+    setActiveTab: (tab: NavigationTab, serviceId?: string) => void;
 }
 
 const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
@@ -427,7 +427,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                                 <ServiceButton 
                                     Icon={TrainIcon} 
                                     label="Commuter Line" 
-                                    onClick={() => setActiveTab(NavigationTab.TrainServices)}
+                                    onClick={() => setActiveTab(NavigationTab.TrainServices, 'commuter')}
                                     bgColor="bg-red-500"
                                 />
                                 <ServiceButton 
@@ -477,6 +477,22 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                                 />
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                {/* Test Commuter Line - Temporary */}
+                <div className="bg-gradient-to-r from-pink-500 to-red-500 rounded-2xl p-4 text-white mb-4">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h3 className="text-lg font-bold">🚆 Test Commuter Line</h3>
+                            <p className="text-sm opacity-90">Klik untuk langsung ke halaman Commuter Line</p>
+                        </div>
+                        <button 
+                            onClick={() => setActiveTab(NavigationTab.TrainServices, 'commuter')}
+                            className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg font-semibold transition-colors"
+                        >
+                            TEST
+                        </button>
                     </div>
                 </div>
 
