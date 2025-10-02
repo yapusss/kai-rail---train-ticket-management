@@ -16,7 +16,7 @@ const NavItem: React.FC<{
   label: string;
 }> = ({ tab, activeTab, onClick, Icon, label }) => {
   const isActive = activeTab === tab;
-  const activeClasses = 'text-red-600 dark:text-red-400';
+  const activeClasses = 'text-blue-600 dark:text-blue-400';
   const inactiveClasses = 'text-gray-500 dark:text-gray-400';
 
   return (

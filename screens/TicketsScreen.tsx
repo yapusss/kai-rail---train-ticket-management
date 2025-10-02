@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Ticket, TrainClass } from '../types';
+import { Ticket, TrainClass, BookedTicket } from '../types';
 import { interpretSearchQuery } from '../services/geminiService';
 import { SearchIcon, MicrophoneIcon, FilterIcon, DownloadIcon, RebookIcon, ArrowRightIcon } from '../components/icons/FeatureIcons';
 import { TrainDataService } from '../services/trainDataService';
@@ -56,6 +56,28 @@ const TicketsScreen: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [isListening, setIsListening] = useState(false);
     const [filters, setFilters] = useState<{ month?: number; year?: number; text?: string }>({});
+    const [bookedTickets, setBookedTickets] = useState<BookedTicket[]>([]);
+    const [selectedTicket, setSelectedTicket] = useState<BookedTicket | null>(null);
+    const [showTicketDetail, setShowTicketDetail] = useState(false);
+    const [activeTab, setActiveTab] = useState<'active' | 'history'>('active');
+
+    // Load booked tickets from localStorage
+    useEffect(() => {
+        const savedTickets = localStorage.getItem('bookedTickets');
+        if (savedTickets) {
+            setBookedTickets(JSON.parse(savedTickets));
+        }
+    }, []);
+
+    const handleTicketClick = (ticket: BookedTicket) => {
+        setSelectedTicket(ticket);
+        setShowTicketDetail(true);
+    };
+
+    const closeTicketDetail = () => {
+        setShowTicketDetail(false);
+        setSelectedTicket(null);
+    };
 
     const recognition = useMemo(() => {
         if ('webkitSpeechRecognition' in window) {
@@ -263,9 +285,37 @@ const TicketsScreen: React.FC = () => {
         });
     }, [filters, searchQuery]);
 
+    // Filter tickets by active/history status
+    const activeTickets = bookedTickets.filter(ticket => ticket.status === 'active');
+    const historyTickets = bookedTickets.filter(ticket => ticket.status !== 'active');
+
     return (
         <div className="p-4 space-y-4">
-            <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Riwayat Tiket</h2>
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Tiket Saya</h2>
+            
+            {/* Tab Navigation */}
+            <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+                <button
+                    onClick={() => setActiveTab('active')}
+                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                        activeTab === 'active'
+                            ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+                    }`}
+                >
+                    Tiket Aktif ({activeTickets.length})
+                </button>
+                <button
+                    onClick={() => setActiveTab('history')}
+                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                        activeTab === 'history'
+                            ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+                    }`}
+                >
+                    Riwayat ({historyTickets.length})
+                </button>
+            </div>
             
             <form onSubmit={handleSearchSubmit} className="space-y-3">
                 <div className="relative flex items-center">
@@ -304,11 +354,202 @@ const TicketsScreen: React.FC = () => {
             </form>
 
             <div className="space-y-4">
-                {filteredTickets.length > 0 ? (
-                    filteredTickets.map(ticket => <TicketCard key={ticket.id} ticket={ticket} />)
+                {activeTab === 'active' ? (
+                    activeTickets.length > 0 ? (
+                        activeTickets.map(ticket => (
+                            <div key={ticket.id} onClick={() => handleTicketClick(ticket)} className="cursor-pointer">
+                                <BookedTicketCard ticket={ticket} />
+                            </div>
+                        ))
+                    ) : (
+                        <div className="text-center py-8">
+                            <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                            </svg>
+                            <p className="text-gray-500 dark:text-gray-400">Belum ada tiket aktif</p>
+                            <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Pesan tiket kereta untuk melihatnya di sini</p>
+                        </div>
+                    )
                 ) : (
-                    <p className="text-center text-gray-500 dark:text-gray-400 pt-8">Tidak ada tiket yang cocok.</p>
+                    historyTickets.length > 0 ? (
+                        historyTickets.map(ticket => (
+                            <div key={ticket.id} onClick={() => handleTicketClick(ticket)} className="cursor-pointer">
+                                <BookedTicketCard ticket={ticket} />
+                            </div>
+                        ))
+                    ) : (
+                        <div className="text-center py-8">
+                            <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                            <p className="text-gray-500 dark:text-gray-400">Belum ada riwayat tiket</p>
+                            <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Riwayat perjalanan akan muncul di sini</p>
+                        </div>
+                    )
                 )}
+            </div>
+
+            {/* Ticket Detail Modal */}
+            {showTicketDetail && selectedTicket && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+                        <div className="p-6">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-xl font-bold text-gray-900 dark:text-white">Detail Tiket</h3>
+                                <button 
+                                    onClick={closeTicketDetail}
+                                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                                >
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                            
+                            <div className="space-y-4">
+                                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                                    <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">Kode Booking</h4>
+                                    <p className="text-2xl font-bold text-blue-900 dark:text-blue-200">{selectedTicket.bookingCode}</p>
+                                </div>
+
+                                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                                    <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-3">Informasi Perjalanan</h4>
+                                    <div className="space-y-2 text-sm">
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600 dark:text-gray-300">Kereta:</span>
+                                            <span className="font-medium text-gray-900 dark:text-white">{selectedTicket.trainName}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600 dark:text-gray-300">Kelas:</span>
+                                            <span className="font-medium text-gray-900 dark:text-white">{selectedTicket.trainClass}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600 dark:text-gray-300">Rute:</span>
+                                            <span className="font-medium text-gray-900 dark:text-white">{selectedTicket.departureStation} → {selectedTicket.arrivalStation}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600 dark:text-gray-300">Keberangkatan:</span>
+                                            <span className="font-medium text-gray-900 dark:text-white">{new Date(selectedTicket.departureTime).toLocaleString('id-ID')}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600 dark:text-gray-300">Kedatangan:</span>
+                                            <span className="font-medium text-gray-900 dark:text-white">{new Date(selectedTicket.arrivalTime).toLocaleString('id-ID')}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600 dark:text-gray-300">Harga:</span>
+                                            <span className="font-bold text-green-600 dark:text-green-400">Rp {selectedTicket.price.toLocaleString('id-ID')}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600 dark:text-gray-300">Status:</span>
+                                            <span className={`px-2 py-1 text-xs rounded-full ${
+                                                selectedTicket.status === 'active' ? 'bg-green-100 text-green-800' :
+                                                selectedTicket.status === 'completed' ? 'bg-blue-100 text-blue-800' :
+                                                'bg-red-100 text-red-800'
+                                            }`}>
+                                                {selectedTicket.status === 'active' ? 'Aktif' :
+                                                 selectedTicket.status === 'completed' ? 'Selesai' : 'Dibatalkan'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                                    <h4 className="font-semibold text-green-800 dark:text-green-300 mb-3">Data Penumpang</h4>
+                                    <div className="space-y-2 text-sm">
+                                        <div className="flex justify-between">
+                                            <span className="text-green-600 dark:text-green-400">Nama:</span>
+                                            <span className="font-medium text-green-900 dark:text-green-200">{selectedTicket.passengerData.name}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-green-600 dark:text-green-400">NIK:</span>
+                                            <span className="font-medium text-green-900 dark:text-green-200">{selectedTicket.passengerData.nik}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-green-600 dark:text-green-400">Telepon:</span>
+                                            <span className="font-medium text-green-900 dark:text-green-200">{selectedTicket.passengerData.phone}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex space-x-3">
+                                    <button 
+                                        onClick={closeTicketDetail}
+                                        className="flex-1 bg-gray-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-gray-600 transition-colors"
+                                    >
+                                        Tutup
+                                    </button>
+                                    <button 
+                                        onClick={() => {
+                                            alert('Fitur download akan segera tersedia!');
+                                        }}
+                                        className="flex-1 bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+                                    >
+                                        Download Tiket
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+// BookedTicketCard component
+const BookedTicketCard: React.FC<{ ticket: BookedTicket }> = ({ ticket }) => {
+    const formatTime = (dateTime: string) => {
+        const date = new Date(dateTime);
+        return date.toLocaleString('id-ID', {
+            day: '2-digit',
+            month: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    };
+
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'active':
+                return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
+            case 'completed':
+                return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
+            case 'cancelled':
+                return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300';
+            default:
+                return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300';
+        }
+    };
+
+    return (
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
+            <div className="flex justify-between items-start mb-3">
+                <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                        <h3 className="font-bold text-gray-900 dark:text-white">{ticket.trainName}</h3>
+                        <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(ticket.status)}`}>
+                            {ticket.status === 'active' ? 'Aktif' :
+                             ticket.status === 'completed' ? 'Selesai' : 'Dibatalkan'}
+                        </span>
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">
+                        {ticket.departureStation} → {ticket.arrivalStation}
+                    </p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {formatTime(ticket.departureTime)} - {formatTime(ticket.arrivalTime)}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Penumpang: {ticket.passengerData.name}
+                    </p>
+                </div>
+                <div className="text-right">
+                    <p className="text-lg font-bold text-red-600 dark:text-red-400 mb-1">
+                        Rp {ticket.price.toLocaleString('id-ID')}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {ticket.bookingCode}
+                    </p>
+                </div>
             </div>
         </div>
     );

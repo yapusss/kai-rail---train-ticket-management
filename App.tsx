@@ -7,6 +7,9 @@ import BottomNavBar from "./components/BottomNavBar";
 import DashboardScreen from "./screens/DashboardScreen";
 import PlannerScreen from "./screens/PlannerScreen";
 import TrainServicesScreen from "./screens/TrainServicesScreen";
+import BookingFormScreen from "./screens/BookingFormScreen";
+import TicketListScreen from "./screens/TicketListScreen";
+import PassengerFormScreen from "./screens/PassengerFormScreen";
 import TicketsScreen from "./screens/TicketsScreen";
 import AccountScreen from "./screens/AccountScreen";
 import { SunIcon, MoonIcon } from "./components/icons/ThemeIcons";
@@ -16,6 +19,12 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<NavigationTab>(
     NavigationTab.Dashboard
   );
+  
+  // Booking flow state
+  const [selectedServiceType, setSelectedServiceType] = useState<string>('');
+  const [bookingFormData, setBookingFormData] = useState<any>(null);
+  const [selectedTicket, setSelectedTicket] = useState<any>(null);
+  const [bookedTicket, setBookedTicket] = useState<any>(null);
 
   // Voice command setup
   const commands = [
@@ -82,7 +91,13 @@ const App: React.FC = () => {
       case NavigationTab.Planner:
         return <PlannerScreen />;
       case NavigationTab.TrainServices:
-        return <TrainServicesScreen setActiveTab={setActiveTab} />;
+        return <TrainServicesScreen setActiveTab={setActiveTab} setSelectedServiceType={setSelectedServiceType} setBookingFormData={setBookingFormData} />;
+      case NavigationTab.BookingForm:
+        return <BookingFormScreen setActiveTab={setActiveTab} selectedServiceType={selectedServiceType} setBookingFormData={setBookingFormData} />;
+      case NavigationTab.TicketList:
+        return <TicketListScreen setActiveTab={setActiveTab} bookingFormData={bookingFormData} setSelectedTicket={setSelectedTicket} />;
+      case NavigationTab.PassengerForm:
+        return <PassengerFormScreen setActiveTab={setActiveTab} selectedTicket={selectedTicket} setBookedTicket={setBookedTicket} />;
       case NavigationTab.Tickets:
         return <TicketsScreen />;
       case NavigationTab.Promotion:
@@ -105,9 +120,9 @@ const App: React.FC = () => {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-gray-900 dark:bg-black rounded-b-xl z-20"></div>
 
         {/* Header */}
-        <header className="relative flex items-center justify-between p-4 pt-8 bg-gradient-to-r from-red-500 via-red-600 to-red-700 dark:from-red-700 dark:via-red-800 dark:to-red-900 backdrop-blur-sm z-10 shadow-lg">
+        <header className="relative flex items-center justify-between p-4 pt-8 bg-gradient-to-tr from-purple-600 to-blue-600 backdrop-blur-sm z-10">
           {/* Background decoration */}
-          <div className="absolute inset-0 bg-gradient-to-r from-red-500/20 to-red-700/20 dark:from-red-700/20 dark:to-red-900/20"></div>
+          <div className="absolute inset-0 bg-gradient-to-tr from-purple-600 to-blue-600"></div>
           <div className="absolute top-0 left-0 w-full h-full opacity-20">
             <div className="absolute top-4 left-4 w-2 h-2 bg-white rounded-full"></div>
             <div className="absolute top-8 right-8 w-1 h-1 bg-white rounded-full"></div>
@@ -116,9 +131,9 @@ const App: React.FC = () => {
           </div>
           
           <div className="relative z-10 flex items-center space-x-3">
-            <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-              <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+              <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M4 16c0 .88.39 1.67 1 2.22V20a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-1h8v1a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z"/>
               </svg>
             </div>
             <div>
@@ -143,8 +158,8 @@ const App: React.FC = () => {
               className={`p-3 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 ${
                 browserSupportsSpeechRecognition
                   ? listening
-                    ? 'bg-green-500 hover:bg-green-600'
-                    : 'bg-red-500 hover:bg-red-600'
+                    ? 'bg-green-500/60 hover:bg-green-600/60'
+                    : 'bg-white/20 hover:bg-white/20'
                   : 'bg-gray-400 cursor-not-allowed'
               }`}
               title={browserSupportsSpeechRecognition 

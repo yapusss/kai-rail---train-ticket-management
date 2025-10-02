@@ -3,6 +3,9 @@ export enum NavigationTab {
   Dashboard = 'DASHBOARD',
   Planner = 'PLANNER',
   TrainServices = 'TRAIN_SERVICES',
+  BookingForm = 'BOOKING_FORM',
+  TicketList = 'TICKET_LIST',
+  PassengerForm = 'PASSENGER_FORM',
   Tickets = 'TICKETS',
   Promotion = 'PROMOTION',
   Account = 'ACCOUNT',
@@ -59,4 +62,37 @@ export interface TripPlan {
   planTitle: string;
   totalEstimatedPrice: number;
   steps: TripStep[];
+}
+
+export interface BookingFormData {
+  serviceType: string;
+  departureStation: string;
+  arrivalStation: string;
+  departureDate: string;
+  passengerCount: number;
+}
+
+export interface AvailableTicket {
+  id: string;
+  trainName: string;
+  trainClass: string;
+  departureStation: string;
+  departureTime: string;
+  arrivalStation: string;
+  arrivalTime: string;
+  price: number;
+  availableSeats: number;
+  duration: string;
+}
+
+export interface PassengerData {
+  name: string;
+  nik: string;
+  phone: string;
+}
+
+export interface BookedTicket extends Ticket {
+  passengerData: PassengerData;
+  bookingDate: string;
+  status: 'active' | 'completed' | 'cancelled';
 }
