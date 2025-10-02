@@ -4,6 +4,7 @@ import { NavigationTab } from './types';
 import BottomNavBar from './components/BottomNavBar';
 import DashboardScreen from './screens/DashboardScreen';
 import PlannerScreen from './screens/PlannerScreen';
+import TrainServicesScreen from './screens/TrainServicesScreen';
 import TicketsScreen from './screens/TicketsScreen';
 import AccountScreen from './screens/AccountScreen';
 import { SunIcon, MoonIcon } from './components/icons/ThemeIcons';
@@ -30,12 +31,16 @@ const App: React.FC = () => {
         return <DashboardScreen setActiveTab={setActiveTab} />;
       case NavigationTab.Planner:
         return <PlannerScreen />;
+      case NavigationTab.TrainServices:
+        return <TrainServicesScreen setActiveTab={setActiveTab} />;
       case NavigationTab.Tickets:
         return <TicketsScreen />;
+      case NavigationTab.Promotion:
+        return <div className="p-4 text-center text-gray-600 dark:text-gray-400">Promotion Screen - Coming Soon</div>;
       case NavigationTab.Account:
         return <AccountScreen />;
       default:
-        return <DashboardScreen />;
+        return <DashboardScreen setActiveTab={setActiveTab} />;
     }
   };
 

@@ -2,7 +2,9 @@
 export enum NavigationTab {
   Dashboard = 'DASHBOARD',
   Planner = 'PLANNER',
+  TrainServices = 'TRAIN_SERVICES',
   Tickets = 'TICKETS',
+  Promotion = 'PROMOTION',
   Account = 'ACCOUNT',
 }
 

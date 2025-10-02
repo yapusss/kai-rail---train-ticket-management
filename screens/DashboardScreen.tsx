@@ -1,45 +1,72 @@
 
 import React, { useState } from 'react';
 import { Ticket, TrainClass, NavigationTab } from '../types';
-import { ArrowRightIcon, BellIcon, FoodIcon, EmergencyIcon, AttendantIcon } from '../components/icons/FeatureIcons';
+import { 
+    ShoppingCartIcon, MessageIcon, FlagIcon, BellIcon, QRIcon, MoneyIcon, ClockIcon,
+    TrainIcon, BuildingIcon, PackageIcon, MoreIcon, TrophyIcon, CoinIcon, SparklesIcon,
+    ArrowRightIcon
+} from '../components/icons/FeatureIcons';
 
-const MOCK_ACTIVE_TICKET: Ticket = {
-  id: 'active123',
-  bookingCode: 'KAI-ACTIVE',
-  trainName: 'Argo Bromo Anggrek',
-  trainClass: TrainClass.Executive,
-  route: { from: 'Jakarta', to: 'Surabaya' },
-  departure: { station: 'Stasiun Gambir', time: new Date() },
-  arrival: { station: 'Stasiun Pasar Turi', time: new Date(new Date().getTime() + 8.5 * 60 * 60 * 1000) },
-  passengers: [{ name: 'John Doe', id: '12345' }],
-  price: 600000,
-  isActive: true,
-};
+// Mock data for the new dashboard
+const MOCK_RAILPOIN = 1250;
+const MOCK_NOTIFICATION_COUNT = 52;
 
+// Service Button Component
 const ServiceButton: React.FC<{ 
     Icon: React.ElementType; 
     label: string; 
     onClick: () => void;
-    isActive?: boolean;
-}> = ({ Icon, label, onClick, isActive = false }) => (
+    bgColor: string;
+    iconColor?: string;
+}> = ({ Icon, label, onClick, bgColor, iconColor = "white" }) => (
     <button 
         onClick={onClick}
-        className={`flex flex-col items-center justify-center space-y-2 text-center group transition-all ${
-            isActive ? 'scale-95' : 'hover:scale-105'
-        }`}
+        className="flex flex-col items-center justify-center space-y-2 text-center group transition-all hover:scale-105"
     >
-        <div className={`p-4 rounded-full transition-colors ${
-            isActive 
-                ? 'bg-green-100 dark:bg-green-900/50' 
-                : 'bg-red-100 dark:bg-red-900/50 group-hover:bg-red-200 dark:group-hover:bg-red-800/70'
-        }`}>
-            <Icon className={`w-8 h-8 transition-colors ${
-                isActive 
-                    ? 'text-green-600 dark:text-green-400' 
-                    : 'text-red-600 dark:text-red-400'
-            }`} />
+        <div className={`w-16 h-16 ${bgColor} rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow`}>
+            <Icon className={`w-8 h-8 text-${iconColor}`} />
         </div>
-        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{label}</span>
+        <span className="text-xs font-medium text-gray-700 dark:text-gray-300 text-center leading-tight">{label}</span>
+    </button>
+);
+
+// Header Icon Component
+const HeaderIcon: React.FC<{
+    Icon: React.ElementType;
+    onClick: () => void;
+    badge?: number;
+}> = ({ Icon, onClick, badge }) => (
+    <button 
+        onClick={onClick}
+        className="relative p-3 bg-white/10 rounded-full hover:bg-white/20 transition-colors"
+    >
+        <Icon className="w-5 h-5 text-white" />
+        {badge && (
+            <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                {badge}
+            </div>
+        )}
+    </button>
+);
+
+// KAI PAY Action Component
+const KAIPayAction: React.FC<{
+    Icon: React.ElementType;
+    label: string;
+    onClick: () => void;
+    disabled?: boolean;
+}> = ({ Icon, label, onClick, disabled = false }) => (
+    <button 
+        onClick={onClick}
+        disabled={disabled}
+        className={`flex flex-col items-center space-y-1 ${disabled ? 'opacity-50' : 'hover:scale-105'} transition-all`}
+    >
+        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+            disabled ? 'bg-gray-200' : 'bg-blue-500'
+        }`}>
+            <Icon className={`w-5 h-5 ${disabled ? 'text-gray-400' : 'text-white'}`} />
+        </div>
+        <span className="text-xs text-gray-600 dark:text-gray-400">{label}</span>
     </button>
 );
 
@@ -48,184 +75,273 @@ interface DashboardScreenProps {
 }
 
 const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
-    const formatTime = (date: Date) => date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-    
     // State untuk tracking status layanan
     const [serviceStates, setServiceStates] = useState({
-        attendantCalled: false,
-        foodOrdered: false,
-        emergencyAlert: false,
+        kaipayActivated: false,
         notifications: false
     });
 
-    // Fungsi untuk notifikasi
-    const handleNotificationToggle = () => {
+    // Fungsi untuk header icons
+    const handleMessages = () => {
+        alert('💬 Messages\n\nAnda memiliki 3 pesan baru.\nBuka untuk melihat pesan dari KAI Access.');
+    };
+
+    const handleLanguageChange = () => {
+        alert('🌐 Language Settings\n\nPilih bahasa:\n• Bahasa Indonesia\n• English\n• 中文');
+    };
+
+    const handleNotifications = () => {
         setServiceStates(prev => ({
             ...prev,
             notifications: !prev.notifications
         }));
         
-        if (!serviceStates.notifications) {
-            alert('🔔 Notifikasi diaktifkan!\nAnda akan menerima update perjalanan dan informasi penting.');
-        } else {
-            alert('🔕 Notifikasi dinonaktifkan.');
-        }
+        alert(`🔔 Notifications ${serviceStates.notifications ? 'Disabled' : 'Enabled'}\n\nAnda ${serviceStates.notifications ? 'tidak akan' : 'akan'} menerima notifikasi dari KAI Access.`);
     };
 
-    // Fungsi untuk memanggil petugas
-    const handleCallAttendant = () => {
+    // Fungsi untuk KAI PAY
+    const handleKAIPayActivation = () => {
         setServiceStates(prev => ({
             ...prev,
-            attendantCalled: true
+            kaipayActivated: !prev.kaipayActivated
         }));
         
-        alert('👨‍💼 Petugas telah dipanggil!\n\nPetugas akan segera datang ke tempat duduk Anda.\nNomor kursi: A1\nEstimasi waktu: 2-5 menit');
-        
-        // Reset status setelah 10 detik
-        setTimeout(() => {
-            setServiceStates(prev => ({
-                ...prev,
-                attendantCalled: false
-            }));
-        }, 10000);
+        alert(`💳 KAI PAY ${serviceStates.kaipayActivated ? 'Deactivated' : 'Activated'}\n\nKAI PAY Anda telah ${serviceStates.kaipayActivated ? 'dinonaktifkan' : 'diaktifkan'}.`);
     };
 
-    // Fungsi untuk pesan makanan
-    const handleOrderFood = () => {
-        setServiceStates(prev => ({
-            ...prev,
-            foodOrdered: true
-        }));
-        
-        const menuItems = [
-            '🍱 Nasi Gudeg - Rp 25.000',
-            '🍜 Soto Ayam - Rp 20.000',
-            '🥤 Es Teh Manis - Rp 8.000',
-            '☕ Kopi Hitam - Rp 10.000',
-            '🍰 Kue Lapis - Rp 15.000'
-        ];
-
-        window.alert(`🍽️ Menu Makanan Kereta:\n\n${menuItems.join('\n')}\n\nSilakan hubungi petugas untuk memesan makanan yang diinginkan.`);
-        
-        alert(`🍽️ Menu Makanan Kereta:\n\n${menuItems.join('\n')}\n\nSilakan hubungi petugas untuk memesan makanan yang diinginkan.`);
-        
-        // Reset status setelah 15 detik
-        setTimeout(() => {
-            setServiceStates(prev => ({
-                ...prev,
-                foodOrdered: false
-            }));
-        }, 15000);
+    const handleScanQR = () => {
+        alert('📱 QR Code Scanner\n\nArahkan kamera ke QR code untuk melakukan pembayaran atau mendapatkan informasi.');
     };
 
-    // Fungsi untuk alarm darurat
-    const handleEmergencyAlert = () => {
-        const confirmed = window.confirm('🚨 ALARM DARURAT 🚨\n\nApakah Anda yakin ingin mengaktifkan alarm darurat?\n\nIni akan memanggil petugas keamanan dan konduktor kereta.');
-        
-        if (confirmed) {
-            setServiceStates(prev => ({
-                ...prev,
-                emergencyAlert: true
-            }));
-            
-            alert('🚨 ALARM DARURAT AKTIF!\n\nPetugas keamanan telah diberitahu dan akan segera datang.\n\nJika ini kesalahan, silakan hubungi petugas untuk mematikan alarm.');
-            
-            // Reset status setelah 30 detik
-            setTimeout(() => {
-                setServiceStates(prev => ({
-                    ...prev,
-                    emergencyAlert: false
-                }));
-            }, 30000);
-        }
+    const handleTopUp = () => {
+        alert('💰 Top Up Balance\n\nPilih metode top up:\n• Bank Transfer\n• Credit Card\n• E-Wallet\n• Mini Market');
     };
 
-    // Fungsi untuk beli tiket baru
-    const handleBuyNewTicket = () => {
-        alert('🎫 Pembelian Tiket Baru\n\nAnda akan dialihkan ke halaman AI Trip Planner untuk mencari dan memesan tiket baru.');
-        
-        // Navigasi ke halaman planner
+    const handleHistory = () => {
+        alert('📋 Transaction History\n\nRiwayat transaksi KAI PAY Anda akan ditampilkan di sini.');
+    };
+
+    const handleBecomeMember = () => {
+        alert('👑 Become Basic Member\n\nNikmati berbagai keuntungan dengan menjadi member KAI Access!\n\n• Poin reward 2x lipat\n• Prioritas customer service\n• Diskon khusus member');
+    };
+
+    // Fungsi untuk service buttons
+    const handleInterCity = () => {
+        alert('🚄 Inter City Train\n\nPesan tiket kereta antarkota dengan mudah.\nDestinasi: Jakarta, Surabaya, Yogyakarta, dll.');
+        setActiveTab(NavigationTab.Planner);
+    };
+
+    const handleLocal = () => {
+        alert('🚂 Local Train\n\nPesan tiket kereta lokal untuk perjalanan jarak dekat.');
+        setActiveTab(NavigationTab.Planner);
+    };
+
+    const handleCommuterLine = () => {
+        alert('🚇 Commuter Line\n\nPesan tiket commuter line untuk perjalanan harian.');
+        setActiveTab(NavigationTab.Planner);
+    };
+
+    const handleLRT = () => {
+        alert('🚈 LRT (Light Rail Transit)\n\nPesan tiket LRT untuk perjalanan cepat di dalam kota.');
+        setActiveTab(NavigationTab.Planner);
+    };
+
+    const handleAirport = () => {
+        alert('✈️ Airport Train\n\nPesan tiket kereta bandara untuk perjalanan ke/dari bandara.');
+        setActiveTab(NavigationTab.Planner);
+    };
+
+    const handleHotel = () => {
+        alert('🏨 Hotel Booking\n\nPesan hotel untuk perjalanan Anda.\nTersedia hotel dengan harga khusus untuk penumpang KAI.');
+    };
+
+    const handleMultiTripCard = () => {
+        alert('💳 Multi Trip Card\n\nKelola kartu multi trip Anda.\nTop up, cek saldo, dan riwayat transaksi.');
+    };
+
+    const handleKaiLogistics = () => {
+        alert('📦 KAI Logistics\n\nKirim paket dengan KAI Logistics.\nMurah, cepat, dan aman sampai tujuan.');
+    };
+
+    const handleShowMore = () => {
+        alert('➕ Show More Services\n\nLayanan lainnya:\n• Travel Insurance\n• Car Rental\n• Tour Package\n• Restaurant Reservation');
+    };
+
+    // Fungsi untuk promotional banners
+    const handleExclusiveBenefits = () => {
+        alert('🎁 Exclusive Benefits\n\nBergabunglah dengan program loyalty KAI Access dan nikmati:\n\n• Cashback hingga 10%\n• Poin reward\n• Diskon eksklusif\n• Prioritas booking');
+    };
+
+    const handleTripPlanner = () => {
+        alert('🗺️ AI TRIP Planner\n\nBuat rencana perjalanan terbaik dengan AI Trip Planner.\nDapatkan saran destinasi, transportasi, dan akomodasi yang disesuaikan dengan preferensi Anda.');
         setActiveTab(NavigationTab.Planner);
     };
 
     return (
-        <div className="p-4 space-y-6">
-            <div className="bg-gradient-to-br from-red-600 to-orange-600 text-white p-6 rounded-2xl shadow-lg relative overflow-hidden">
-                {/* Status Badge */}
-                <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
-                    <span className="text-xs font-semibold">AKTIF</span>
-                </div>
-                
-                <div className="flex justify-between items-start mb-6">
-                    <div>
-                        <p className="text-sm opacity-80 mb-1">Perjalanan Aktif</p>
-                        <h2 className="text-2xl font-bold">{MOCK_ACTIVE_TICKET.trainName}</h2>
-                        <p className="font-medium opacity-90">{MOCK_ACTIVE_TICKET.trainClass}</p>
-                    </div>
-                    <button 
-                        onClick={handleNotificationToggle}
-                        className={`bg-white/20 p-2 rounded-full transition-colors hover:bg-white/30 ${
-                            serviceStates.notifications ? 'bg-green-500/30' : ''
-                        }`}
-                    >
-                        <BellIcon className="w-6 h-6" />
-                    </button>
-                </div>
-                {/* Booking Code */}
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 mb-4">
-                    <p className="text-xs opacity-80 mb-1">Kode Booking</p>
-                    <p className="text-lg font-bold">{MOCK_ACTIVE_TICKET.bookingCode}</p>
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+            {/* Header Section with 3D Illustration Background */}
+            <div className="relative bg-gradient-to-br from-purple-600 via-blue-600 to-green-500 text-white p-6 rounded-b-3xl">
+                {/* 3D Illustration Background */}
+                <div className="absolute inset-0 overflow-hidden rounded-b-3xl">
+                    <div className="absolute top-4 left-4 w-16 h-16 bg-green-400 rounded-full opacity-60"></div>
+                    <div className="absolute top-8 right-20 w-12 h-12 bg-blue-400 rounded-full opacity-50"></div>
+                    <div className="absolute bottom-8 left-20 w-20 h-20 bg-purple-400 rounded-full opacity-40"></div>
+                    <div className="absolute bottom-4 right-8 w-14 h-14 bg-yellow-400 rounded-full opacity-50"></div>
                 </div>
 
-                <div className="flex items-center justify-between space-x-2">
-                    <div className="text-center">
-                        <p className="text-2xl font-semibold">{formatTime(MOCK_ACTIVE_TICKET.departure.time)}</p>
-                        <p className="text-xs opacity-80 uppercase">{MOCK_ACTIVE_TICKET.route.from}</p>
+                {/* Greeting */}
+                <div className="relative flex justify-between items-center mb-6">
+                    <h1 className="text-2xl font-bold">Good Afternoon</h1>
+                    <div className="flex items-center space-x-2">
+                        <HeaderIcon Icon={MessageIcon} onClick={handleMessages} />
+                        <HeaderIcon Icon={FlagIcon} onClick={handleLanguageChange} />
+                        <HeaderIcon Icon={BellIcon} onClick={handleNotifications} badge={MOCK_NOTIFICATION_COUNT} />
                     </div>
-                    <div className="flex-grow flex items-center">
-                        <div className="w-full h-1 bg-white/30 rounded-full flex items-center">
-                           <ArrowRightIcon className="w-6 h-6 text-white -translate-x-1/2" style={{ marginLeft: '30%' }} />
+                </div>
+            </div>
+
+            {/* Main Content */}
+            <div className="p-4 space-y-6">
+                {/* Service Grid - Horizontal Scrollable */}
+                <div className="space-y-4">
+                    {/* Train Services - Horizontal Scroll */}
+                    <div className="space-y-2">
+                        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Train Services</h3>
+                        <div className="flex space-x-4 overflow-x-auto pb-2 scrollbar-hide">
+                            <div className="flex space-x-4 min-w-max">
+                                <ServiceButton 
+                                    Icon={TrainIcon} 
+                                    label="Inter City" 
+                                    onClick={handleInterCity}
+                                    bgColor="bg-blue-500"
+                                />
+                                <ServiceButton 
+                                    Icon={TrainIcon} 
+                                    label="Local" 
+                                    onClick={handleLocal}
+                                    bgColor="bg-orange-500"
+                                />
+                                <ServiceButton 
+                                    Icon={TrainIcon} 
+                                    label="Commuter Line" 
+                                    onClick={handleCommuterLine}
+                                    bgColor="bg-red-500"
+                                />
+                                <ServiceButton 
+                                    Icon={TrainIcon} 
+                                    label="LRT" 
+                                    onClick={handleLRT}
+                                    bgColor="bg-purple-500"
+                                />
+                                <ServiceButton 
+                                    Icon={TrainIcon} 
+                                    label="Airport" 
+                                    onClick={handleAirport}
+                                    bgColor="bg-blue-400"
+                                />
+                                <ServiceButton 
+                                    Icon={TrainIcon} 
+                                    label="Express" 
+                                    onClick={handleShowMore}
+                                    bgColor="bg-green-500"
+                                />
+                                <ServiceButton 
+                                    Icon={TrainIcon} 
+                                    label="More" 
+                                    onClick={handleShowMore}
+                                    bgColor="bg-gray-400"
+                                />
+                            </div>
                         </div>
                     </div>
-                    <div className="text-center">
-                        <p className="text-2xl font-semibold">{formatTime(MOCK_ACTIVE_TICKET.arrival.time)}</p>
-                        <p className="text-xs opacity-80 uppercase">{MOCK_ACTIVE_TICKET.route.to}</p>
+
+                    {/* Other Services - Horizontal Scroll */}
+                    <div className="space-y-2">
+                        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Other Services</h3>
+                        <div className="flex space-x-4 overflow-x-auto pb-2 scrollbar-hide">
+                            <div className="flex space-x-4 min-w-max">
+                                <ServiceButton 
+                                    Icon={BuildingIcon} 
+                                    label="Hotel" 
+                                    onClick={handleHotel}
+                                    bgColor="bg-blue-500"
+                                />
+                                <ServiceButton 
+                                    Icon={MoneyIcon} 
+                                    label="Multi Trip Card" 
+                                    onClick={handleMultiTripCard}
+                                    bgColor="bg-blue-500"
+                                />
+                                <ServiceButton 
+                                    Icon={PackageIcon} 
+                                    label="KAI Logistics" 
+                                    onClick={handleKaiLogistics}
+                                    bgColor="bg-blue-500"
+                                />
+                                <ServiceButton 
+                                    Icon={SparklesIcon} 
+                                    label="Travel Insurance" 
+                                    onClick={handleShowMore}
+                                    bgColor="bg-purple-500"
+                                />
+                                <ServiceButton 
+                                    Icon={MoneyIcon} 
+                                    label="Car Rental" 
+                                    onClick={handleShowMore}
+                                    bgColor="bg-green-500"
+                                />
+                                <ServiceButton 
+                                    Icon={MoreIcon} 
+                                    label="Show more" 
+                                    onClick={handleShowMore}
+                                    bgColor="bg-gray-400"
+                                />
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div>
-                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Layanan Perjalanan</h3>
-                <div className="grid grid-cols-3 gap-4">
-                    <ServiceButton 
-                        Icon={AttendantIcon} 
-                        label="Panggil Petugas" 
-                        onClick={handleCallAttendant}
-                        isActive={serviceStates.attendantCalled}
-                    />
-                    <ServiceButton 
-                        Icon={FoodIcon} 
-                        label="Pesan Makanan" 
-                        onClick={handleOrderFood}
-                        isActive={serviceStates.foodOrdered}
-                    />
-                    <ServiceButton 
-                        Icon={EmergencyIcon} 
-                        label="Alarm Darurat" 
-                        onClick={handleEmergencyAlert}
-                        isActive={serviceStates.emergencyAlert}
-                    />
-                </div>
-            </div>
-
-             <div>
-                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Pembelian Tiket</h3>
-                <button 
-                    onClick={handleBuyNewTicket}
-                    className="w-full bg-red-600 text-white font-bold py-3 px-4 rounded-xl shadow-md hover:bg-red-700 transition-transform transform hover:scale-105"
+                {/* Exclusive Benefits Banner */}
+                <div 
+                    onClick={handleExclusiveBenefits}
+                    className="relative bg-gradient-to-r from-purple-600 to-blue-600 text-white p-6 rounded-2xl cursor-pointer hover:scale-105 transition-transform"
                 >
-                    Beli Tiket Baru
-                </button>
+                    <div className="relative z-10">
+                        <h3 className="text-xl font-bold mb-2">Access to Our Exclusive Benefits</h3>
+                        <p className="text-sm opacity-90 mb-4">
+                            Nikmati berbagai keuntungan dengan bergabung dalam program loyalty di Access by KAI.
+                        </p>
+                        <div className="absolute top-4 right-4 bg-white/20 px-2 py-1 rounded text-xs">
+                            Ads
+                        </div>
+                    </div>
+                    {/* Decorative elements */}
+                    <div className="absolute bottom-2 right-4 flex space-x-2">
+                        <TrophyIcon className="w-8 h-8 text-yellow-300 opacity-60" />
+                        <CoinIcon className="w-8 h-8 text-yellow-300 opacity-60" />
+                    </div>
+                </div>
+
+                {/* TRIP Planner Banner */}
+                <div 
+                    onClick={handleTripPlanner}
+                    className="relative bg-gradient-to-r from-purple-600 to-blue-600 text-white p-6 rounded-2xl cursor-pointer hover:scale-105 transition-transform"
+                >
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                            <div className="w-16 h-16 bg-purple-700 rounded-full flex items-center justify-center">
+                                <span className="text-2xl font-bold">P</span>
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-bold">TRIP Planner</h3>
+                                <p className="text-sm opacity-90">Make the best plans for your trip.</p>
+                            </div>
+                        </div>
+                        <button className="px-6 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-purple-600 transition-colors">
+                            CREATE
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     );
