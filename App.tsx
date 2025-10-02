@@ -139,6 +139,17 @@ const App: React.FC = () => {
           >
             Reset
           </button>
+          <button
+            className="ml-2 px-2 py-1 bg-blue-200 dark:bg-blue-800 rounded text-xs"
+            onClick={() =>
+              SpeechRecognition.startListening({
+                continuous: true,
+                language: "id-ID",
+              })
+            }
+          >
+            Aktifkan Voice Command
+          </button>
         </div>
 
         {/* Screen Content */}
