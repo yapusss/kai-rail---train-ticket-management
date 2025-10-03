@@ -1,5 +1,5 @@
 {
-  "name": "Kai Rail - Train Ticket Management",
+  "name": "KAI Access",
   "description": "An AI-powered mobile application for managing train travel tickets, featuring a dashboard for active trips, ticket purchasing, an AI trip planner, and comprehensive ticket history management with natural language search.",
   "requestFramePermissions": [
     "microphone"

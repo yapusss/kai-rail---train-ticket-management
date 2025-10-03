@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { generateTripPlan } from '../services/geminiService';
 import type { TripPlan } from '../types';
 import { PlannerIcon, SparklesIcon } from '../components/icons/FeatureIcons';
+import Swal from 'sweetalert2';
 
 const PlannerScreen: React.FC = () => {
   const [prompt, setPrompt] = useState('');
@@ -12,7 +13,6 @@ const PlannerScreen: React.FC = () => {
   const [selectedTrain, setSelectedTrain] = useState<any>(null);
   const [showModal, setShowModal] = useState(false);
   
-  // Voice recognition state
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [browserSupportsSpeechRecognition, setBrowserSupportsSpeechRecognition] = useState(false);
@@ -27,7 +27,6 @@ const PlannerScreen: React.FC = () => {
     setSelectedTrain(null);
   };
 
-  // Initialize speech recognition
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     
@@ -36,7 +35,6 @@ const PlannerScreen: React.FC = () => {
     }
   }, []);
 
-  // Handle transcript changes
   useEffect(() => {
     if (transcript) {
       setPrompt(prev => prev + (prev ? ' ' : '') + transcript);
@@ -44,7 +42,6 @@ const PlannerScreen: React.FC = () => {
     }
   }, [transcript]);
 
-  // Voice recognition functions
   const startListening = () => {
     if (!browserSupportsSpeechRecognition) return;
 
@@ -128,7 +125,7 @@ const PlannerScreen: React.FC = () => {
             rows={4}
           />
           
-          {/* Voice Recognition Button */}
+        {}
           <button
             onClick={browserSupportsSpeechRecognition ? (isListening ? stopListening : startListening) : undefined}
             disabled={!browserSupportsSpeechRecognition}
@@ -156,7 +153,7 @@ const PlannerScreen: React.FC = () => {
           </button>
         </div>
 
-        {/* Voice Status */}
+        {}
         {isListening && (
           <div className="flex items-center justify-center gap-2 text-sm text-blue-600 dark:text-blue-400">
             <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
@@ -164,7 +161,7 @@ const PlannerScreen: React.FC = () => {
           </div>
         )}
 
-        {/* Voice Commands Examples */}
+        {}
         <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
           <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">
             🎤 Contoh Voice Commands:
@@ -229,7 +226,7 @@ const PlannerScreen: React.FC = () => {
         </div>
       )}
 
-      {/* Modal for Train Details */}
+        {}
       {showModal && selectedTrain && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-gray-800 rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
@@ -298,7 +295,12 @@ const PlannerScreen: React.FC = () => {
                   </button>
                   <button 
                     onClick={() => {
-                      alert('Fitur booking akan segera tersedia!');
+                      Swal.fire({
+                          icon: 'info',
+                          title: 'Info',
+                          text: 'Fitur booking akan segera tersedia!',
+                          confirmButtonText: 'OK'
+                      });
                       closeModal();
                     }}
                     className="flex-1 bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors"

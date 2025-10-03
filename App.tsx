@@ -6,7 +6,8 @@ import { NavigationTab } from "./types";
 import BottomNavBar from "./components/BottomNavBar";
 import DashboardScreen from "./screens/DashboardScreen";
 import PlannerScreen from "./screens/PlannerScreen";
-import TrainServicesScreen from "./screens/TrainServicesScreen";
+import InterCityBookingScreen from "./screens/InterCityBookingScreen";
+import CommuterLineScreen from "./screens/CommuterLineScreen";
 import BookingFormScreen from "./screens/BookingFormScreen";
 import TicketListScreen from "./screens/TicketListScreen";
 import PassengerFormScreen from "./screens/PassengerFormScreen";
@@ -20,16 +21,13 @@ const App: React.FC = () => {
     NavigationTab.Dashboard
   );
   
-  // Booking flow state
   const [selectedServiceType, setSelectedServiceType] = useState<string>('');
   const [bookingFormData, setBookingFormData] = useState<any>(null);
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
   const [bookedTicket, setBookedTicket] = useState<any>(null);
   
-  // Voice command feedback state
   const [voiceCommandFeedback, setVoiceCommandFeedback] = useState<string>('');
 
-  // Voice command callback functions
   const showFeedback = (message: string) => {
     setVoiceCommandFeedback(message);
     setTimeout(() => setVoiceCommandFeedback(''), 2000);
@@ -45,7 +43,6 @@ const App: React.FC = () => {
     showFeedback(`Mengubah ke tema ${theme === 'light' ? 'gelap' : 'terang'}...`);
   };
 
-  // Voice command setup
   const commands = [
     {
       command: ["buka dashboard", "dashboard"],
@@ -56,8 +53,12 @@ const App: React.FC = () => {
       callback: () => navigateWithFeedback(NavigationTab.Planner, "Membuka Planner..."),
     },
     {
-      command: ["buka layanan kereta", "layanan kereta", "train services"],
-      callback: () => navigateWithFeedback(NavigationTab.TrainServices, "Membuka Layanan Kereta..."),
+      command: ["buka inter city", "inter city", "intercity"],
+      callback: () => navigateWithFeedback(NavigationTab.InterCityBooking, "Membuka Inter City..."),
+    },
+    {
+      command: ["buka commuter line", "commuter line", "commuter"],
+      callback: () => navigateWithFeedback(NavigationTab.CommuterLine, "Membuka Commuter Line..."),
     },
     {
       command: ["buka tiket", "tiket", "tickets"],
@@ -105,10 +106,6 @@ const App: React.FC = () => {
   } = useSpeechRecognition({ commands });
 
   useEffect(() => {
-    // Start listening automatically
-    if (browserSupportsSpeechRecognition) {
-      SpeechRecognition.startListening({ continuous: true, language: "id-ID" });
-    }
   }, [browserSupportsSpeechRecognition]);
 
   useEffect(() => {
@@ -129,8 +126,10 @@ const App: React.FC = () => {
         return <DashboardScreen setActiveTab={setActiveTab} />;
       case NavigationTab.Planner:
         return <PlannerScreen />;
-      case NavigationTab.TrainServices:
-        return <TrainServicesScreen setActiveTab={setActiveTab} setSelectedServiceType={setSelectedServiceType} setBookingFormData={setBookingFormData} />;
+      case NavigationTab.InterCityBooking:
+        return <InterCityBookingScreen setActiveTab={setActiveTab} setSelectedServiceType={setSelectedServiceType} setBookingFormData={setBookingFormData} />;
+      case NavigationTab.CommuterLine:
+        return <CommuterLineScreen setActiveTab={setActiveTab} setSelectedServiceType={setSelectedServiceType} setBookingFormData={setBookingFormData} />;
       case NavigationTab.BookingForm:
         return <BookingFormScreen setActiveTab={setActiveTab} selectedServiceType={selectedServiceType} setBookingFormData={setBookingFormData} />;
       case NavigationTab.TicketList:
@@ -155,12 +154,12 @@ const App: React.FC = () => {
   return (
     <div className="bg-gray-200 dark:bg-black min-h-screen flex items-center justify-center p-4 font-sans">
       <div className="w-full max-w-sm h-[800px] max-h-[90vh] bg-white dark:bg-gray-900 rounded-3xl shadow-2xl overflow-hidden flex flex-col relative">
-        {/* Notch */}
+        {}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-gray-900 dark:bg-black rounded-b-xl z-20"></div>
 
-        {/* Header */}
+        {}
         <header className="relative flex items-center justify-between p-4 pt-8 bg-gradient-to-tr from-purple-600 to-blue-600 backdrop-blur-sm z-10">
-          {/* Background decoration */}
+        {}
           <div className="absolute inset-0 bg-gradient-to-tr from-purple-600 to-blue-600"></div>
           <div className="absolute top-0 left-0 w-full h-full opacity-20">
             <div className="absolute top-4 left-4 w-2 h-2 bg-white rounded-full"></div>
@@ -184,7 +183,7 @@ const App: React.FC = () => {
           </div>
           
           <div className="relative z-10 flex items-center space-x-3">
-            {/* Voice Command Toggle Button */}
+        {}
             <button
               onClick={browserSupportsSpeechRecognition ? () => {
                 if (listening) {
@@ -194,7 +193,7 @@ const App: React.FC = () => {
                 }
               } : undefined}
               disabled={!browserSupportsSpeechRecognition}
-              className={`p-3 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 ${
+              className={`relative p-3 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110 ${
                 browserSupportsSpeechRecognition
                   ? listening
                     ? 'bg-green-500/60 hover:bg-green-600/60'
@@ -206,12 +205,27 @@ const App: React.FC = () => {
                 : 'Voice recognition not supported'
               }
             >
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-              </svg>
+        {}
+              {listening && (
+                <>
+                  <div className="absolute inset-0 rounded-full border-2 border-green-400 animate-ping"></div>
+                  <div className="absolute inset-0 rounded-full border-2 border-green-400 animate-pulse" style={{animationDelay: '0.5s'}}></div>
+                  <div className="absolute inset-0 rounded-full border-2 border-green-400 animate-pulse" style={{animationDelay: '1s'}}></div>
+                </>
+              )}
+              
+              {listening ? (
+                <svg className="w-5 h-5 text-white relative z-10" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M2 12 L4 6 L6 18 L8 2 L10 16 L12 4 L14 20 L16 6 L18 12 L20 8 L22 16 L24 12" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              ) : (
+                <svg className="w-5 h-5 text-white relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                </svg>
+              )}
             </button>
             
-            {/* Theme Toggle Button */}
+            {}
             <button
               onClick={toggleTheme}
               className="p-3 rounded-full bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-all duration-300 hover:scale-110 shadow-lg"
@@ -225,7 +239,7 @@ const App: React.FC = () => {
           </div>
         </header>
 
-        {/* Voice Command Feedback */}
+        {}
         {voiceCommandFeedback && (
           <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg animate-pulse">
             <div className="flex items-center gap-2">
@@ -237,12 +251,12 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {/* Screen Content */}
+        {}
         <main className="flex-grow overflow-y-auto pb-20">
           {renderScreen()}
         </main>
 
-        {/* Bottom Navigation */}
+        {}
         <BottomNavBar activeTab={activeTab} setActiveTab={setActiveTab} />
       </div>
     </div>

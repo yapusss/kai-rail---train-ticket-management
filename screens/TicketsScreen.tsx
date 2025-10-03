@@ -3,8 +3,8 @@ import { Ticket, TrainClass, BookedTicket } from '../types';
 import { interpretSearchQuery } from '../services/geminiService';
 import { SearchIcon, MicrophoneIcon, FilterIcon, DownloadIcon, RebookIcon, ArrowRightIcon } from '../components/icons/FeatureIcons';
 import { TrainDataService } from '../services/trainDataService';
+import Swal from 'sweetalert2';
 
-// Generate mock tickets from centralized train data
 const generateMockTickets = (): Ticket[] => {
     const trains = TrainDataService.getInterCityTrains().concat(TrainDataService.getLocalTrains());
     return trains.slice(0, 4).map((train, index) => ({
@@ -61,7 +61,6 @@ const TicketsScreen: React.FC = () => {
     const [showTicketDetail, setShowTicketDetail] = useState(false);
     const [activeTab, setActiveTab] = useState<'active' | 'history'>('active');
 
-    // Load booked tickets from localStorage
     useEffect(() => {
         const savedTickets = localStorage.getItem('bookedTickets');
         if (savedTickets) {
@@ -81,8 +80,6 @@ const TicketsScreen: React.FC = () => {
 
     const recognition = useMemo(() => {
         if ('webkitSpeechRecognition' in window) {
-            // FIX: Cast window to `any` to access the non-standard `webkitSpeechRecognition` property
-            // without causing a TypeScript error. This allows `new SpeechRecognition()` to work correctly.
             const SpeechRecognition = (window as any).webkitSpeechRecognition;
             const rec = new SpeechRecognition();
             rec.continuous = false;
@@ -122,7 +119,6 @@ const TicketsScreen: React.FC = () => {
     const parseSearchQuery = (query: string) => {
         const lowerQuery = query.toLowerCase();
         
-        // Extract month names
         const monthMap: { [key: string]: number } = {
             'januari': 1, 'january': 1, 'jan': 1,
             'februari': 2, 'february': 2, 'feb': 2,
@@ -138,11 +134,9 @@ const TicketsScreen: React.FC = () => {
             'desember': 12, 'december': 12, 'dec': 12
         };
 
-        // Extract year
         const yearMatch = lowerQuery.match(/(\d{4})/);
         const year = yearMatch ? parseInt(yearMatch[1]) : null;
 
-        // Extract month
         let month: number | undefined;
         for (const [monthName, monthNum] of Object.entries(monthMap)) {
             if (lowerQuery.includes(monthName)) {
@@ -151,11 +145,9 @@ const TicketsScreen: React.FC = () => {
             }
         }
 
-        // Extract train names
         const trainKeywords = ['argo', 'jayabaya', 'taksaka', 'serayu', 'bromo', 'anggrek'];
         const trainName = trainKeywords.find(keyword => lowerQuery.includes(keyword));
 
-        // Extract routes
         const routeKeywords = ['jakarta', 'surabaya', 'yogyakarta', 'malang', 'purwokerto', 'bandung'];
         const fromLocation = routeKeywords.find(location => 
             lowerQuery.includes(`dari ${location}`) || 
@@ -166,11 +158,9 @@ const TicketsScreen: React.FC = () => {
             lowerQuery.includes(`tujuan ${location}`)
         );
 
-        // Extract booking code
         const bookingCodeMatch = lowerQuery.match(/(tix-[a-z0-9]+)/i);
         const bookingCode = bookingCodeMatch ? bookingCodeMatch[1].toUpperCase() : null;
 
-        // Extract price range
         const priceMatch = lowerQuery.match(/(\d+)\s*(?:rb|ribu|k|000)/);
         const maxPrice = priceMatch ? parseInt(priceMatch[1]) * 1000 : null;
 
@@ -192,7 +182,6 @@ const TicketsScreen: React.FC = () => {
             return;
         }
 
-        // Try AI interpretation first
         try {
             const interpretedFilters = await interpretSearchQuery(query);
             if (interpretedFilters) {
@@ -203,14 +192,12 @@ const TicketsScreen: React.FC = () => {
             console.log('AI interpretation failed, using local parsing');
         }
 
-        // Fallback to local natural language parsing
         const parsed = parseSearchQuery(query);
         const newFilters: { month?: number; year?: number; text?: string } = {};
 
         if (parsed.month) newFilters.month = parsed.month;
         if (parsed.year) newFilters.year = parsed.year;
         
-        // Build text filter from various components
         const textComponents = [];
         if (parsed.trainName) textComponents.push(parsed.trainName);
         if (parsed.fromLocation) textComponents.push(parsed.fromLocation);
@@ -227,8 +214,17 @@ const TicketsScreen: React.FC = () => {
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const query = e.target.value;
         setSearchQuery(query);
+        
+        if ((window as any).searchTimeout) {
+            clearTimeout((window as any).searchTimeout);
+        }
+        
         if (query.length === 0) {
             setFilters({});
+        } else {
+            (window as any).searchTimeout = setTimeout(() => {
+                handleAISearch(query);
+            }, 500);
         }
     };
     
@@ -239,21 +235,17 @@ const TicketsScreen: React.FC = () => {
 
     const filteredTickets = useMemo(() => {
         return MOCK_TICKETS.filter(ticket => {
-            // If no search query and no filters, show all tickets
             if (!searchQuery && Object.keys(filters).length === 0) {
                 return true;
             }
 
-            // Parse current query for additional filtering
             const parsedQuery = searchQuery ? parseSearchQuery(searchQuery) : null;
 
-            // Date filters
             const matchMonth = !filters.month && !parsedQuery?.month || 
                 ticket.departure.time.getMonth() + 1 === (filters.month || parsedQuery?.month);
             const matchYear = !filters.year && !parsedQuery?.year || 
                 ticket.departure.time.getFullYear() === (filters.year || parsedQuery?.year);
             
-            // Text filters
             const lowerCaseText = filters.text?.toLowerCase() || '';
             const matchText = !filters.text ||
                 ticket.trainName.toLowerCase().includes(lowerCaseText) ||
@@ -261,31 +253,25 @@ const TicketsScreen: React.FC = () => {
                 ticket.route.to.toLowerCase().includes(lowerCaseText) ||
                 ticket.bookingCode.toLowerCase().includes(lowerCaseText);
 
-            // Specific train name filter
             const matchTrainName = !parsedQuery?.trainName ||
                 ticket.trainName.toLowerCase().includes(parsedQuery.trainName.toLowerCase());
 
-            // Route filters
             const matchFromLocation = !parsedQuery?.fromLocation ||
                 ticket.route.from.toLowerCase().includes(parsedQuery.fromLocation.toLowerCase());
             const matchToLocation = !parsedQuery?.toLocation ||
                 ticket.route.to.toLowerCase().includes(parsedQuery.toLocation.toLowerCase());
 
-            // Booking code filter
             const matchBookingCode = !parsedQuery?.bookingCode ||
                 ticket.bookingCode.toLowerCase().includes(parsedQuery.bookingCode.toLowerCase());
 
-            // Price filter
             const matchPrice = !parsedQuery?.maxPrice ||
                 ticket.price <= parsedQuery.maxPrice;
 
-            // Combine all filters
             return matchMonth && matchYear && matchText && matchTrainName && 
                    matchFromLocation && matchToLocation && matchBookingCode && matchPrice;
         });
     }, [filters, searchQuery]);
 
-    // Filter tickets by active/history status
     const activeTickets = bookedTickets.filter(ticket => ticket.status === 'active');
     const historyTickets = bookedTickets.filter(ticket => ticket.status !== 'active');
 
@@ -293,7 +279,7 @@ const TicketsScreen: React.FC = () => {
         <div className="p-4 space-y-4">
             <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Tiket Saya</h2>
             
-            {/* Tab Navigation */}
+        {}
             <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
                 <button
                     onClick={() => setActiveTab('active')}
@@ -324,10 +310,26 @@ const TicketsScreen: React.FC = () => {
                         placeholder="Cari tiket..."
                         value={searchQuery}
                         onChange={handleSearchChange}
-                        className="w-full pl-10 pr-16 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
+                        className="w-full pl-10 pr-20 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
                     />
                     <SearchIcon className="absolute left-3 w-5 h-5 text-gray-400" />
                     <div className="absolute right-3 flex items-center space-x-1">
+        {}
+                        {searchQuery && (
+                            <button 
+                                type="button" 
+                                onClick={() => {
+                                    setSearchQuery('');
+                                    setFilters({});
+                                }}
+                                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
+                                title="Clear search"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        )}
                         <button type="button" onClick={handleVoiceSearch} className={`p-2 rounded-full ${isListening ? 'bg-red-500 text-white animate-pulse' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'}`}>
                             <MicrophoneIcon className="w-5 h-5" />
                         </button>
@@ -337,7 +339,7 @@ const TicketsScreen: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Voice Recognition Status */}
+        {}
                 {recognition && (
                     <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center space-x-2">
                         <span>Voice Search:</span>
@@ -351,6 +353,20 @@ const TicketsScreen: React.FC = () => {
                         )}
                     </div>
                 )}
+
+        {}
+                <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+                    <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">
+                        🔍 Contoh Pencarian Natural Language:
+                    </h4>
+                    <div className="text-xs text-blue-700 dark:text-blue-400 space-y-1">
+                        <p>• "tiket bulan desember" - Cari tiket di bulan Desember</p>
+                        <p>• "kereta argo bromo" - Cari tiket kereta Argo Bromo</p>
+                        <p>• "jakarta ke yogyakarta" - Cari tiket rute Jakarta-Yogyakarta</p>
+                        <p>• "tahun 2024" - Cari tiket tahun 2024</p>
+                        <p>• "TIX-1234" - Cari dengan kode booking</p>
+                    </div>
+                </div>
             </form>
 
             <div className="space-y-4">
@@ -389,7 +405,7 @@ const TicketsScreen: React.FC = () => {
                 )}
             </div>
 
-            {/* Ticket Detail Modal */}
+        {}
             {showTicketDetail && selectedTicket && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white dark:bg-gray-800 rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
@@ -480,7 +496,12 @@ const TicketsScreen: React.FC = () => {
                                     </button>
                                     <button 
                                         onClick={() => {
-                                            alert('Fitur download akan segera tersedia!');
+                                            Swal.fire({
+                                                icon: 'info',
+                                                title: 'Info',
+                                                text: 'Fitur download akan segera tersedia!',
+                                                confirmButtonText: 'OK'
+                                            });
                                         }}
                                         className="flex-1 bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
                                     >
@@ -496,7 +517,6 @@ const TicketsScreen: React.FC = () => {
     );
 };
 
-// BookedTicketCard component
 const BookedTicketCard: React.FC<{ ticket: BookedTicket }> = ({ ticket }) => {
     const formatTime = (dateTime: string) => {
         const date = new Date(dateTime);

@@ -2,7 +2,8 @@
 export enum NavigationTab {
   Dashboard = 'DASHBOARD',
   Planner = 'PLANNER',
-  TrainServices = 'TRAIN_SERVICES',
+  InterCityBooking = 'INTERCITY_BOOKING',
+  CommuterLine = 'COMMUTER_LINE',
   BookingForm = 'BOOKING_FORM',
   TicketList = 'TICKET_LIST',
   PassengerForm = 'PASSENGER_FORM',

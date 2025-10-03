@@ -4,19 +4,17 @@ import {
     TrainIcon, BuildingIcon, PackageIcon, MoreIcon, TrophyIcon, SparklesIcon
 } from '../components/icons/FeatureIcons';
 import { TrainDataService } from '../services/trainDataService';
+import Swal from 'sweetalert2';
 
-// Extend window interface for search timeout
 declare global {
     interface Window {
         searchTimeout?: NodeJS.Timeout;
     }
 }
 
-// Mock data for the new dashboard
 const MOCK_RAILPOIN = 1250;
 const MOCK_NOTIFICATION_COUNT = 52;
 
-// Service Button Component
 const ServiceButton: React.FC<{ 
     Icon: React.ElementType; 
     label: string; 
@@ -40,34 +38,33 @@ interface DashboardScreenProps {
 }
 
 const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
-    // State untuk search
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState<any[]>([]);
     const [isSearching, setIsSearching] = useState(false);
     const [showSearchResults, setShowSearchResults] = useState(false);
 
-    // State untuk voice recognition
     const [isListening, setIsListening] = useState(false);
     const [transcript, setTranscript] = useState('');
     const [browserSupportsSpeechRecognition, setBrowserSupportsSpeechRecognition] = useState(false);
 
-    // Setup voice recognition
     useEffect(() => {
-        // Check if browser supports speech recognition
         const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
         if (SpeechRecognition) {
             setBrowserSupportsSpeechRecognition(true);
         }
         
-        // Test search functionality on component mount
         console.log('Testing search functionality...');
         TrainDataService.testSearch();
     }, []);
 
-    // Fungsi untuk voice recognition
     const startListening = () => {
         if (!browserSupportsSpeechRecognition) {
-            alert('Browser Anda tidak mendukung voice recognition');
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: 'Browser Anda tidak mendukung voice recognition',
+                confirmButtonText: 'OK'
+            });
             return;
         }
 
@@ -106,7 +103,6 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
         setIsListening(false);
     };
 
-    // Fungsi untuk search yang disederhanakan
     const handleSearch = async (query: string) => {
         if (!query.trim()) {
             setSearchResults([]);
@@ -116,12 +112,10 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
 
         setIsSearching(true);
         
-        // Simulate API delay
         setTimeout(() => {
             try {
                 console.log('Searching for:', query);
                 
-                // Get search results from centralized service
                 const searchResults = TrainDataService.searchAllServices(query);
                 console.log('Search results from service:', searchResults);
                 console.log('Service results breakdown:', {
@@ -132,10 +126,8 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                     insurance: searchResults.insurance?.length || 0
                 });
                 
-                // Combine all results into a simple array
                 const allResults: any[] = [];
                 
-                // Add hotels
                 if (searchResults.hotels && searchResults.hotels.length > 0) {
                     console.log('Processing hotels:', searchResults.hotels.length);
                     searchResults.hotels.forEach(hotel => {
@@ -152,7 +144,6 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                     console.log('No hotels found or hotels array is empty');
                 }
                 
-                // Add trains
                 if (searchResults.trains && searchResults.trains.length > 0) {
                     console.log('Processing trains:', searchResults.trains.length);
                     searchResults.trains.forEach(train => {
@@ -169,7 +160,6 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                     console.log('No trains found or trains array is empty');
                 }
                 
-                // Add car rentals
                 if (searchResults.carRentals && searchResults.carRentals.length > 0) {
                     searchResults.carRentals.forEach(car => {
                         allResults.push({
@@ -182,7 +172,6 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                     });
                 }
                 
-                // Add logistics
                 if (searchResults.logistics && searchResults.logistics.length > 0) {
                     searchResults.logistics.forEach(logistic => {
                         allResults.push({
@@ -195,7 +184,6 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                     });
                 }
                 
-                // Add insurance
                 if (searchResults.insurance && searchResults.insurance.length > 0) {
                     searchResults.insurance.forEach(insurance => {
                         allResults.push({
@@ -211,14 +199,12 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                 console.log('Final combined results:', allResults);
                 console.log('Setting search results and showing results...');
                 
-                // Use functional updates to ensure state consistency
                 setSearchResults(allResults);
                 setShowSearchResults(allResults.length > 0);
                 setIsSearching(false);
                 
                 console.log('Search completed - results should be visible now');
                 
-                // Force re-render debugging
                 setTimeout(() => {
                     console.log('After state update - showSearchResults should be true, results length:', allResults.length);
                 }, 100);
@@ -231,17 +217,14 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
         }, 1000);
     };
 
-    // Fungsi untuk handle search input dengan debounce
     const handleSearchInput = (value: string) => {
         setSearchQuery(value);
         
-        // Clear previous timeout
         if (window.searchTimeout) {
             clearTimeout(window.searchTimeout);
         }
         
         if (value.trim()) {
-            // Debounce search - wait 500ms after user stops typing
             window.searchTimeout = setTimeout(() => {
                 handleSearch(value);
             }, 500);
@@ -251,7 +234,6 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
         }
     };
 
-    // Effect untuk handle transcript changes (voice recognition)
     useEffect(() => {
         if (transcript && transcript.trim()) {
             console.log('Transcript received:', transcript);
@@ -259,20 +241,17 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
         }
     }, [transcript]);
 
-    // Debug effect untuk tracking state changes
     useEffect(() => {
         console.log('State changed - showSearchResults:', showSearchResults, 'searchResults.length:', searchResults.length);
         console.log('searchResults content:', searchResults);
     }, [showSearchResults, searchResults]);
 
-    // Fungsi untuk clear search
     const clearSearch = () => {
         setSearchQuery('');
         setSearchResults([]);
         setShowSearchResults(false);
     };
 
-    // Komponen untuk menampilkan hasil pencarian yang disederhanakan
     const SearchResults = () => {
         console.log('SearchResults component called - showSearchResults:', showSearchResults, 'searchResults.length:', searchResults.length);
         if (!showSearchResults || searchResults.length === 0) return null;
@@ -323,7 +302,17 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                         )}
                         
                         <button 
-                            onClick={() => alert(`📋 Booking ${result.displayName || result.name}\n\nLokasi: ${result.displayLocation || result.location}\nHarga: ${result.displayPrice || TrainDataService.formatPrice(result.price || 0)}\n\nFitur booking akan segera tersedia.`)}
+                            onClick={() => Swal.fire({
+                                icon: 'info',
+                                title: '📋 Booking',
+                                html: `<div class="text-left">
+                                    <p><strong>${result.displayName || result.name}</strong></p>
+                                    <p>Lokasi: ${result.displayLocation || result.location}</p>
+                                    <p>Harga: ${result.displayPrice || TrainDataService.formatPrice(result.price || 0)}</p>
+                                    <p class="mt-3 text-gray-600">Fitur booking akan segera tersedia.</p>
+                                </div>`,
+                                confirmButtonText: 'OK'
+                            })}
                             className={`w-full py-2 text-white font-semibold rounded-lg transition-colors ${
                                 result.type === 'hotel' ? 'bg-blue-500 hover:bg-blue-600' :
                                 result.type === 'train' ? 'bg-green-500 hover:bg-green-600' :
@@ -342,11 +331,11 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-            {/* Header Section with Search */}
+        {}
             <div className="relative bg-gradient-to-br from-purple-600 to-blue-600 text-white p-6 rounded-b-3xl">
                 <div className="relative z-10">
                     
-                    {/* Search Bar */}
+        {}
                     <div className="relative">
                         <div className="relative">
                             <input
@@ -366,7 +355,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                                 )}
                             </div>
                             <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
-                                {/* Voice Recognition Button */}
+        {}
                                 <button
                                     onClick={isListening ? stopListening : startListening}
                                     className={`p-2 rounded-full transition-colors ${
@@ -402,7 +391,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                         </div>
                     </div>
 
-                    {/* Search Results - Inside Header */}
+        {}
                     {(() => {
                         console.log('Rendering search results section - showSearchResults:', showSearchResults, 'searchResults.length:', searchResults.length);
                         const shouldShow = searchResults.length > 0;
@@ -410,7 +399,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                         return shouldShow;
                     })() && (
                         <div className="mt-4 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 max-h-80 overflow-y-auto">
-                            {/* Sticky Header */}
+        {}
                             <div className="sticky top-0 bg-white/60 backdrop-blur-sm rounded-t-2xl px-4 py-3 border-b border-white/20">
                                 <div className="flex justify-between items-center">
                                     <h3 className="text-lg font-semibold text-white">
@@ -425,7 +414,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                                 </div>
                             </div>
                             
-                            {/* Scrollable Content */}
+        {}
                             <div className="px-4 pb-4">
                                 <div className="pt-4">
                                     <SearchResults />
@@ -434,7 +423,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                         </div>
                     )}
 
-                    {/* No Results Found - Show when search query exists but no results */}
+        {}
                     {searchQuery && !isSearching && searchResults.length === 0 && (
                         <div className="mt-4 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-6">
                             <div className="text-center">
@@ -473,79 +462,20 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                         </div>
                     )}
                     
-                    {/* Debug Info
-                    {process.env.NODE_ENV === 'development' && (
-                        <div className="mt-2 text-xs text-white/50">
-                            Debug: showSearchResults={showSearchResults.toString()}, results={searchResults.length}
-                        </div>
-                    )} */}
+                          {}
+
                     
-                    {/* Fallback Results Display - Always show if we have results */}
-                    {/* {searchResults.length > 0 && (
-                        <div className="mt-4 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 max-h-80 overflow-y-auto">
-                            <div className="px-4 py-3 border-b border-white/20">
-                                <h3 className="text-lg font-semibold text-white">
-                                    Hasil Pencarian ({searchResults.length}) - Fallback
-                                </h3>
-                            </div>
-                            <div className="px-4 pb-4">
-                                <div className="pt-4">
-                                    {searchResults.map((result, index) => (
-                                        <div key={index} className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md mb-3">
-                                            <div className="flex justify-between items-start mb-3">
-                                                <div className="flex-1">
-                                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                                                        {result.displayName || result.name}
-                                                    </h3>
-                                                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                                                        {result.displayLocation || result.location}
-                                                    </p>
-                                                    <span className={`px-2 py-1 text-xs rounded-full ${
-                                                        result.type === 'hotel' ? 'bg-blue-100 text-blue-800' :
-                                                        result.type === 'train' ? 'bg-green-100 text-green-800' :
-                                                        result.type === 'car' ? 'bg-purple-100 text-purple-800' :
-                                                        result.type === 'logistics' ? 'bg-orange-100 text-orange-800' :
-                                                        'bg-gray-100 text-gray-800'
-                                                    }`}>
-                                                        {result.type === 'hotel' ? '🏨 Hotel' :
-                                                         result.type === 'train' ? '🚄 Kereta' :
-                                                         result.type === 'car' ? '🚗 Rental' :
-                                                         result.type === 'logistics' ? '📦 Logistik' :
-                                                         result.type === 'insurance' ? '🛡️ Asuransi' : 'Layanan'}
-                                                    </span>
-                                                </div>
-                                                <div className="text-right">
-                                                    <p className="text-lg font-bold text-green-600 dark:text-green-400">
-                                                        {result.displayPrice || TrainDataService.formatPrice(result.price || 0)}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <button 
-                                                onClick={() => alert(`📋 Booking ${result.displayName || result.name}\n\nLokasi: ${result.displayLocation || result.location}\nHarga: ${result.displayPrice || TrainDataService.formatPrice(result.price || 0)}\n\nFitur booking akan segera tersedia.`)}
-                                                className={`w-full py-2 text-white font-semibold rounded-lg transition-colors ${
-                                                    result.type === 'hotel' ? 'bg-blue-500 hover:bg-blue-600' :
-                                                    result.type === 'train' ? 'bg-green-500 hover:bg-green-600' :
-                                                    result.type === 'car' ? 'bg-purple-500 hover:bg-purple-600' :
-                                                    result.type === 'logistics' ? 'bg-orange-500 hover:bg-orange-600' :
-                                                    'bg-gray-500 hover:bg-gray-600'
-                                                }`}
-                                            >
-                                                Pesan Sekarang
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    )} */}
+        {}
+                            {}
+
                 </div>
             </div>
 
-            {/* Main Content */}
+        {}
             <div className="p-4 space-y-6">
-                {/* Service Grid - Horizontal Scrollable */}
+        {}
                 <div className="space-y-4">
-                    {/* Train Services - Horizontal Scroll */}
+        {}
                     <div className="space-y-2">
                         <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Train Services</h3>
                         <div className="flex space-x-4 overflow-x-auto pb-2 scrollbar-hide">
@@ -553,38 +483,38 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                                 <ServiceButton 
                                     Icon={TrainIcon} 
                                     label="Inter City" 
-                                    onClick={() => setActiveTab(NavigationTab.TrainServices)}
+                                    onClick={() => setActiveTab(NavigationTab.InterCityBooking)}
                                     bgColor="bg-blue-500"
                                 />
                                 <ServiceButton 
                                     Icon={TrainIcon} 
                                     label="Local" 
-                                    onClick={() => setActiveTab(NavigationTab.TrainServices)}
+                                    onClick={() => setActiveTab(NavigationTab.InterCityBooking)}
                                     bgColor="bg-orange-500"
                                 />
                                 <ServiceButton 
                                     Icon={TrainIcon} 
                                     label="Commuter Line" 
-                                    onClick={() => setActiveTab(NavigationTab.TrainServices)}
+                                    onClick={() => setActiveTab(NavigationTab.CommuterLine)}
                                     bgColor="bg-red-500"
                                 />
                                 <ServiceButton 
                                     Icon={TrainIcon} 
                                     label="LRT" 
-                                    onClick={() => setActiveTab(NavigationTab.TrainServices)}
+                                    onClick={() => setActiveTab(NavigationTab.CommuterLine)}
                                     bgColor="bg-purple-500"
                                 />
                                 <ServiceButton 
                                     Icon={TrainIcon} 
                                     label="Airport" 
-                                    onClick={() => setActiveTab(NavigationTab.TrainServices)}
+                                    onClick={() => setActiveTab(NavigationTab.InterCityBooking)}
                                     bgColor="bg-blue-400"
                                 />
                     </div>
                         </div>
                     </div>
 
-                    {/* Other Services */}
+        {}
                     <div className="space-y-2">
                         <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Other Services</h3>
                         <div className="flex space-x-4 overflow-x-auto pb-2 scrollbar-hide">
@@ -592,19 +522,34 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                                 <ServiceButton 
                                     Icon={BuildingIcon} 
                                     label="Hotels" 
-                                    onClick={() => alert('🏨 Hotel Services - Coming Soon')}
+                                    onClick={() => Swal.fire({
+                                        icon: 'info',
+                                        title: '🏨 Hotel Services',
+                                        text: 'Coming Soon',
+                                        confirmButtonText: 'OK'
+                                    })}
                                     bgColor="bg-green-500"
                                 />
                                 <ServiceButton 
                                     Icon={PackageIcon} 
                                     label="Logistics" 
-                                    onClick={() => alert('📦 Logistics Services - Coming Soon')}
+                                    onClick={() => Swal.fire({
+                                        icon: 'info',
+                                        title: '📦 Logistics Services',
+                                        text: 'Coming Soon',
+                                        confirmButtonText: 'OK'
+                                    })}
                                     bgColor="bg-yellow-500"
                                 />
                                 <ServiceButton 
                                     Icon={MoreIcon} 
                                     label="More" 
-                                    onClick={() => alert('🔧 More Services - Coming Soon')}
+                                    onClick={() => Swal.fire({
+                                        icon: 'info',
+                                        title: '🔧 More Services',
+                                        text: 'Coming Soon',
+                                        confirmButtonText: 'OK'
+                                    })}
                                     bgColor="bg-gray-500"
                                 />
                             </div>
@@ -612,7 +557,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                     </div>
                 </div>
 
-                {/* Trip Planner Section */}
+        {}
                 <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl p-6 text-white">
                     <div className="flex items-center justify-between mb-4">
                         <div>
@@ -629,7 +574,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                     </button>
             </div>
 
-                {/* Promotional Banner */}
+        {}
                 <div className="bg-gradient-to-r from-orange-400 to-red-500 rounded-2xl p-6 text-white">
                     <div className="flex items-center justify-between">
             <div>

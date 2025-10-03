@@ -10,11 +10,9 @@ import {
   InsuranceService
 } from '../data/types';
 
-// Type assertion for the imported JSON data
 const data = trainServicesData as unknown as TrainServicesData;
 
 export class TrainDataService {
-  // Station methods
   static getAllStations(): Station[] {
     return Object.values(data.stations).flat();
   }
@@ -31,7 +29,6 @@ export class TrainDataService {
     return null;
   }
 
-  // Train service methods
   static getAllTrainServices(): ServiceCategory[] {
     return Object.values(data.trainServices);
   }
@@ -60,11 +57,9 @@ export class TrainDataService {
     return data.trainServices.airport.services || [];
   }
 
-  // Search methods
   static searchTrainsByRoute(fromCode: string, toCode: string): TrainService[] {
     const results: TrainService[] = [];
     
-    // Search in intercity trains
     if (data.trainServices.intercity.trains) {
       data.trainServices.intercity.trains.forEach(train => {
         if (train.route.from.code === fromCode && train.route.to.code === toCode) {
@@ -73,7 +68,6 @@ export class TrainDataService {
       });
     }
     
-    // Search in local trains
     if (data.trainServices.local.trains) {
       data.trainServices.local.trains.forEach(train => {
         if (train.route.from.code === fromCode && train.route.to.code === toCode) {
@@ -88,7 +82,6 @@ export class TrainDataService {
   static getTrainsByCity(cityCode: string): TrainService[] {
     const results: TrainService[] = [];
     
-    // Search in all train categories
     Object.values(data.trainServices).forEach(category => {
       if (category.trains) {
         category.trains.forEach(train => {
@@ -135,7 +128,6 @@ export class TrainDataService {
   static searchTrainsByDuration(maxDuration: string): TrainService[] {
     const results: TrainService[] = [];
     
-    // Parse duration string like "8h 30m" to minutes
     const parseDuration = (duration: string): number => {
       const match = duration.match(/(\d+)h\s*(\d+)?m?/);
       if (match) {
@@ -161,7 +153,6 @@ export class TrainDataService {
     return results;
   }
 
-  // Hotel methods
   static getAllHotels(): Hotel[] {
     try {
       console.log('Getting all hotels, data.hotels:', data.hotels);
@@ -187,7 +178,6 @@ export class TrainDataService {
     return this.getHotelsByCity(city);
   }
 
-  // Car rental methods
   static getAllCarRentals(): CarRental[] {
     try {
       console.log('Getting all car rentals, data.carRentals:', data.carRentals);
@@ -209,7 +199,6 @@ export class TrainDataService {
     return allCarRentals.filter(car => car.type.toLowerCase().includes(type.toLowerCase()));
   }
 
-  // Logistics methods
   static getAllLogisticsServices(): LogisticsService[] {
     return data.logistics;
   }
@@ -220,7 +209,6 @@ export class TrainDataService {
     );
   }
 
-  // Insurance methods
   static getAllInsuranceServices(): InsuranceService[] {
     return data.insurance;
   }
@@ -231,7 +219,6 @@ export class TrainDataService {
     );
   }
 
-  // Utility methods
   static formatPrice(price: number): string {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
@@ -256,7 +243,6 @@ export class TrainDataService {
     return icons[serviceType] || '🚀';
   }
 
-  // Advanced search methods
   static searchAllServices(query: string): {
     trains: TrainService[];
     hotels: Hotel[];
@@ -267,11 +253,9 @@ export class TrainDataService {
     const lowerQuery = query.toLowerCase();
     
     try {
-      // Parse natural language query
       const parsedQuery = this.parseNaturalLanguageQuery(lowerQuery);
       console.log('Parsed query:', parsedQuery);
       
-      // Search trains
       const trains: TrainService[] = [];
       Object.values(data.trainServices).forEach(category => {
         if (category.trains) {
@@ -283,22 +267,18 @@ export class TrainDataService {
         }
       });
 
-      // Search hotels
       const hotels = this.getAllHotels().filter(hotel =>
         this.matchesHotel(hotel, parsedQuery)
       );
 
-      // Search car rentals
       const carRentals = this.getAllCarRentals().filter(car =>
         this.matchesCarRental(car, parsedQuery)
       );
 
-      // Search logistics
       const logistics = data.logistics.filter(logistic =>
         this.matchesLogistics(logistic, parsedQuery)
       );
 
-      // Search insurance
       const insurance = data.insurance.filter(ins =>
         this.matchesInsurance(ins, parsedQuery)
       );
@@ -322,7 +302,6 @@ export class TrainDataService {
     }
   }
 
-  // Parse natural language query
   static parseNaturalLanguageQuery(query: string) {
     const cities = ['jakarta', 'bandung', 'surabaya', 'yogyakarta', 'semarang', 'malang', 'denpasar'];
     const services = ['hotel', 'hotel', 'tiket', 'kereta', 'train', 'rental', 'mobil', 'car', 'logistik', 'logistics', 'asuransi', 'insurance'];
@@ -336,7 +315,6 @@ export class TrainDataService {
       keywords: []
     };
 
-    // Extract cities
     words.forEach(word => {
       const cleanWord = word.replace(/[^a-z]/g, '');
       if (cities.includes(cleanWord)) {
@@ -344,7 +322,6 @@ export class TrainDataService {
       }
     });
 
-    // Extract services
     words.forEach(word => {
       const cleanWord = word.replace(/[^a-z]/g, '');
       if (services.includes(cleanWord)) {
@@ -352,7 +329,6 @@ export class TrainDataService {
       }
     });
 
-    // Extract other keywords
     words.forEach(word => {
       const cleanWord = word.replace(/[^a-z]/g, '');
       if (cleanWord.length > 2 && !result.cities.includes(cleanWord) && !result.services.includes(cleanWord)) {
@@ -363,18 +339,15 @@ export class TrainDataService {
     return result;
   }
 
-  // Match train based on parsed query
   static matchesTrain(train: any, parsedQuery: any): boolean {
     const { cities, services, keywords, originalQuery } = parsedQuery;
     
-    // Check if query contains train-related terms
     const hasTrainService = services.some((s: string) => ['tiket', 'kereta', 'train'].includes(s));
     const hasTrainKeywords = keywords.some((k: string) => 
       ['argo', 'bima', 'bromo', 'jayakarta', 'krd', 'commuter'].includes(k)
     );
     
     if (hasTrainService || hasTrainKeywords) {
-      // If specific cities mentioned, check route
       if (cities.length > 0) {
         const matchesRoute = cities.some((city: string) =>
           train.route.from.city.toLowerCase().includes(city) ||
@@ -383,27 +356,22 @@ export class TrainDataService {
         return matchesRoute;
       }
       
-      // If no specific cities, check train name or general match
       return train.name.toLowerCase().includes(originalQuery) ||
              originalQuery.includes(train.name.toLowerCase()) ||
              hasTrainKeywords;
     }
     
-    // Fallback to original logic
     return train.name.toLowerCase().includes(originalQuery) ||
            train.route.from.city.toLowerCase().includes(originalQuery) ||
            train.route.to.city.toLowerCase().includes(originalQuery);
   }
 
-  // Match hotel based on parsed query
   static matchesHotel(hotel: any, parsedQuery: any): boolean {
     const { cities, services, keywords, originalQuery } = parsedQuery;
     
-    // Check if query contains hotel-related terms
     const hasHotelService = services.some((s: string) => ['hotel', 'hotel'].includes(s));
     
     if (hasHotelService) {
-      // If specific cities mentioned, check location
       if (cities.length > 0) {
         const matchesCity = cities.some((city: string) =>
           hotel.location.toLowerCase().includes(city)
@@ -411,17 +379,14 @@ export class TrainDataService {
         return matchesCity;
       }
       
-      // If no specific cities, check hotel name
       return hotel.name.toLowerCase().includes(originalQuery) ||
              keywords.some((k: string) => hotel.name.toLowerCase().includes(k));
     }
     
-    // Fallback to original logic
     return hotel.name.toLowerCase().includes(originalQuery) ||
            hotel.location.toLowerCase().includes(originalQuery);
   }
 
-  // Match car rental based on parsed query
   static matchesCarRental(car: any, parsedQuery: any): boolean {
     const { cities, services, keywords, originalQuery } = parsedQuery;
     
@@ -444,35 +409,32 @@ export class TrainDataService {
            car.type.toLowerCase().includes(originalQuery);
   }
 
-  // Match logistics based on parsed query
   static matchesLogistics(logistic: any, parsedQuery: any): boolean {
     const { services, originalQuery } = parsedQuery;
     
     const hasLogisticsService = services.some((s: string) => ['logistik', 'logistics'].includes(s));
     
     if (hasLogisticsService) {
-      return true; // If logistics mentioned, show all logistics
+      return true;
     }
     
     return logistic.name.toLowerCase().includes(originalQuery) ||
            logistic.route.toLowerCase().includes(originalQuery);
   }
 
-  // Match insurance based on parsed query
   static matchesInsurance(insurance: any, parsedQuery: any): boolean {
     const { services, originalQuery } = parsedQuery;
     
     const hasInsuranceService = services.some((s: string) => ['asuransi', 'insurance'].includes(s));
     
     if (hasInsuranceService) {
-      return true; // If insurance mentioned, show all insurance
+      return true; 
     }
     
     return insurance.name.toLowerCase().includes(originalQuery) ||
            insurance.coverage.toLowerCase().includes(originalQuery);
   }
 
-  // Get service statistics
   static getServiceStatistics() {
     return {
       totalStations: this.getAllStations().length,
@@ -485,13 +447,11 @@ export class TrainDataService {
     };
   }
 
-  // Get trains by category
   static getAllTrainsByCategory(category: string): TrainService[] {
     const serviceCategory = data.trainServices[category as keyof typeof data.trainServices];
     return serviceCategory?.trains || [];
   }
 
-  // Test method untuk debugging
   static testSearch() {
     console.log('=== TESTING SEARCH FUNCTIONALITY ===');
     console.log('Data structure:', {

@@ -26,7 +26,6 @@ const PassengerFormScreen: React.FC<PassengerFormScreenProps> = ({
       [field]: value
     }));
     
-    // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({
         ...prev,
@@ -67,7 +66,6 @@ const PassengerFormScreen: React.FC<PassengerFormScreenProps> = ({
 
     setIsLoading(true);
 
-    // Simulate booking process
     setTimeout(() => {
       const bookingCode = `KAI${Date.now().toString().slice(-6)}`;
       
@@ -75,18 +73,27 @@ const PassengerFormScreen: React.FC<PassengerFormScreenProps> = ({
         id: `booked-${Date.now()}`,
         bookingCode: bookingCode,
         trainName: selectedTicket.trainName,
-        trainClass: selectedTicket.trainClass,
-        departureStation: selectedTicket.departureStation,
-        departureTime: selectedTicket.departureTime,
-        arrivalStation: selectedTicket.arrivalStation,
-        arrivalTime: selectedTicket.arrivalTime,
+        trainClass: selectedTicket.trainClass as any,
+        route: {
+          from: selectedTicket.departureStation,
+          to: selectedTicket.arrivalStation
+        },
+        departure: {
+          station: selectedTicket.departureStation,
+          time: new Date(selectedTicket.departureTime)
+        },
+        arrival: {
+          station: selectedTicket.arrivalStation,
+          time: new Date(selectedTicket.arrivalTime)
+        },
+        passengers: [{ name: passengerData.name, id: passengerData.nik }],
         price: selectedTicket.price,
+        isActive: true,
         passengerData: passengerData,
         bookingDate: new Date().toISOString(),
         status: 'active'
       };
 
-      // Save to localStorage (simulate database)
       const existingTickets = JSON.parse(localStorage.getItem('bookedTickets') || '[]');
       existingTickets.push(bookedTicket);
       localStorage.setItem('bookedTickets', JSON.stringify(existingTickets));
@@ -140,7 +147,7 @@ const PassengerFormScreen: React.FC<PassengerFormScreenProps> = ({
         <p className="text-gray-600 dark:text-gray-400">Lengkapi data diri Anda untuk menyelesaikan pemesanan</p>
       </div>
 
-      {/* Selected Ticket Info */}
+        {}
       <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800">
         <h3 className="font-semibold text-blue-800 dark:text-blue-300 mb-3">Tiket yang Dipilih</h3>
         <div className="flex justify-between items-start">
@@ -169,10 +176,10 @@ const PassengerFormScreen: React.FC<PassengerFormScreenProps> = ({
         </div>
       </div>
 
-      {/* Passenger Form */}
+        {}
       <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
         <form className="space-y-4">
-          {/* Nama Lengkap */}
+        {}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Nama Lengkap <span className="text-red-500">*</span>
@@ -191,7 +198,7 @@ const PassengerFormScreen: React.FC<PassengerFormScreenProps> = ({
             )}
           </div>
 
-          {/* NIK */}
+        {}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               NIK (Nomor Induk Kependudukan) <span className="text-red-500">*</span>
@@ -211,8 +218,7 @@ const PassengerFormScreen: React.FC<PassengerFormScreenProps> = ({
             )}
           </div>
 
-          {/* Nomor Telepon */}
-          <div>
+v          <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Nomor Telepon <span className="text-red-500">*</span>
             </label>
@@ -230,7 +236,7 @@ const PassengerFormScreen: React.FC<PassengerFormScreenProps> = ({
             )}
           </div>
 
-          {/* Tombol Beli Tiket */}
+        {}
           <button
             type="button"
             onClick={handleBookTicket}
@@ -257,7 +263,7 @@ const PassengerFormScreen: React.FC<PassengerFormScreenProps> = ({
         </form>
       </div>
 
-      {/* Info Card */}
+        {}
       <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-xl p-4 border border-yellow-200 dark:border-yellow-800">
         <div className="flex items-start gap-3">
           <svg className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mt-0.5" fill="currentColor" viewBox="0 0 24 24">

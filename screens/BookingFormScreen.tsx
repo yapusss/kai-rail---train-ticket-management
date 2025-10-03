@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavigationTab, BookingFormData } from '../types';
 import TrainDataService from '../services/trainDataService';
+import Swal from 'sweetalert2';
 
 interface BookingFormScreenProps {
   setActiveTab: (tab: NavigationTab) => void;
@@ -25,7 +26,6 @@ const BookingFormScreen: React.FC<BookingFormScreenProps> = ({
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // Load all stations
     const allStations = TrainDataService.getAllStations();
     setStations(allStations);
   }, []);
@@ -44,7 +44,12 @@ const BookingFormScreen: React.FC<BookingFormScreenProps> = ({
     }
 
     if (formData.departureStation === formData.arrivalStation) {
-      alert('Stasiun asal dan tujuan tidak boleh sama');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error!',
+        text: 'Stasiun asal dan tujuan tidak boleh sama',
+        confirmButtonText: 'OK'
+      });
       return;
     }
 
@@ -61,7 +66,7 @@ const BookingFormScreen: React.FC<BookingFormScreenProps> = ({
     <div className="p-4 space-y-6">
       <div className="text-center">
         <button
-          onClick={() => setActiveTab(NavigationTab.TrainServices)}
+          onClick={() => setActiveTab(NavigationTab.Dashboard)}
           className="mb-4 flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -83,7 +88,7 @@ const BookingFormScreen: React.FC<BookingFormScreenProps> = ({
 
       <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
         <form className="space-y-4">
-          {/* Stasiun Asal */}
+        {}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Stasiun Asal
@@ -102,7 +107,7 @@ const BookingFormScreen: React.FC<BookingFormScreenProps> = ({
             </select>
           </div>
 
-          {/* Stasiun Tujuan */}
+        {}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Stasiun Tujuan
@@ -121,7 +126,7 @@ const BookingFormScreen: React.FC<BookingFormScreenProps> = ({
             </select>
           </div>
 
-          {/* Tanggal Keberangkatan */}
+        {}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Tanggal Keberangkatan
@@ -135,7 +140,7 @@ const BookingFormScreen: React.FC<BookingFormScreenProps> = ({
             />
           </div>
 
-          {/* Jumlah Penumpang */}
+        {}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Jumlah Penumpang
@@ -151,7 +156,7 @@ const BookingFormScreen: React.FC<BookingFormScreenProps> = ({
             </select>
           </div>
 
-          {/* Tombol Cari Tiket */}
+        {}
           <button
             type="button"
             onClick={handleSearchTickets}
@@ -178,7 +183,7 @@ const BookingFormScreen: React.FC<BookingFormScreenProps> = ({
         </form>
       </div>
 
-      {/* Info Card */}
+        {}
       <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800">
         <div className="flex items-start gap-3">
           <svg className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" fill="currentColor" viewBox="0 0 24 24">

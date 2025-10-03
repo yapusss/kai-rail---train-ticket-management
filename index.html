@@ -3,9 +3,9 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+      <link rel="icon" type="image/png" href="/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kai Rail - Train Ticket Management</title>
+    <title>KAI Access</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -13,17 +13,16 @@
       }
     </script>
     <style>
-      /* Hide scrollbars globally */
+      /* Hide all scrollbars globally */
       * {
         scrollbar-width: none;
-        -ms-overflow-style: none;
+        -ms-overflow-style: none; 
       }
       
       *::-webkit-scrollbar {
         display: none;
       }
       
-      /* Keep the utility class for specific use cases */
       .scrollbar-hide {
         -ms-overflow-style: none;
         scrollbar-width: none;
@@ -31,6 +30,21 @@
       .scrollbar-hide::-webkit-scrollbar {
         display: none;
       }
+      
+      @keyframes wave {
+        0%, 100% { transform: scaleY(1); }
+        50% { transform: scaleY(1.5); }
+      }
+      
+      .wave-bar {
+        animation: wave 1s ease-in-out infinite;
+      }
+      
+      .wave-bar:nth-child(1) { animation-delay: 0s; }
+      .wave-bar:nth-child(2) { animation-delay: 0.1s; }
+      .wave-bar:nth-child(3) { animation-delay: 0.2s; }
+      .wave-bar:nth-child(4) { animation-delay: 0.3s; }
+      .wave-bar:nth-child(5) { animation-delay: 0.4s; }
     </style>
   <script type="importmap">
 {

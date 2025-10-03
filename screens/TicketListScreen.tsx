@@ -18,11 +18,9 @@ const TicketListScreen: React.FC<TicketListScreenProps> = ({
   const [sortBy, setSortBy] = useState<'price' | 'time' | 'duration'>('time');
 
   useEffect(() => {
-    // Simulate loading available tickets based on form data
     const loadAvailableTickets = () => {
       setIsLoading(true);
       
-      // Generate mock tickets based on the search criteria
       setTimeout(() => {
         const mockTickets: AvailableTicket[] = generateMockTickets();
         setAvailableTickets(mockTickets);
@@ -34,13 +32,10 @@ const TicketListScreen: React.FC<TicketListScreenProps> = ({
   }, [bookingFormData]);
 
   const generateMockTickets = (): AvailableTicket[] => {
-    // Get service type with fallback
     const serviceType = bookingFormData?.serviceType?.toLowerCase() || 'intercity';
     
-    // Try to get trains from the service
     let trains = TrainDataService.getAllTrainsByCategory(serviceType);
     
-    // If no trains found, try alternative category names
     if (!trains || trains.length === 0) {
       if (serviceType === 'kereta antar kota') {
         trains = TrainDataService.getAllTrainsByCategory('intercity');
@@ -49,7 +44,6 @@ const TicketListScreen: React.FC<TicketListScreenProps> = ({
       }
     }
     
-    // If still no trains, create fallback trains
     if (!trains || trains.length === 0) {
       trains = [
         {
@@ -91,13 +85,11 @@ const TicketListScreen: React.FC<TicketListScreenProps> = ({
 
     const tickets: AvailableTicket[] = [];
 
-    // Generate 5-8 random tickets
     const ticketCount = Math.floor(Math.random() * 4) + 5;
     
     for (let i = 0; i < ticketCount; i++) {
       const train = trains[Math.floor(Math.random() * trains.length)];
       
-      // Check if train has classes, if not use default
       const availableClasses = train.classes || [
         { name: 'Ekonomi', price: 100000, facilities: ['AC', 'Toilet'] },
         { name: 'Bisnis', price: 200000, facilities: ['AC', 'Toilet', 'Snack'] },
@@ -106,17 +98,14 @@ const TicketListScreen: React.FC<TicketListScreenProps> = ({
       
       const trainClass = availableClasses[Math.floor(Math.random() * availableClasses.length)];
       
-      // Generate random departure time for the selected date
-      const departureHour = Math.floor(Math.random() * 16) + 6; // 06:00 - 21:00
-      const departureMinute = Math.floor(Math.random() * 4) * 15; // 00, 15, 30, 45
+      const departureHour = Math.floor(Math.random() * 16) + 6;
+      const departureMinute = Math.floor(Math.random() * 4) * 15; 
       const departureTime = `${departureHour.toString().padStart(2, '0')}:${departureMinute.toString().padStart(2, '0')}`;
       
-      // Calculate arrival time (add duration)
-      const duration = Math.floor(Math.random() * 8) + 2; // 2-10 hours
+      const duration = Math.floor(Math.random() * 8) + 2;
       const arrivalHour = (departureHour + duration) % 24;
       const arrivalTime = `${arrivalHour.toString().padStart(2, '0')}:${departureMinute.toString().padStart(2, '0')}`;
 
-      // Use form data with fallbacks
       const departureStation = bookingFormData?.departureStation || 'Stasiun Jakarta (GMR)';
       const arrivalStation = bookingFormData?.arrivalStation || 'Stasiun Surabaya (PSE)';
       const departureDate = bookingFormData?.departureDate || new Date().toISOString().split('T')[0];
@@ -211,7 +200,7 @@ const TicketListScreen: React.FC<TicketListScreenProps> = ({
           </div>
         </div>
         
-        {/* Loading skeleton */}
+        {}
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
             <div key={i} className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700 animate-pulse">
@@ -246,7 +235,7 @@ const TicketListScreen: React.FC<TicketListScreenProps> = ({
         </div>
       </div>
 
-      {/* Sort Options */}
+        {}
       <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between">
           <h3 className="font-semibold text-gray-800 dark:text-gray-200">Urutkan berdasarkan:</h3>
@@ -272,7 +261,7 @@ const TicketListScreen: React.FC<TicketListScreenProps> = ({
         </div>
       </div>
 
-      {/* Available Tickets */}
+        {}
       <div className="space-y-4">
         {sortTickets(availableTickets).map((ticket, index) => (
           <div key={ticket.id} className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
@@ -340,3 +329,5 @@ const TicketListScreen: React.FC<TicketListScreenProps> = ({
 };
 
 export default TicketListScreen;
+
+

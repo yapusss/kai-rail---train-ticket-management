@@ -228,7 +228,6 @@ export interface TrainServicesData {
   insurance: InsuranceService[];
 }
 
-// Helper functions for working with the data
 export const getStationByCode = (stations: { [city: string]: Station[] }, code: string): Station | null => {
   for (const cityStations of Object.values(stations)) {
     const station = cityStations.find(s => s.code === code);
@@ -248,7 +247,6 @@ export const getAllStations = (stations: { [city: string]: Station[] }): Station
 export const searchTrainsByRoute = (data: TrainServicesData, fromCode: string, toCode: string): TrainService[] => {
   const results: TrainService[] = [];
   
-  // Search in intercity trains
   if (data.trainServices.intercity.trains) {
     data.trainServices.intercity.trains.forEach(train => {
       if (train.route.from.code === fromCode && train.route.to.code === toCode) {
@@ -257,7 +255,6 @@ export const searchTrainsByRoute = (data: TrainServicesData, fromCode: string, t
     });
   }
   
-  // Search in local trains
   if (data.trainServices.local.trains) {
     data.trainServices.local.trains.forEach(train => {
       if (train.route.from.code === fromCode && train.route.to.code === toCode) {
@@ -272,7 +269,6 @@ export const searchTrainsByRoute = (data: TrainServicesData, fromCode: string, t
 export const getTrainsByCity = (data: TrainServicesData, cityCode: string): TrainService[] => {
   const results: TrainService[] = [];
   
-  // Search in all train categories
   Object.values(data.trainServices).forEach(category => {
     if (category.trains) {
       category.trains.forEach(train => {
@@ -296,7 +292,7 @@ export const formatPrice = (price: number): string => {
 };
 
 export const formatDuration = (duration: string): string => {
-  return duration; // Already formatted as "8h 30m"
+  return duration;
 };
 
 export const getServiceIcon = (serviceType: string): string => {
