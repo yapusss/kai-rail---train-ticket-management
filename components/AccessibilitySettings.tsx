@@ -59,7 +59,7 @@ const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({ isOpen, o
         )}
 
         <div className="space-y-6">
-          {/* Enable/Disable Accessibility */}
+{}
           <div className="flex items-center justify-between">
             <div>
               <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -83,7 +83,7 @@ const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({ isOpen, o
             </button>
           </div>
 
-          {/* Voice Conflict Management */}
+{}
           <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
             <h4 className="text-sm font-semibold text-yellow-800 dark:text-yellow-300 mb-2">
               Manajemen Konflik Suara
@@ -122,7 +122,8 @@ const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({ isOpen, o
             </div>
           </div>
 
-          {/* Voice Settings */}
+{}
+
           {localSettings.enabled && (
             <>
               <div className="space-y-4">
@@ -130,7 +131,7 @@ const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({ isOpen, o
                   Pengaturan Suara
                 </h3>
 
-                {/* Voice Rate */}
+{}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Kecepatan Bicara: {localSettings.voiceRate.toFixed(1)}x
@@ -150,7 +151,7 @@ const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({ isOpen, o
                   </div>
                 </div>
 
-                {/* Voice Pitch */}
+{}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Nada Suara: {localSettings.voicePitch.toFixed(1)}
@@ -170,7 +171,7 @@ const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({ isOpen, o
                   </div>
                 </div>
 
-                {/* Voice Volume */}
+{}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Volume: {Math.round(localSettings.voiceVolume * 100)}%
@@ -190,7 +191,7 @@ const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({ isOpen, o
                   </div>
                 </div>
 
-                {/* Announcement Delay */}
+{}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Delay Announcement: {localSettings.announcementDelay}ms
@@ -214,7 +215,7 @@ const AccessibilitySettings: React.FC<AccessibilitySettingsProps> = ({ isOpen, o
           )}
         </div>
 
-        {/* Action Buttons */}
+{}
         <div className="flex gap-3 mt-8">
           <button
             onClick={handleReset}

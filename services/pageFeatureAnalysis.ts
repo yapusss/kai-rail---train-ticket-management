@@ -1,7 +1,4 @@
-/**
- * Analisis Fitur yang Tersedia di Setiap Halaman
- * Berdasarkan analisis kode dari DashboardScreen.tsx dan TicketsScreen.tsx
- */
+
 
 export interface PageFeatureAnalysis {
   pageName: string;
@@ -123,23 +120,17 @@ export const PAGE_FEATURES: PageFeatureAnalysis[] = [
   }
 ];
 
-/**
- * Mendapatkan analisis fitur untuk halaman tertentu
- */
+
 export const getPageFeatures = (pageName: string): PageFeatureAnalysis | null => {
   return PAGE_FEATURES.find(page => page.pageName === pageName) || null;
 };
 
-/**
- * Mendapatkan semua voice commands yang tersedia
- */
+
 export const getAllVoiceCommands = (): string[] => {
   return PAGE_FEATURES.flatMap(page => page.voiceCommands);
 };
 
-/**
- * Mendapatkan semua accessibility features yang tersedia
- */
+
 export const getAllAccessibilityFeatures = (): string[] => {
   return PAGE_FEATURES.flatMap(page => page.accessibilityFeatures);
 };

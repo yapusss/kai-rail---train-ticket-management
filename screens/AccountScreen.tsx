@@ -47,30 +47,40 @@ const MenuItem: React.FC<{
 
 const LanguageToggle: React.FC<{ language: string; onToggle: () => void }> = ({ language, onToggle }) => (
   <div className="flex items-center space-x-3">
-    <span className={`text-sm ${language === 'IN' ? 'text-blue-600 font-semibold' : 'text-gray-500'}`}>IN</span>
+    <span className={`text-sm ${language === 'ENG' ? 'text-blue-600 font-semibold' : 'text-gray-500'}`}>IND</span>
     <button
       onClick={onToggle}
       className={`relative w-12 h-6 rounded-full transition-colors ${
-        language === 'IN' ? 'bg-blue-600' : 'bg-gray-300'
+        language === 'ENG' ? 'bg-blue-600' : 'bg-gray-300'
       }`}
     >
       <div
         className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
-          language === 'IN' ? 'transform translate-x-7' : 'transform translate-x-1'
+          language === 'ENG' ? 'transform translate-x-7' : 'transform translate-x-1'
         }`}
       />
     </button>
-    <span className={`text-sm ${language === 'EN' ? 'text-blue-600 font-semibold' : 'text-gray-500'}`}>EN</span>
+    <span className={`text-sm ${language === 'IND' ? 'text-blue-600 font-semibold' : 'text-gray-500'}`}>ENG</span>
   </div>
 );
 
 const AccountScreen: React.FC = () => {
-  const [language, setLanguage] = useState<'IN' | 'EN'>('IN');
+  const [language, setLanguage] = useState<'ENG' | 'IND'>('ENG');
   const [showDetail, setShowDetail] = useState<MenuOption | null>(null);
+  const [showPasswords, setShowPasswords] = useState({
+    oldPassword: false,
+    newPassword: false,
+    confirmPassword: false
+  });
+  const [passwords, setPasswords] = useState({
+    oldPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
 
   const handleMenuClick = (option: MenuOption) => {
     if (option === 'bahasa') {
-      setLanguage(language === 'IN' ? 'EN' : 'IN');
+      setLanguage(language === 'ENG' ? 'IND' : 'ENG');
       return;
     }
     
@@ -104,7 +114,59 @@ const AccountScreen: React.FC = () => {
   };
 
   const toggleLanguage = () => {
-    setLanguage(language === 'IN' ? 'EN' : 'IN');
+    setLanguage(language === 'ENG' ? 'IND' : 'ENG');
+  };
+
+  const togglePasswordVisibility = (field: keyof typeof showPasswords) => {
+    setShowPasswords(prev => ({
+      ...prev,
+      [field]: !prev[field]
+    }));
+  };
+
+  const handlePasswordChange = (field: keyof typeof passwords, value: string) => {
+    setPasswords(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const calculatePasswordStrength = (password: string) => {
+    let score = 0;
+    let feedback = [];
+
+    if (password.length >= 8) score += 1;
+    else feedback.push('Minimal 8 karakter');
+
+    if (/[a-z]/.test(password)) score += 1;
+    else feedback.push('Huruf kecil');
+
+    if (/[A-Z]/.test(password)) score += 1;
+    else feedback.push('Huruf besar');
+
+    if (/[0-9]/.test(password)) score += 1;
+    else feedback.push('Angka');
+
+    if (/[^A-Za-z0-9]/.test(password)) score += 1;
+    else feedback.push('Karakter khusus');
+
+    return { score, feedback };
+  };
+
+  const getPasswordStrengthColor = (score: number) => {
+    if (score <= 1) return 'bg-red-500';
+    if (score <= 2) return 'bg-orange-500';
+    if (score <= 3) return 'bg-yellow-500';
+    if (score <= 4) return 'bg-blue-500';
+    return 'bg-green-500';
+  };
+
+  const getPasswordStrengthText = (score: number) => {
+    if (score <= 1) return 'Sangat Lemah';
+    if (score <= 2) return 'Lemah';
+    if (score <= 3) return 'Sedang';
+    if (score <= 4) return 'Kuat';
+    return 'Sangat Kuat';
   };
 
   if (showDetail) {
@@ -178,17 +240,131 @@ const AccountScreen: React.FC = () => {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Kata Sandi Lama</label>
-                  <input type="password" className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  <div className="relative">
+                    <input 
+                      type={showPasswords.oldPassword ? "text" : "password"} 
+                      value={passwords.oldPassword}
+                      onChange={(e) => handlePasswordChange('oldPassword', e.target.value)}
+                      className="w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                    />
+                    <button
+                      type="button"
+                      onClick={() => togglePasswordVisibility('oldPassword')}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      {showPasswords.oldPassword ? (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                        </svg>
+                      ) : (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Kata Sandi Baru</label>
-                  <input type="password" className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  <div className="relative">
+                    <input 
+                      type={showPasswords.newPassword ? "text" : "password"} 
+                      value={passwords.newPassword}
+                      onChange={(e) => handlePasswordChange('newPassword', e.target.value)}
+                      className="w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                    />
+                    <button
+                      type="button"
+                      onClick={() => togglePasswordVisibility('newPassword')}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      {showPasswords.newPassword ? (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                        </svg>
+                      ) : (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+                  
+{}
+                  {passwords.newPassword && (
+                    <div className="mt-2">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs text-gray-600 dark:text-gray-400">Kekuatan kata sandi:</span>
+                        <span className={`text-xs font-medium ${getPasswordStrengthColor(calculatePasswordStrength(passwords.newPassword).score).replace('bg-', 'text-')}`}>
+                          {getPasswordStrengthText(calculatePasswordStrength(passwords.newPassword).score)}
+                        </span>
+                      </div>
+                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div 
+                          className={`h-2 rounded-full transition-all duration-300 ${getPasswordStrengthColor(calculatePasswordStrength(passwords.newPassword).score)}`}
+                          style={{ width: `${(calculatePasswordStrength(passwords.newPassword).score / 5) * 100}%` }}
+                        ></div>
+                      </div>
+                      {calculatePasswordStrength(passwords.newPassword).feedback.length > 0 && (
+                        <div className="mt-1">
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            Tambahkan: {calculatePasswordStrength(passwords.newPassword).feedback.join(', ')}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Konfirmasi Kata Sandi</label>
-                  <input type="password" className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  <div className="relative">
+                    <input 
+                      type={showPasswords.confirmPassword ? "text" : "password"} 
+                      value={passwords.confirmPassword}
+                      onChange={(e) => handlePasswordChange('confirmPassword', e.target.value)}
+                      className="w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                    />
+                    <button
+                      type="button"
+                      onClick={() => togglePasswordVisibility('confirmPassword')}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      {showPasswords.confirmPassword ? (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                        </svg>
+                      ) : (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+                  
+{}
+                  {passwords.confirmPassword && (
+                    <div className="mt-1">
+                      {passwords.newPassword === passwords.confirmPassword ? (
+                        <p className="text-xs text-green-600 dark:text-green-400 flex items-center">                          
+                        </p>
+                      ) : (
+                        <p className="text-xs text-red-600 dark:text-red-400 flex items-center">
+                          <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                          </svg>
+                          Kata sandi tidak cocok
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
-                <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-blue-700">
+                <button 
+                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  disabled={!passwords.oldPassword || !passwords.newPassword || passwords.newPassword !== passwords.confirmPassword || calculatePasswordStrength(passwords.newPassword).score < 3}
+                >
                   Simpan Perubahan
                 </button>
               </div>

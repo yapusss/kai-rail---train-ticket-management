@@ -119,14 +119,7 @@ export const interpretSearchQuery = async (query: string): Promise<{ month?: num
     }
 };
 
-/**
- * AI-powered voice command interpreter
- * Translates natural language voice commands into system actions
- * 
- * @param command - The voice command text from speech recognition
- * @param currentPage - The current page context (optional)
- * @returns Object containing action, feedback message, and optional parameters
- */
+
 export const interpretVoiceCommand = async (command: string, currentPage?: string): Promise<{ action: string; feedback: string; params?: string } | null> => {
     if (!API_KEY) return null;
     try {

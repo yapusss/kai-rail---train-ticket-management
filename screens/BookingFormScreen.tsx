@@ -192,7 +192,7 @@ const BookingFormScreen: React.FC<BookingFormScreenProps> = ({
         {}
       {showBookingTips && (
       <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800 relative">
-        {/* Close Button */}
+{}
         <button
           onClick={() => setShowBookingTips(false)}
           className="absolute top-2 right-2 p-1 text-blue-600 dark:text-blue-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-white/50 dark:hover:bg-gray-800/50 rounded-full transition-all duration-200 group"

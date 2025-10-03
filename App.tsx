@@ -61,7 +61,6 @@ const App: React.FC = () => {
   };
 
   const handleVoiceCommand = async (transcript: string): Promise<void> => {
-    // Mulai voice command - pause accessibility
     voiceConflictManager.startVoiceCommand();
     
     setIsProcessingAI(true);
@@ -84,7 +83,6 @@ const App: React.FC = () => {
       executeSimpleCommand(transcript);
     } finally {
       setIsProcessingAI(false);
-      // Akhiri voice command - resume accessibility
       voiceConflictManager.endVoiceCommand();
     }
   };
@@ -430,7 +428,6 @@ const App: React.FC = () => {
           <div className="relative z-10 flex items-center space-x-3">
             <button
               onClick={browserSupportsSpeechRecognition ? () => {
-                // Cek apakah voice command di-disable oleh accessibility
                 if (window.disableVoiceCommands) {
                   showFeedback("Voice command sementara dinonaktifkan karena accessibility sedang berbicara");
                   return;

@@ -56,7 +56,6 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
     const [transcript, setTranscript] = useState('');
     const [browserSupportsSpeechRecognition, setBrowserSupportsSpeechRecognition] = useState(false);
 
-    // Accessibility hook
     const { announcePage, announceElement, announceAction, announceError, announceSuccess, settings } = useAccessibility();
 
     useEffect(() => {
@@ -65,7 +64,6 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
             setBrowserSupportsSpeechRecognition(true);
         }
 
-        // Announce halaman saat pertama kali dibuka
         if (settings.enabled) {
             announcePage({
                 pageTitle: "Dashboard",
@@ -98,7 +96,6 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
             return;
         }
 
-        // Mulai voice command - pause accessibility
         voiceConflictManager.startVoiceCommand();
 
         const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -131,14 +128,12 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
             });
             announceError("Terjadi kesalahan saat mengenali suara", "Silakan coba lagi atau gunakan keyboard");
             setIsListening(false);
-            // Akhiri voice command - resume accessibility
             voiceConflictManager.endVoiceCommand();
         };
 
         recognition.onend = () => {
             setIsListening(false);
             announceAction("Pengenalan suara selesai");
-            // Akhiri voice command - resume accessibility
             voiceConflictManager.endVoiceCommand();
         };
 

@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
 import { accessibilityService, AccessibilitySettings, PageAnnouncement } from '../services/accessibilityService';
 
-/**
- * Hook untuk menggunakan accessibility service
- */
+
 export const useAccessibility = () => {
   const [settings, setSettings] = useState<AccessibilitySettings>(accessibilityService.getSettings());
   const [isSupported, setIsSupported] = useState(false);
@@ -11,18 +9,15 @@ export const useAccessibility = () => {
   useEffect(() => {
     console.log('useAccessibility: Initializing...');
     
-    // Load settings dari localStorage
     accessibilityService.loadSettings();
     const loadedSettings = accessibilityService.getSettings();
     console.log('useAccessibility: Loaded settings:', loadedSettings);
     setSettings(loadedSettings);
     
-    // Cek apakah browser mendukung speech synthesis
     const supported = accessibilityService.isSpeechSupported();
     console.log('useAccessibility: Speech synthesis supported:', supported);
     setIsSupported(supported);
 
-    // Cleanup saat component unmount
     return () => {
       accessibilityService.stopSpeech();
     };

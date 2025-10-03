@@ -19,7 +19,6 @@ const PlannerScreen: React.FC = () => {
   const [browserSupportsSpeechRecognition, setBrowserSupportsSpeechRecognition] = useState(false);
   const [showVoiceExamples, setShowVoiceExamples] = useState(true);
 
-  // Accessibility hook
   const { announcePage, announceElement, announceAction, announceError, announceSuccess, settings } = useAccessibility();
 
   const handleTrainClick = (train: any) => {
@@ -39,7 +38,6 @@ const PlannerScreen: React.FC = () => {
       setBrowserSupportsSpeechRecognition(true);
     }
 
-    // Announce halaman saat pertama kali dibuka
     if (settings.enabled) {
       announcePage({
         pageTitle: "AI Trip Planner",
@@ -65,7 +63,6 @@ const PlannerScreen: React.FC = () => {
   const startListening = () => {
     if (!browserSupportsSpeechRecognition) return;
 
-    // Mulai voice command - pause accessibility
     voiceConflictManager.startVoiceCommand();
 
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -90,7 +87,6 @@ const PlannerScreen: React.FC = () => {
     recognition.onend = () => {
       setIsListening(false);
       announceAction("Pengenalan suara selesai");
-      // Akhiri voice command - resume accessibility
       voiceConflictManager.endVoiceCommand();
     };
 
@@ -103,7 +99,6 @@ const PlannerScreen: React.FC = () => {
       });
       announceError("Terjadi kesalahan saat mengenali suara", "Silakan coba lagi atau gunakan keyboard");
       setIsListening(false);
-      // Akhiri voice command - resume accessibility
       voiceConflictManager.endVoiceCommand();
     };
 
@@ -116,7 +111,6 @@ const PlannerScreen: React.FC = () => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     SpeechRecognition.stopListening();
     
-    // Akhiri voice command - resume accessibility
     voiceConflictManager.endVoiceCommand();
   };
 
@@ -235,7 +229,7 @@ const PlannerScreen: React.FC = () => {
           {}
           {showVoiceExamples && (
           <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg relative">
-            {/* Close Button */}
+{}
             <button
               onClick={() => setShowVoiceExamples(false)}
               className="absolute top-2 right-2 p-1 text-blue-600 dark:text-blue-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-white/50 dark:hover:bg-gray-800/50 rounded-full transition-all duration-200 group"

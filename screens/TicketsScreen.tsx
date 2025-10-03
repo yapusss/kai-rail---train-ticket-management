@@ -230,7 +230,6 @@ const TicketsScreen: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'active' | 'history'>('active');
     const [showSearchExamples, setShowSearchExamples] = useState(true);
 
-    // Accessibility hook
     const { announcePage, announceElement, announceAction, announceError, announceSuccess, settings } = useAccessibility();
 
     useEffect(() => {
@@ -242,7 +241,6 @@ const TicketsScreen: React.FC = () => {
             localStorage.setItem('bookedTickets', JSON.stringify(DUMMY_BOOKED_TICKETS));
         }
 
-        // Announce halaman saat pertama kali dibuka
         if (settings.enabled) {
             announcePage({
                 pageTitle: "Tiket Saya",
@@ -284,7 +282,6 @@ const TicketsScreen: React.FC = () => {
 
     const handleVoiceSearch = () => {
         if (recognition && !isListening) {
-            // Mulai voice command - pause accessibility
             voiceConflictManager.startVoiceCommand();
             
             recognition.start();
@@ -306,7 +303,6 @@ const TicketsScreen: React.FC = () => {
         recognition.onend = () => {
             setIsListening(false);
             announceAction("Pengenalan suara selesai");
-            // Akhiri voice command - resume accessibility
             voiceConflictManager.endVoiceCommand();
         };
         
@@ -319,7 +315,6 @@ const TicketsScreen: React.FC = () => {
             });
             announceError("Terjadi kesalahan saat mengenali suara", "Silakan coba lagi atau gunakan keyboard");
             setIsListening(false);
-            // Akhiri voice command - resume accessibility
             voiceConflictManager.endVoiceCommand();
         };
     }, [recognition]);
@@ -692,7 +687,7 @@ const TicketsScreen: React.FC = () => {
             {}
                     {showSearchExamples && (
                     <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg relative">
-                        {/* Close Button */}
+{}
                         <button
                             onClick={() => setShowSearchExamples(false)}
                             className="absolute top-2 right-2 p-1 text-blue-600 dark:text-blue-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-white/50 dark:hover:bg-gray-800/50 rounded-full transition-all duration-200 group"

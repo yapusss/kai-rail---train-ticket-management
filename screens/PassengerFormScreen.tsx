@@ -335,7 +335,7 @@ const PassengerFormScreen: React.FC<PassengerFormScreenProps> = ({
       {}
         {showImportantInfo && (
         <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-2xl p-6 border border-amber-200 dark:border-amber-800 relative">
-          {/* Close Button */}
+{}
           <button
             onClick={() => setShowImportantInfo(false)}
             className="absolute top-2 right-2 p-1 text-amber-600 dark:text-amber-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-white/50 dark:hover:bg-gray-800/50 rounded-full transition-all duration-200 group"
