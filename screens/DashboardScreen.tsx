@@ -15,6 +15,13 @@ declare global {
 const MOCK_RAILPOIN = 1250;
 const MOCK_NOTIFICATION_COUNT = 52;
 
+const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good Morning";
+    if (hour < 18) return "Good Afternoon";
+    return "Good Evening";
+};
+
 const ServiceButton: React.FC<{ 
     Icon: React.ElementType; 
     label: string; 
@@ -252,6 +259,10 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
         setShowSearchResults(false);
     };
 
+    const handleNotificationClick = () => {
+        setActiveTab(NavigationTab.Notifications);
+    };
+
     const SearchResults = () => {
         console.log('SearchResults component called - showSearchResults:', showSearchResults, 'searchResults.length:', searchResults.length);
         if (!showSearchResults || searchResults.length === 0) return null;
@@ -334,6 +345,31 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
         {}
             <div className="relative bg-gradient-to-br from-purple-600 to-blue-600 text-white p-6 rounded-b-3xl">
                 <div className="relative z-10">
+                    {}
+                    <div className="flex items-center justify-between mb-6">
+                    {}                        <div className="flex items-center space-x-4">
+                      
+                            <div>
+                                <h1 className="text-2xl font-bold text-white">{getGreeting()}</h1>
+                                <p className="text-white/80 text-sm">Selamat datang di KAI Access</p>
+                            </div>
+                        </div>
+
+                        {}                        <div className="flex items-center space-x-3">
+                        {}                        
+                            {}                            <button 
+                                onClick={handleNotificationClick}
+                                className="relative p-3 bg-white/20 rounded-full hover:bg-white/30 transition-colors"
+                            >
+                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                </svg>
+                                <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold">
+                                    {MOCK_NOTIFICATION_COUNT}
+                                </div>
+                            </button>
+                        </div>
+                    </div>
                     
         {}
                     <div className="relative">

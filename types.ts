@@ -10,6 +10,7 @@ export enum NavigationTab {
   Tickets = 'TICKETS',
   Promotion = 'PROMOTION',
   Account = 'ACCOUNT',
+  Notifications = 'NOTIFICATIONS',
 }
 
 export enum TrainClass {

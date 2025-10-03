@@ -13,6 +13,7 @@ import TicketListScreen from "./screens/TicketListScreen";
 import PassengerFormScreen from "./screens/PassengerFormScreen";
 import TicketsScreen from "./screens/TicketsScreen";
 import AccountScreen from "./screens/AccountScreen";
+import NotificationsScreen from "./screens/NotificationsScreen";
 import { SunIcon, MoonIcon } from "./components/icons/ThemeIcons";
 
 const App: React.FC = () => {
@@ -138,6 +139,8 @@ const App: React.FC = () => {
         return <PassengerFormScreen setActiveTab={setActiveTab} selectedTicket={selectedTicket} setBookedTicket={setBookedTicket} />;
       case NavigationTab.Tickets:
         return <TicketsScreen />;
+      case NavigationTab.Notifications:
+        return <NotificationsScreen setActiveTab={setActiveTab} />;
       case NavigationTab.Promotion:
         return (
           <div className="p-4 text-center text-gray-600 dark:text-gray-400">
@@ -257,7 +260,9 @@ const App: React.FC = () => {
         </main>
 
         {}
-        <BottomNavBar activeTab={activeTab} setActiveTab={setActiveTab} />
+        {activeTab !== NavigationTab.Notifications && (
+          <BottomNavBar activeTab={activeTab} setActiveTab={setActiveTab} />
+        )}
       </div>
     </div>
   );
