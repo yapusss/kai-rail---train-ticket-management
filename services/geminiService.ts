@@ -102,3 +102,170 @@ export const interpretSearchQuery = async (query: string): Promise<{ month?: num
         return null;
     }
 };
+
+export interface VoiceCommandResult {
+    action: 'navigate' | 'toggle-theme' | 'search' | 'book' | 'help' | 'unknown';
+    target?: string;
+    confidence?: number;
+}
+
+export const interpretVoiceCommand = async (command: string): Promise<VoiceCommandResult> => {
+    if (!API_KEY) {
+        // Fallback to pattern matching when API key is not available
+        return interpretCommandWithPatternMatching(command);
+    }
+
+    try {
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: `Interpret the following voice command and return a JSON response with action and target.
+            Available actions: navigate, toggle-theme, search, book, help
+            Available navigation targets: dashboard, planner, train-services, tickets, account, promotion, booking-form, ticket-list
+            
+            Voice command: "${command}"
+            
+            Examples:
+            - "buka dashboard" -> {"action": "navigate", "target": "dashboard", "confidence": 0.9}
+            - "ganti tema" -> {"action": "toggle-theme", "confidence": 0.9}
+            - "cari kereta" -> {"action": "search", "target": "trains", "confidence": 0.8}
+            - "saya ingin buka planner" -> {"action": "navigate", "target": "planner", "confidence": 0.8}
+            - "tolong buka tiket saya" -> {"action": "navigate", "target": "tickets", "confidence": 0.8}
+            - "buka layanan kereta" -> {"action": "navigate", "target": "train-services", "confidence": 0.9}
+            - "lihat akun saya" -> {"action": "navigate", "target": "account", "confidence": 0.8}
+            - "buka promosi" -> {"action": "navigate", "target": "promotion", "confidence": 0.9}
+            - "form pemesanan" -> {"action": "navigate", "target": "booking-form", "confidence": 0.8}
+            - "daftar tiket" -> {"action": "navigate", "target": "ticket-list", "confidence": 0.8}
+            - "saya mau ke dashboard" -> {"action": "navigate", "target": "dashboard", "confidence": 0.8}
+            - "bisa buka trip planner" -> {"action": "navigate", "target": "planner", "confidence": 0.8}
+            - "tolong tampilkan tiket" -> {"action": "navigate", "target": "tickets", "confidence": 0.8}
+            - "saya ingin lihat akun" -> {"action": "navigate", "target": "account", "confidence": 0.8}
+            - "ada promo apa" -> {"action": "navigate", "target": "promotion", "confidence": 0.8}
+            - "mau pesan tiket" -> {"action": "navigate", "target": "booking-form", "confidence": 0.8}
+            - "lihat list tiket" -> {"action": "navigate", "target": "ticket-list", "confidence": 0.8}
+            - "ubah ke mode gelap" -> {"action": "toggle-theme", "confidence": 0.8}
+            - "ganti ke tema terang" -> {"action": "toggle-theme", "confidence": 0.8}
+            
+            Return only the JSON response:`,
+            config: {
+                responseMimeType: "application/json",
+                responseSchema: {
+                    type: Type.OBJECT,
+                    properties: {
+                        action: { type: Type.STRING, description: "The action to perform" },
+                        target: { type: Type.STRING, description: "The target for navigation actions" },
+                        confidence: { type: Type.NUMBER, description: "Confidence level from 0 to 1" }
+                    },
+                    required: ["action"]
+                }
+            }
+        });
+
+        const jsonText = response.text.trim();
+        return JSON.parse(jsonText) as VoiceCommandResult;
+    } catch (error) {
+        console.error("Error interpreting voice command:", error);
+        // Fallback to pattern matching
+        return interpretCommandWithPatternMatching(command);
+    }
+};
+
+const interpretCommandWithPatternMatching = (command: string): VoiceCommandResult => {
+    const lowerCommand = command.toLowerCase();
+    
+    // Navigation commands with high confidence
+    if (lowerCommand.includes('dashboard') || lowerCommand.includes('beranda') || lowerCommand.includes('home') || lowerCommand.includes('utama') || lowerCommand.includes('ke dashboard')) {
+        return { action: 'navigate', target: 'dashboard', confidence: 0.9 };
+    }
+    
+    if (lowerCommand.includes('planner') || lowerCommand.includes('trip') || lowerCommand.includes('rencana') || lowerCommand.includes('perjalanan') || lowerCommand.includes('ai')) {
+        return { action: 'navigate', target: 'planner', confidence: 0.9 };
+    }
+    
+    if (lowerCommand.includes('layanan') || lowerCommand.includes('kereta') || lowerCommand.includes('train') || lowerCommand.includes('service')) {
+        return { action: 'navigate', target: 'train-services', confidence: 0.9 };
+    }
+    
+    if (lowerCommand.includes('tiket') || lowerCommand.includes('ticket') || lowerCommand.includes('tampilkan tiket') || lowerCommand.includes('lihat tiket')) {
+        return { action: 'navigate', target: 'tickets', confidence: 0.9 };
+    }
+    
+    if (lowerCommand.includes('akun') || lowerCommand.includes('account') || lowerCommand.includes('profile') || lowerCommand.includes('profil') || lowerCommand.includes('lihat akun')) {
+        return { action: 'navigate', target: 'account', confidence: 0.9 };
+    }
+    
+    if (lowerCommand.includes('promo') || lowerCommand.includes('promotion') || lowerCommand.includes('diskon') || lowerCommand.includes('offer') || lowerCommand.includes('ada promo')) {
+        return { action: 'navigate', target: 'promotion', confidence: 0.9 };
+    }
+    
+    if ((lowerCommand.includes('form') && lowerCommand.includes('pemesanan')) || lowerCommand.includes('pesan tiket') || lowerCommand.includes('mau pesan')) {
+        return { action: 'navigate', target: 'booking-form', confidence: 0.9 };
+    }
+    
+    if (lowerCommand.includes('daftar') || lowerCommand.includes('list') || lowerCommand.includes('list tiket')) {
+        return { action: 'navigate', target: 'ticket-list', confidence: 0.9 };
+    }
+    
+    // Theme commands
+    if (lowerCommand.includes('tema') || lowerCommand.includes('theme') || lowerCommand.includes('mode') || lowerCommand.includes('ganti') || lowerCommand.includes('ubah') || lowerCommand.includes('mode gelap') || lowerCommand.includes('tema terang')) {
+        return { action: 'toggle-theme', confidence: 0.9 };
+    }
+    
+    // Search commands
+    if (lowerCommand.includes('cari') || lowerCommand.includes('search') || lowerCommand.includes('find')) {
+        if (lowerCommand.includes('kereta') || lowerCommand.includes('train')) {
+            return { action: 'search', target: 'trains', confidence: 0.8 };
+        }
+        if (lowerCommand.includes('hotel') || lowerCommand.includes('penginapan')) {
+            return { action: 'search', target: 'hotels', confidence: 0.8 };
+        }
+        if (lowerCommand.includes('mobil') || lowerCommand.includes('car') || lowerCommand.includes('rental')) {
+            return { action: 'search', target: 'cars', confidence: 0.8 };
+        }
+        return { action: 'search', target: 'general', confidence: 0.7 };
+    }
+    
+    // Booking commands
+    if (lowerCommand.includes('pesan') || lowerCommand.includes('book') || lowerCommand.includes('beli') || lowerCommand.includes('buy')) {
+        if (lowerCommand.includes('kereta') || lowerCommand.includes('train')) {
+            return { action: 'book', target: 'train', confidence: 0.8 };
+        }
+        if (lowerCommand.includes('hotel') || lowerCommand.includes('penginapan')) {
+            return { action: 'book', target: 'hotel', confidence: 0.8 };
+        }
+        if (lowerCommand.includes('mobil') || lowerCommand.includes('car')) {
+            return { action: 'book', target: 'car', confidence: 0.8 };
+        }
+        return { action: 'book', target: 'general', confidence: 0.7 };
+    }
+    
+    // Complex natural language patterns
+    if (lowerCommand.includes('saya ingin') || lowerCommand.includes('i want') || lowerCommand.includes('tolong')) {
+        if (lowerCommand.includes('pergi ke') || lowerCommand.includes('buka')) {
+            // Extract destination from command
+            const destination = extractDestination(lowerCommand);
+            if (destination) {
+                return { action: 'navigate', target: destination, confidence: 0.8 };
+            }
+        }
+    }
+    
+    if (lowerCommand.includes('bagaimana cara') || lowerCommand.includes('how to') || lowerCommand.includes('cara')) {
+        return { action: 'help', confidence: 0.7 };
+    }
+    
+    // Default fallback
+    return { action: 'unknown', confidence: 0.1 };
+};
+
+const extractDestination = (command: string): string | null => {
+    // Extract navigation destination from natural language
+    if (command.includes('dashboard') || command.includes('beranda')) return 'dashboard';
+    if (command.includes('planner') || command.includes('trip')) return 'planner';
+    if (command.includes('layanan') || command.includes('kereta')) return 'train-services';
+    if (command.includes('tiket')) return 'tickets';
+    if (command.includes('akun')) return 'account';
+    if (command.includes('promo')) return 'promotion';
+    if (command.includes('form') && command.includes('pemesanan')) return 'booking-form';
+    if (command.includes('daftar') || command.includes('list')) return 'ticket-list';
+    return null;
+};

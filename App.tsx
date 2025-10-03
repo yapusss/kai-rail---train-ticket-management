@@ -3,6 +3,7 @@ import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
 import { NavigationTab } from "./types";
+import { interpretVoiceCommand } from "./services/geminiService";
 import BottomNavBar from "./components/BottomNavBar";
 import DashboardScreen from "./screens/DashboardScreen";
 import PlannerScreen from "./screens/PlannerScreen";
@@ -45,55 +46,98 @@ const App: React.FC = () => {
     showFeedback(`Mengubah ke tema ${theme === 'light' ? 'gelap' : 'terang'}...`);
   };
 
-  // Voice command setup
+  // AI-powered voice command interpreter
+  const handleVoiceCommand = async (transcript: string): Promise<void> => {
+    try {
+      showFeedback("Memproses perintah...");
+      const commandResult = await interpretVoiceCommand(transcript);
+      executeCommand(commandResult);
+    } catch (error) {
+      console.error('Error interpreting voice command:', error);
+      // Fallback to simple keyword matching
+      executeSimpleCommand(transcript);
+    }
+  };
+
+  // Execute AI-interpreted command
+  const executeCommand = (commandResult: any) => {
+    switch (commandResult.action) {
+      case 'navigate':
+        switch (commandResult.target) {
+          case 'dashboard':
+            navigateWithFeedback(NavigationTab.Dashboard, "Membuka Dashboard...");
+            break;
+          case 'planner':
+            navigateWithFeedback(NavigationTab.Planner, "Membuka AI Trip Planner...");
+            break;
+          case 'train-services':
+            navigateWithFeedback(NavigationTab.TrainServices, "Membuka Layanan Kereta...");
+            break;
+          case 'tickets':
+            navigateWithFeedback(NavigationTab.Tickets, "Membuka Tiket Saya...");
+            break;
+          case 'account':
+            navigateWithFeedback(NavigationTab.Account, "Membuka Akun...");
+            break;
+          case 'promotion':
+            navigateWithFeedback(NavigationTab.Promotion, "Membuka Promosi...");
+            break;
+          case 'booking-form':
+            navigateWithFeedback(NavigationTab.BookingForm, "Membuka Form Pemesanan...");
+            break;
+          case 'ticket-list':
+            navigateWithFeedback(NavigationTab.TicketList, "Membuka Daftar Tiket...");
+            break;
+        }
+        break;
+      case 'toggle-theme':
+        toggleThemeWithFeedback();
+        break;
+      case 'search':
+        showFeedback("Fitur pencarian akan segera tersedia...");
+        break;
+      case 'book':
+        showFeedback("Fitur pemesanan akan segera tersedia...");
+        break;
+      default:
+        showFeedback("Perintah tidak dikenali. Silakan coba lagi.");
+    }
+  };
+
+  // Fallback simple command matching
+  const executeSimpleCommand = (transcript: string) => {
+    const lowerTranscript = transcript.toLowerCase();
+    
+    if (lowerTranscript.includes('dashboard') || lowerTranscript.includes('beranda') || lowerTranscript.includes('home')) {
+      navigateWithFeedback(NavigationTab.Dashboard, "Membuka Dashboard...");
+    } else if (lowerTranscript.includes('planner') || lowerTranscript.includes('trip') || lowerTranscript.includes('rencana')) {
+      navigateWithFeedback(NavigationTab.Planner, "Membuka AI Trip Planner...");
+    } else if (lowerTranscript.includes('layanan') || lowerTranscript.includes('kereta') || lowerTranscript.includes('train')) {
+      navigateWithFeedback(NavigationTab.TrainServices, "Membuka Layanan Kereta...");
+    } else if (lowerTranscript.includes('tiket') || lowerTranscript.includes('ticket')) {
+      navigateWithFeedback(NavigationTab.Tickets, "Membuka Tiket Saya...");
+    } else if (lowerTranscript.includes('akun') || lowerTranscript.includes('account')) {
+      navigateWithFeedback(NavigationTab.Account, "Membuka Akun...");
+    } else if (lowerTranscript.includes('promo') || lowerTranscript.includes('promotion')) {
+      navigateWithFeedback(NavigationTab.Promotion, "Membuka Promosi...");
+    } else if (lowerTranscript.includes('booking') || lowerTranscript.includes('pemesanan')) {
+      navigateWithFeedback(NavigationTab.BookingForm, "Membuka Form Pemesanan...");
+    } else if (lowerTranscript.includes('daftar') || lowerTranscript.includes('list')) {
+      navigateWithFeedback(NavigationTab.TicketList, "Membuka Daftar Tiket...");
+    } else if (lowerTranscript.includes('tema') || lowerTranscript.includes('theme')) {
+      toggleThemeWithFeedback();
+    } else {
+      showFeedback("Perintah tidak dikenali. Silakan coba lagi.");
+    }
+  };
+
+  // Voice command setup with AI interpretation
   const commands = [
     {
-      command: ["buka dashboard", "dashboard"],
-      callback: () => navigateWithFeedback(NavigationTab.Dashboard, "Membuka Dashboard..."),
-    },
-    {
-      command: ["buka planner", "planner"],
-      callback: () => navigateWithFeedback(NavigationTab.Planner, "Membuka Planner..."),
-    },
-    {
-      command: ["buka layanan kereta", "layanan kereta", "train services"],
-      callback: () => navigateWithFeedback(NavigationTab.TrainServices, "Membuka Layanan Kereta..."),
-    },
-    {
-      command: ["buka tiket", "tiket", "tickets"],
-      callback: () => navigateWithFeedback(NavigationTab.Tickets, "Membuka Tiket Saya..."),
-    },
-    {
-      command: ["buka akun", "akun", "account"],
-      callback: () => navigateWithFeedback(NavigationTab.Account, "Membuka Akun..."),
-    },
-    {
-      command: ["buka promo", "promo", "promotion"],
-      callback: () => navigateWithFeedback(NavigationTab.Promotion, "Membuka Promosi..."),
-    },
-    {
-      command: ["buka trip planner", "trip planner", "ai trip planner", "buka trip", "trip", "perencanaan perjalanan", "rencana perjalanan"],
-      callback: () => navigateWithFeedback(NavigationTab.Planner, "Membuka AI Trip Planner..."),
-    },
-    {
-      command: ["kembali ke dashboard", "buka dashboard", "dashboard", "home", "beranda"],
-      callback: () => navigateWithFeedback(NavigationTab.Dashboard, "Kembali ke Dashboard..."),
-    },
-    {
-      command: ["ganti tema", "ubah tema", "toggle theme"],
-      callback: toggleThemeWithFeedback,
-    },
-    {
-      command: ["buat rencana perjalanan", "buat trip", "buat perjalanan", "rencana baru"],
-      callback: () => navigateWithFeedback(NavigationTab.Planner, "Membuka Trip Planner untuk rencana baru..."),
-    },
-    {
-      command: ["buka booking form", "booking form", "form pemesanan"],
-      callback: () => navigateWithFeedback(NavigationTab.BookingForm, "Membuka Form Pemesanan..."),
-    },
-    {
-      command: ["lihat daftar tiket", "daftar tiket", "list tiket"],
-      callback: () => navigateWithFeedback(NavigationTab.TicketList, "Membuka Daftar Tiket..."),
+      command: ["*"],
+      callback: (spokenText: string) => {
+        handleVoiceCommand(spokenText);
+      },
     },
   ];
 

@@ -389,7 +389,7 @@ const TicketsScreen: React.FC = () => {
     }
 
     const filteredTickets = useMemo(() => {
-        return MOCK_TICKETS.filter(ticket => {
+        return bookedTickets.filter(ticket => {
             // If no search query and no filters, show all tickets
             if (!searchQuery && Object.keys(filters).length === 0) {
                 return true;
@@ -399,28 +399,92 @@ const TicketsScreen: React.FC = () => {
             const parsedQuery = searchQuery ? parseSearchQuery(searchQuery) : null;
 
             // Date filters
+            const ticketDate = new Date(ticket.departureTime);
             const matchMonth = !filters.month && !parsedQuery?.month || 
-                ticket.departure.time.getMonth() + 1 === (filters.month || parsedQuery?.month);
+                ticketDate.getMonth() + 1 === (filters.month || parsedQuery?.month);
             const matchYear = !filters.year && !parsedQuery?.year || 
-                ticket.departure.time.getFullYear() === (filters.year || parsedQuery?.year);
+                ticketDate.getFullYear() === (filters.year || parsedQuery?.year);
             
             // Text filters
             const lowerCaseText = filters.text?.toLowerCase() || '';
             const matchText = !filters.text ||
                 ticket.trainName.toLowerCase().includes(lowerCaseText) ||
-                ticket.route.from.toLowerCase().includes(lowerCaseText) ||
-                ticket.route.to.toLowerCase().includes(lowerCaseText) ||
+                ticket.departureStation.toLowerCase().includes(lowerCaseText) ||
+                ticket.arrivalStation.toLowerCase().includes(lowerCaseText) ||
                 ticket.bookingCode.toLowerCase().includes(lowerCaseText);
             
+            // Service type filter
+            let matchServiceType = true;
+            if (filters.serviceType) {
+                const serviceType = filters.serviceType.toLowerCase();
+                const trainName = ticket.trainName.toLowerCase();
+                
+                // Debug log for service type filtering
+                console.log(`Filtering by service type "${serviceType}" for train "${trainName}"`);
+                
+                if (serviceType === 'inter city') {
+                    // Check for Inter City trains (premium trains)
+                    matchServiceType = trainName.includes('argo') ||
+                        trainName.includes('taksaka') ||
+                        trainName.includes('gajayana') ||
+                        trainName.includes('bima') ||
+                        trainName.includes('sembrani') ||
+                        trainName.includes('bangunkarta') ||
+                        trainName.includes('mutiara') ||
+                        trainName.includes('rajawali') ||
+                        trainName.includes('malioboro') ||
+                        trainName.includes('bromo') ||
+                        trainName.includes('anggrek');
+                    
+                    console.log(`Inter City filter result: ${matchServiceType} for train: ${trainName}`);
+                } else if (serviceType === 'local') {
+                    // Check for Local trains
+                    matchServiceType = trainName.includes('jayabaya') ||
+                        trainName.includes('kalijaga') ||
+                        trainName.includes('mataram') ||
+                        trainName.includes('blambangan');
+                } else if (serviceType === 'commuter line') {
+                    // Check for Commuter Line trains
+                    matchServiceType = trainName.includes('lin') ||
+                        trainName.includes('commuter');
+                } else {
+                    // Generic match for any other service type
+                    matchServiceType = trainName.includes(serviceType);
+                }
+            }
+
+            // Train class filter
+            let matchTrainClass = true;
+            if (filters.trainClass) {
+                const filterClass = filters.trainClass.toLowerCase();
+                const ticketClass = ticket.trainClass.toLowerCase();
+                
+                matchTrainClass = ticketClass === filterClass ||
+                    ticketClass.includes(filterClass) ||
+                    (filterClass === 'ekonomi' && ticketClass === 'economy') ||
+                    (filterClass === 'bisnis' && ticketClass === 'business') ||
+                    (filterClass === 'eksekutif' && ticketClass === 'executive');
+            }
+
+            // Price range filter
+            const matchPriceRange = !filters.priceRange ||
+                (!filters.priceRange.min || ticket.price >= filters.priceRange.min) &&
+                (!filters.priceRange.max || ticket.price <= filters.priceRange.max);
+
+            // Route filter
+            const matchRoute = !filters.route ||
+                (!filters.route.from || ticket.departureStation.toLowerCase().includes(filters.route.from.toLowerCase())) &&
+                (!filters.route.to || ticket.arrivalStation.toLowerCase().includes(filters.route.to.toLowerCase()));
+
             // Specific train name filter
             const matchTrainName = !parsedQuery?.trainName ||
                 ticket.trainName.toLowerCase().includes(parsedQuery.trainName.toLowerCase());
 
             // Route filters
             const matchFromLocation = !parsedQuery?.fromLocation ||
-                ticket.route.from.toLowerCase().includes(parsedQuery.fromLocation.toLowerCase());
+                ticket.departureStation.toLowerCase().includes(parsedQuery.fromLocation.toLowerCase());
             const matchToLocation = !parsedQuery?.toLocation ||
-                ticket.route.to.toLowerCase().includes(parsedQuery.toLocation.toLowerCase());
+                ticket.arrivalStation.toLowerCase().includes(parsedQuery.toLocation.toLowerCase());
 
             // Booking code filter
             const matchBookingCode = !parsedQuery?.bookingCode ||
@@ -431,14 +495,15 @@ const TicketsScreen: React.FC = () => {
                 ticket.price <= parsedQuery.maxPrice;
 
             // Combine all filters
-            return matchMonth && matchYear && matchText && matchTrainName && 
-                   matchFromLocation && matchToLocation && matchBookingCode && matchPrice;
+            return matchMonth && matchYear && matchText && matchServiceType && matchTrainClass && 
+                   matchPriceRange && matchRoute && matchTrainName && matchFromLocation && 
+                   matchToLocation && matchBookingCode && matchPrice;
         });
-    }, [filters, searchQuery]);
+    }, [filters, searchQuery, bookedTickets]);
 
     // Filter tickets by active/history status
-    const activeTickets = bookedTickets.filter(ticket => ticket.status === 'active');
-    const historyTickets = bookedTickets.filter(ticket => ticket.status !== 'active');
+    const activeTickets = filteredTickets.filter(ticket => ticket.status === 'active');
+    const historyTickets = filteredTickets.filter(ticket => ticket.status !== 'active');
 
     return (
         <div className="space-y-6">
@@ -530,12 +595,252 @@ const TicketsScreen: React.FC = () => {
                         <MicrophoneIcon className="w-5 h-5" />
                             )}
                     </button>
-                    <button type="button" className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full">
+                    <button 
+                        type="button" 
+                        onClick={() => setShowFilterMenu(!showFilterMenu)}
+                        className={`p-2 rounded-full transition-colors relative ${
+                            showFilterMenu || getActiveFiltersCount() > 0
+                                ? 'text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30'
+                                : 'text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                        }`}
+                        title="Filter tiket"
+                    >
                         <FilterIcon className="w-5 h-5" />
+                        {getActiveFiltersCount() > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                {getActiveFiltersCount()}
+                            </span>
+                        )}
                     </button>
                 </div>
                 </div>
 
+                {/* Filter Menu */}
+                {showFilterMenu && (
+                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                        {/* Filter Header */}
+                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-600 px-6 py-4 border-b border-gray-200 dark:border-gray-600">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                                        <FilterIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold text-gray-800 dark:text-gray-200">Filter Tiket</h3>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400">Saring tiket berdasarkan kriteria</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => setShowFilterMenu(false)}
+                                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-all duration-200"
+                                    title="Tutup filter"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Filter Content */}
+                        <div className="p-6">
+                            {/* Filter Grid */}
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                {/* Left Column */}
+                                <div className="space-y-6">
+                                    {/* Service Type Filter */}
+                                    <div className="space-y-2">
+                                        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                            </svg>
+                                            Jenis Layanan
+                                        </label>
+                                        <select
+                                            value={filters.serviceType || ''}
+                                            onChange={(e) => updateFilter('serviceType', e.target.value || undefined)}
+                                            className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-gray-300 dark:hover:border-gray-500"
+                                        >
+                                            <option value="">🚂 Semua Layanan</option>
+                                            <option value="Inter City">🚄 Inter City</option>
+                                            <option value="Local">🚃 Local</option>
+                                            <option value="Commuter Line">🚊 Commuter Line</option>
+                                        </select>
+                                    </div>
+
+                                    {/* Train Class Filter */}
+                                    <div className="space-y-2">
+                                        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                                            </svg>
+                                            Kelas Kereta
+                                        </label>
+                                        <select
+                                            value={filters.trainClass || ''}
+                                            onChange={(e) => updateFilter('trainClass', e.target.value || undefined)}
+                                            className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 hover:border-gray-300 dark:hover:border-gray-500"
+                                        >
+                                            <option value="">💺 Semua Kelas</option>
+                                            <option value="Ekonomi">🟢 Ekonomi</option>
+                                            <option value="Bisnis">🔵 Bisnis</option>
+                                            <option value="Eksekutif">🟣 Eksekutif</option>
+                                            <option value="Luxury">🟡 Luxury</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                {/* Right Column */}
+                                <div className="space-y-6">
+                                    {/* Price Range Filter */}
+                                    <div className="space-y-2">
+                                        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            <svg className="w-4 h-4 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                                            </svg>
+                                            Rentang Harga
+                                        </label>
+                                        <div className="flex gap-3">
+                                            <div className="flex-1">
+                                                <input
+                                                    type="number"
+                                                    placeholder="Min (Rp)"
+                                                    value={filters.priceRange?.min || ''}
+                                                    onChange={(e) => updateFilter('priceRange', {
+                                                        ...filters.priceRange,
+                                                        min: e.target.value ? parseInt(e.target.value) : undefined
+                                                    })}
+                                                    className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all duration-200 hover:border-gray-300 dark:hover:border-gray-500"
+                                                />
+                                            </div>
+                                            <div className="flex items-center text-gray-400">
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                                                </svg>
+                                            </div>
+                                            <div className="flex-1">
+                                                <input
+                                                    type="number"
+                                                    placeholder="Max (Rp)"
+                                                    value={filters.priceRange?.max || ''}
+                                                    onChange={(e) => updateFilter('priceRange', {
+                                                        ...filters.priceRange,
+                                                        max: e.target.value ? parseInt(e.target.value) : undefined
+                                                    })}
+                                                    className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all duration-200 hover:border-gray-300 dark:hover:border-gray-500"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Route Filter */}
+                                    <div className="space-y-2">
+                                        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            <svg className="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            </svg>
+                                            Rute Perjalanan
+                                        </label>
+                                        <div className="flex gap-3">
+                                            <div className="flex-1">
+                                                <input
+                                                    type="text"
+                                                    placeholder="Stasiun Asal"
+                                                    value={filters.route?.from || ''}
+                                                    onChange={(e) => updateFilter('route', {
+                                                        ...filters.route,
+                                                        from: e.target.value || undefined
+                                                    })}
+                                                    className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 hover:border-gray-300 dark:hover:border-gray-500"
+                                                />
+                                            </div>
+                                            <div className="flex items-center text-gray-400">
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                                </svg>
+                                            </div>
+                                            <div className="flex-1">
+                                                <input
+                                                    type="text"
+                                                    placeholder="Stasiun Tujuan"
+                                                    value={filters.route?.to || ''}
+                                                    onChange={(e) => updateFilter('route', {
+                                                        ...filters.route,
+                                                        to: e.target.value || undefined
+                                                    })}
+                                                    className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 hover:border-gray-300 dark:hover:border-gray-500"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Active Filters */}
+                            {activeFilters.length > 0 && (
+                                <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-600">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="flex items-center gap-2">
+                                            <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                            </svg>
+                                            <span className="font-medium text-gray-700 dark:text-gray-300">
+                                                Filter Aktif ({activeFilters.length})
+                                            </span>
+                                        </div>
+                                        <button
+                                            onClick={clearAllFilters}
+                                            className="flex items-center gap-1 px-3 py-1 text-xs text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                        >
+                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                            Hapus Semua
+                                        </button>
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                        {activeFilters.map((filter, index) => (
+                                            <span
+                                                key={index}
+                                                className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 text-sm rounded-lg border border-blue-200 dark:border-blue-700"
+                                            >
+                                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                </svg>
+                                                {filter}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Filter Actions */}
+                        <div className="bg-gray-50 dark:bg-gray-700/50 px-6 py-4 border-t border-gray-200 dark:border-gray-600">
+                            <div className="flex justify-between items-center">
+                                <button
+                                    onClick={clearAllFilters}
+                                    className="flex items-center gap-2 px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-all duration-200"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
+                                    Reset Filter
+                                </button>
+                                <button
+                                    onClick={() => setShowFilterMenu(false)}
+                                    className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    Terapkan Filter
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Search Examples */}
                 {showSearchExamples && (
