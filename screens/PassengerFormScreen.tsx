@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { NavigationTab, AvailableTicket, PassengerData, BookedTicket } from '../types';
+import { ArrowLeftIcon } from '../components/icons/FeatureIcons';
 
 interface PassengerFormScreenProps {
   setActiveTab: (tab: NavigationTab) => void;
@@ -76,11 +77,21 @@ const PassengerFormScreen: React.FC<PassengerFormScreenProps> = ({
         bookingCode: bookingCode,
         trainName: selectedTicket.trainName,
         trainClass: selectedTicket.trainClass,
-        departureStation: selectedTicket.departureStation,
-        departureTime: selectedTicket.departureTime,
-        arrivalStation: selectedTicket.arrivalStation,
-        arrivalTime: selectedTicket.arrivalTime,
+        route: {
+          from: selectedTicket.departureStation,
+          to: selectedTicket.arrivalStation
+        },
+        departure: {
+          station: selectedTicket.departureStation,
+          time: new Date(selectedTicket.departureTime)
+        },
+        arrival: {
+          station: selectedTicket.arrivalStation,
+          time: new Date(selectedTicket.arrivalTime)
+        },
+        passengers: [{ name: passengerData.name, id: passengerData.nik }],
         price: selectedTicket.price,
+        isActive: true,
         passengerData: passengerData,
         bookingDate: new Date().toISOString(),
         status: 'active'
@@ -124,21 +135,23 @@ const PassengerFormScreen: React.FC<PassengerFormScreenProps> = ({
   };
 
   return (
-    <div className="p-4 space-y-6">
-      <div className="text-center">
-        <button
-          onClick={() => setActiveTab(NavigationTab.TicketList)}
-          className="mb-4 flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          Kembali ke Pilihan Tiket
-        </button>
-        
-        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">Data Penumpang</h2>
-        <p className="text-gray-600 dark:text-gray-400">Lengkapi data diri Anda untuk menyelesaikan pemesanan</p>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="bg-gradient-to-br from-purple-600 to-blue-600 text-white p-4 rounded-b-3xl">
+        <div className="flex items-center justify-start">
+          <button 
+            onClick={() => setActiveTab(NavigationTab.TicketList)}
+            className="p-2 transition-colors"
+          >
+            <ArrowLeftIcon className="w-6 h-6" />
+          </button>
+          <h1 className="text-xl font-bold">Data Penumpang</h1>
+          <div></div>
+        </div>
+        <p className="text-sm opacity-90 mt-2 ml-10">Lengkapi data diri Anda untuk menyelesaikan pemesanan</p>
       </div>
+
+      <div className="p-4 space-y-6">
 
       {/* Selected Ticket Info */}
       <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800">
@@ -273,6 +286,7 @@ const PassengerFormScreen: React.FC<PassengerFormScreenProps> = ({
             </ul>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

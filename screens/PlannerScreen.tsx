@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { generateTripPlan } from '../services/geminiService';
 import type { TripPlan } from '../types';
+import { ArrowLeftIcon } from '../components/icons/FeatureIcons';
 import { PlannerIcon, SparklesIcon } from '../components/icons/FeatureIcons';
 
 const PlannerScreen: React.FC = () => {
@@ -16,6 +17,7 @@ const PlannerScreen: React.FC = () => {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [browserSupportsSpeechRecognition, setBrowserSupportsSpeechRecognition] = useState(false);
+  const [showVoiceExamples, setShowVoiceExamples] = useState(true);
 
   const handleTrainClick = (train: any) => {
     setSelectedTrain(train);
@@ -107,16 +109,20 @@ const PlannerScreen: React.FC = () => {
   };
 
   return (
-    <div className="p-4 space-y-6">
-      <div className="text-center">
-        <div className="flex justify-center items-center gap-2">
-            <PlannerIcon className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-            <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">AI Trip Planner</h2>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="bg-gradient-to-br from-purple-600 to-blue-600 text-white p-4 rounded-b-3xl">
+        <div className="flex items-center justify-start">
+          <div className="p-2">
+            <PlannerIcon className="w-6 h-6" />
+          </div>
+          <h1 className="text-xl font-bold">AI Trip Planner</h1>
+          <div></div>
         </div>
-        <p className="text-gray-600 dark:text-gray-400 mt-1">
-          Deskripsikan perjalanan impian Anda, dan biarkan AI merancangnya.
-        </p>
+        <p className="text-sm opacity-90 mt-2 ml-10">Deskripsikan perjalanan impian Anda, dan biarkan AI merancangnya</p>
       </div>
+
+      <div className="p-4 space-y-6">
 
       <div className="space-y-4">
         <div className="relative">
@@ -165,17 +171,32 @@ const PlannerScreen: React.FC = () => {
         )}
 
         {/* Voice Commands Examples */}
-        <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
-          <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">
-            🎤 Contoh Voice Commands:
-          </h4>
-          <div className="text-xs text-blue-700 dark:text-blue-400 space-y-1">
-            <p>• "Saya ingin pergi dari Jakarta ke Yogyakarta akhir pekan depan"</p>
-            <p>• "Buatkan rencana perjalanan ke Bandung dengan kereta eksekutif"</p>
-            <p>• "Saya berangkat hari Jumat dan kembali hari Minggu"</p>
-            <p>• "Perjalanan ke Surabaya dengan budget lima ratus ribu"</p>
+        {showVoiceExamples && (
+          <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg relative">
+            {/* Close Button */}
+            <button
+              onClick={() => setShowVoiceExamples(false)}
+              className="absolute top-2 right-2 p-1 text-blue-600 dark:text-blue-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-white/50 dark:hover:bg-gray-800/50 rounded-full transition-all duration-200 group"
+              title="Tutup contoh voice commands"
+            >
+              <svg className="w-3 h-3 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            
+            <div className="pr-6">
+              <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">
+                🎤 Contoh Voice Commands:
+              </h4>
+              <div className="text-xs text-blue-700 dark:text-blue-400 space-y-1">
+                <p>• "Saya ingin pergi dari Jakarta ke Yogyakarta akhir pekan depan"</p>
+                <p>• "Buatkan rencana perjalanan ke Bandung dengan kereta eksekutif"</p>
+                <p>• "Saya berangkat hari Jumat dan kembali hari Minggu"</p>
+                <p>• "Perjalanan ke Surabaya dengan budget lima ratus ribu"</p>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
         <button
           onClick={handleGeneratePlan}
           disabled={isLoading}
@@ -311,6 +332,7 @@ const PlannerScreen: React.FC = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

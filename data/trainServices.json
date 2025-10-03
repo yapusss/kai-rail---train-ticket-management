@@ -36,6 +36,27 @@
         "name": "Stasiun Bandara Soekarno-Hatta",
         "city": "Jakarta",
         "province": "DKI Jakarta"
+      },
+      {
+        "code": "DRI",
+        "name": "Stasiun Duri",
+        "city": "Jakarta",
+        "province": "DKI Jakarta",
+        "commuterLine": true
+      },
+      {
+        "code": "TAB",
+        "name": "Stasiun Tanah Abang",
+        "city": "Jakarta",
+        "province": "DKI Jakarta",
+        "commuterLine": true
+      },
+      {
+        "code": "JNG",
+        "name": "Stasiun Jatinegara",
+        "city": "Jakarta",
+        "province": "DKI Jakarta",
+        "commuterLine": true
       }
     ],
     "bandung": [
@@ -77,13 +98,71 @@
         "code": "TUG",
         "name": "Stasiun Yogyakarta",
         "city": "Yogyakarta",
-        "province": "DI Yogyakarta"
+        "province": "DI Yogyakarta",
+        "commuterLine": true
       },
       {
         "code": "LPN",
         "name": "Stasiun Lempuyangan",
         "city": "Yogyakarta",
-        "province": "DI Yogyakarta"
+        "province": "DI Yogyakarta",
+        "commuterLine": true
+      },
+      {
+        "code": "MGO",
+        "name": "Stasiun Maguwo",
+        "city": "Yogyakarta",
+        "province": "DI Yogyakarta",
+        "commuterLine": true
+      },
+      {
+        "code": "BRB",
+        "name": "Stasiun Brambanan",
+        "city": "Yogyakarta",
+        "province": "DI Yogyakarta",
+        "commuterLine": true
+      },
+      {
+        "code": "SRW",
+        "name": "Stasiun Srowot",
+        "city": "Yogyakarta",
+        "province": "DI Yogyakarta",
+        "commuterLine": true
+      },
+      {
+        "code": "KLT",
+        "name": "Stasiun Klaten",
+        "city": "Klaten",
+        "province": "Jawa Tengah",
+        "commuterLine": true
+      },
+      {
+        "code": "CPR",
+        "name": "Stasiun Ceper",
+        "city": "Klaten",
+        "province": "Jawa Tengah",
+        "commuterLine": true
+      },
+      {
+        "code": "DLG",
+        "name": "Stasiun Delanggu",
+        "city": "Klaten",
+        "province": "Jawa Tengah",
+        "commuterLine": true
+      },
+      {
+        "code": "GWK",
+        "name": "Stasiun Gawok",
+        "city": "Sukoharjo",
+        "province": "Jawa Tengah",
+        "commuterLine": true
+      },
+      {
+        "code": "PWS",
+        "name": "Stasiun Purwosari",
+        "city": "Sukoharjo",
+        "province": "Jawa Tengah",
+        "commuterLine": true
       }
     ],
     "malang": [
@@ -127,7 +206,70 @@
         "code": "SLO",
         "name": "Stasiun Solo Balapan",
         "city": "Solo",
-        "province": "Jawa Tengah"
+        "province": "Jawa Tengah",
+        "commuterLine": true
+      },
+      {
+        "code": "SLJ",
+        "name": "Stasiun Solo Jebres",
+        "city": "Solo",
+        "province": "Jawa Tengah",
+        "commuterLine": true
+      },
+      {
+        "code": "PLR",
+        "name": "Stasiun Palur",
+        "city": "Solo",
+        "province": "Jawa Tengah",
+        "commuterLine": true
+      }
+    ],
+    "depok": [
+      {
+        "code": "DPK",
+        "name": "Stasiun Depok",
+        "city": "Depok",
+        "province": "Jawa Barat",
+        "commuterLine": true
+      }
+    ],
+    "bekasi": [
+      {
+        "code": "BKS",
+        "name": "Stasiun Bekasi",
+        "city": "Bekasi",
+        "province": "Jawa Barat",
+        "commuterLine": true
+      },
+      {
+        "code": "CKR",
+        "name": "Stasiun Cikarang",
+        "city": "Bekasi",
+        "province": "Jawa Barat",
+        "commuterLine": true
+      }
+    ],
+    "tangerang": [
+      {
+        "code": "TGR",
+        "name": "Stasiun Tangerang",
+        "city": "Tangerang",
+        "province": "Banten",
+        "commuterLine": true
+      },
+      {
+        "code": "SPO",
+        "name": "Stasiun Serpong",
+        "city": "Tangerang",
+        "province": "Banten",
+        "commuterLine": true
+      },
+      {
+        "code": "RKB",
+        "name": "Stasiun Rangkasbitung",
+        "city": "Lebak",
+        "province": "Banten",
+        "commuterLine": true
       }
     ],
     "medan": [
@@ -941,6 +1083,194 @@
         "address": "Jl. Tunjungan, Surabaya",
         "phone": "+62-31-5678901"
       }
+    ]
+  },
+  "commuter": {
+    "id": "commuter",
+    "name": "Commuter Line",
+    "description": "Kereta commuter untuk perjalanan harian dalam kota dan sekitarnya",
+    "icon": "🚊",
+    "bgColor": "bg-green-500",
+    "lines": [
+      {
+        "id": "lin-bogor",
+        "name": "Lin Bogor",
+        "code": "LB",
+        "route": {
+          "from": {
+            "code": "JKT",
+            "name": "Stasiun Jakarta Kota",
+            "city": "Jakarta"
+          },
+          "to": {
+            "code": "BGR",
+            "name": "Stasiun Bogor",
+            "city": "Bogor"
+          }
+        },
+        "stops": [
+          {"code": "JKT", "name": "Jakarta Kota"},
+          {"code": "MGR", "name": "Manggarai"},
+          {"code": "DPK", "name": "Depok"},
+          {"code": "BGR", "name": "Bogor"}
+        ],
+        "duration": "45m",
+        "distance": "56 km",
+        "frequency": "10-15 menit",
+        "operatingHours": "04:30 - 22:00"
+      },
+      {
+        "id": "lin-bekasi",
+        "name": "Lin Bekasi",
+        "code": "LBE",
+        "route": {
+          "from": {
+            "code": "JKT",
+            "name": "Stasiun Jakarta Kota",
+            "city": "Jakarta"
+          },
+          "to": {
+            "code": "CKR",
+            "name": "Stasiun Cikarang",
+            "city": "Bekasi"
+          }
+        },
+        "stops": [
+          {"code": "JKT", "name": "Jakarta Kota"},
+          {"code": "MGR", "name": "Manggarai"},
+          {"code": "BKS", "name": "Bekasi"},
+          {"code": "CKR", "name": "Cikarang"}
+        ],
+        "duration": "35m",
+        "distance": "42 km",
+        "frequency": "8-12 menit",
+        "operatingHours": "04:30 - 22:00"
+      },
+      {
+        "id": "lin-serpong",
+        "name": "Lin Serpong",
+        "code": "LS",
+        "route": {
+          "from": {
+            "code": "TAB",
+            "name": "Stasiun Tanah Abang",
+            "city": "Jakarta"
+          },
+          "to": {
+            "code": "RKB",
+            "name": "Stasiun Rangkasbitung",
+            "city": "Lebak"
+          }
+        },
+        "stops": [
+          {"code": "TAB", "name": "Tanah Abang"},
+          {"code": "SPO", "name": "Serpong"},
+          {"code": "RKB", "name": "Rangkasbitung"}
+        ],
+        "duration": "60m",
+        "distance": "70 km",
+        "frequency": "15-20 menit",
+        "operatingHours": "05:00 - 21:00"
+      },
+      {
+        "id": "lin-tangerang",
+        "name": "Lin Tangerang",
+        "code": "LT",
+        "route": {
+          "from": {
+            "code": "DRI",
+            "name": "Stasiun Duri",
+            "city": "Jakarta"
+          },
+          "to": {
+            "code": "TGR",
+            "name": "Stasiun Tangerang",
+            "city": "Tangerang"
+          }
+        },
+        "stops": [
+          {"code": "DRI", "name": "Duri"},
+          {"code": "TGR", "name": "Tangerang"}
+        ],
+        "duration": "25m",
+        "distance": "18 km",
+        "frequency": "12-15 menit",
+        "operatingHours": "05:00 - 21:30"
+      },
+      {
+        "id": "lin-tanjung-priok",
+        "name": "Lin Tanjung Priok",
+        "code": "LTP",
+        "route": {
+          "from": {
+            "code": "JKT",
+            "name": "Stasiun Jakarta Kota",
+            "city": "Jakarta"
+          },
+          "to": {
+            "code": "TNG",
+            "name": "Stasiun Tanjung Priok",
+            "city": "Jakarta"
+          }
+        },
+        "stops": [
+          {"code": "JKT", "name": "Jakarta Kota"},
+          {"code": "TNG", "name": "Tanjung Priok"}
+        ],
+        "duration": "20m",
+        "distance": "12 km",
+        "frequency": "10-15 menit",
+        "operatingHours": "05:00 - 22:00"
+      },
+      {
+        "id": "lin-yogyakarta-solo",
+        "name": "Lin Yogyakarta-Solo",
+        "code": "LYS",
+        "route": {
+          "from": {
+            "code": "TUG",
+            "name": "Stasiun Yogyakarta",
+            "city": "Yogyakarta"
+          },
+          "to": {
+            "code": "PLR",
+            "name": "Stasiun Palur",
+            "city": "Solo"
+          }
+        },
+        "stops": [
+          {"code": "TUG", "name": "Yogyakarta"},
+          {"code": "LPN", "name": "Lempuyangan"},
+          {"code": "MGO", "name": "Maguwo"},
+          {"code": "BRB", "name": "Brambanan"},
+          {"code": "SRW", "name": "Srowot"},
+          {"code": "KLT", "name": "Klaten"},
+          {"code": "CPR", "name": "Ceper"},
+          {"code": "DLG", "name": "Delanggu"},
+          {"code": "GWK", "name": "Gawok"},
+          {"code": "PWS", "name": "Purwosari"},
+          {"code": "SLO", "name": "Solo Balapan"},
+          {"code": "SLJ", "name": "Solo Jebres"},
+          {"code": "PLR", "name": "Palur"}
+        ],
+        "duration": "65m",
+        "distance": "65.4 km",
+        "frequency": "8-96 menit",
+        "operatingHours": "04:30 - 19:10"
+      }
+    ],
+    "classes": [
+      {
+        "name": "Ekonomi",
+        "priceMultiplier": 1.0,
+        "description": "Kelas ekonomi untuk perjalanan harian"
+      }
+    ],
+    "features": [
+      "AC",
+      "WiFi",
+      "Toilet",
+      "Priority Seating"
     ]
   },
   "logistics": [

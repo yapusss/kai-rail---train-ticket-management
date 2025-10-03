@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavigationTab, AvailableTicket, BookingFormData } from '../types';
 import TrainDataService from '../services/trainDataService';
+import { ArrowLeftIcon } from '../components/icons/FeatureIcons';
 
 interface TicketListScreenProps {
   setActiveTab: (tab: NavigationTab) => void;
@@ -226,25 +227,23 @@ const TicketListScreen: React.FC<TicketListScreenProps> = ({
   }
 
   return (
-    <div className="p-4 space-y-6">
-      <div className="text-center">
-        <button
-          onClick={() => setActiveTab(NavigationTab.BookingForm)}
-          className="mb-4 flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          Kembali ke Form Pemesanan
-        </button>
-        
-        <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">Tiket Tersedia</h2>
-        <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-          <p><span className="font-medium">Rute:</span> {bookingFormData.departureStation} → {bookingFormData.arrivalStation}</p>
-          <p><span className="font-medium">Tanggal:</span> {new Date(bookingFormData.departureDate).toLocaleDateString('id-ID')}</p>
-          <p><span className="font-medium">Penumpang:</span> {bookingFormData.passengerCount} orang</p>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="bg-gradient-to-br from-purple-600 to-blue-600 text-white p-4 rounded-b-3xl">
+        <div className="flex items-center justify-start">
+          <button 
+            onClick={() => setActiveTab(NavigationTab.BookingForm)}
+            className="p-2 transition-colors"
+          >
+            <ArrowLeftIcon className="w-6 h-6" />
+          </button>
+          <h1 className="text-xl font-bold">Tiket Tersedia</h1>
+          <div></div>
         </div>
+        <p className="text-sm opacity-90 mt-2 ml-10">{bookingFormData.departureStation} → {bookingFormData.arrivalStation} • {new Date(bookingFormData.departureDate).toLocaleDateString('id-ID')}</p>
       </div>
+
+      <div className="p-4 space-y-6">
 
       {/* Sort Options */}
       <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
@@ -335,6 +334,7 @@ const TicketListScreen: React.FC<TicketListScreenProps> = ({
           <p className="text-gray-500 dark:text-gray-500">Coba pilih tanggal atau rute yang berbeda</p>
         </div>
       )}
+      </div>
     </div>
   );
 };
