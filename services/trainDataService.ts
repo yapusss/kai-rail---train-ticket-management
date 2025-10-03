@@ -8,6 +8,9 @@ import {
   CarRental,
   LogisticsService,
   InsuranceService
+    
+    
+    
 } from '../data/types';
 import Swal from 'sweetalert2';
 
@@ -468,6 +471,58 @@ export class TrainDataService {
     return serviceCategory?.trains || [];
   }
 
+  static getTrainPositionData(): any {
+    return data.trainPositions || null;
+  }
+
+  static getLiveTrainsForStation(stationCode: string): any[] {
+    const positionData = this.getTrainPositionData();
+    if (!positionData || !positionData.liveTrains) return [];
+    
+    return positionData.liveTrains.filter((train: any) => 
+      train.currentStation === stationCode
+    );
+  }
+
+  static getCurrentStationData(stationCode: string): any {
+    const positionData = this.getTrainPositionData();
+    if (!positionData || !positionData.currentStations) return null;
+    
+    return positionData.currentStations[stationCode] || null;
+  }
+
+  static calculateFare(fromStation: string, toStation: string): { fare: number; distance: number; travelTime: number } {
+    const pricingData = data.pricing?.commuterLine;
+    if (!pricingData) return { fare: 3000, distance: 0, travelTime: 0 };
+
+    const key = this.findDistanceKey(fromStation, toStation);
+    const distance = pricingData.stationDistances[key] || 0;
+    const travelTime = pricingData.travelTimes[key] || 0;
+
+    const fare = pricingData.basePrice + (distance * pricingData.pricePerKm);
+    
+    return { fare, distance, travelTime };
+  }
+
+  static formatTravelTime(minutes: number): string {
+    if (minutes >= 60) {
+      const hours = Math.floor(minutes / 60);
+      const remainingMinutes = minutes % 60;
+      return remainingMinutes > 0 ? `${hours}j ${remainingMinutes}m` : `${hours}j`;
+    }
+    return `${minutes}m`;
+  }
+
+  static findDistanceKey(fromStation: string, toStation: string): string {
+    const getAllStations = () => this.getAllStations();
+    const stations = getAllStations();
+    
+    const fromCode = stations.find(s => s.name === fromStation)?.code || fromStation;
+    const toCode = stations.find(s => s.name === toStation)?.code || toStation;
+    
+    return `${fromCode}-${toCode}`;
+  }
+
   static testSearch() {
     console.log('=== TESTING SEARCH FUNCTIONALITY ===');
     console.log('Data structure:', {
@@ -476,7 +531,8 @@ export class TrainDataService {
       hotels: Object.keys(data.hotels),
       carRentals: Object.keys(data.carRentals),
       logistics: data.logistics.length,
-      insurance: data.insurance.length
+      insurance: data.insurance.length,
+      trainPositions: data.trainPositions ? Object.keys(data.trainPositions) : 'none'
     });
     
     console.log('Testing search for "hotel":');

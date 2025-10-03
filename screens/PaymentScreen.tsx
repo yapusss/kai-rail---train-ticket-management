@@ -1,203 +1,266 @@
-import React, { useState, useEffect } from "react";
-import { NavigationTab, PaymentIntent } from "../types";
-import { TrainDataService } from "../services/trainDataService";
+import React, { useState } from 'react';
+import { ArrowLeftIcon } from '../components/icons/FeatureIcons';
+import { TrainDataService } from '../services/trainDataService';
+import { NavigationTab } from '../types';
+import { PaymentService, PaymentMethod, PaymentData } from '../services/paymentService';
 import Swal from 'sweetalert2';
 
 interface PaymentScreenProps {
-  setActiveTab: (tab: NavigationTab) => void;
-  payment: PaymentIntent | null;
+    bookingData: {
+        serviceType: string;
+        departureStation: string;
+        arrivalStation: string;
+        fare: number;
+        distance: number;
+        travelTime: number;
+        passengers?: number;
+        date?: string;
+    };
+    setActiveTab: (tab: NavigationTab) => void;
 }
 
-const PaymentScreen: React.FC<PaymentScreenProps> = ({
-  setActiveTab,
-  payment,
-}) => {
-  const [localPayment, setLokalPayment] = useState<PaymentIntent | null>(
-    payment
-  );
-  const [allStations, setAllStations] = useState<any[]>([]);
+const PaymentScreen: React.FC<PaymentScreenProps> = ({ bookingData, setActiveTab }) => {
+    const [selectedPaymentMethodId, setSelectedPaymentMethodId] = useState<string | null>(null);
+    const [showQR, setShowQR] = useState(false);
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [paymentMethods] = useState<PaymentMethod[]>(PaymentService.getUserPaymentMethods());
 
-  useEffect(() => {
-    setLokalPayment(payment);
-    setAllStations(TrainDataService.getAllStations());
-  }, [payment]);
+    React.useEffect(() => {
+        const primaryMethod = PaymentService.getPrimaryPaymentMethod();
+        if (primaryMethod) {
+            setSelectedPaymentMethodId(primaryMethod.id);
+        }
+    }, []);
 
-  const parseDistanceNumber = (d: any) => {
-    if (!d && d !== 0) return 0;
-    if (typeof d === "number") return d;
-    const s = String(d).replace(",", ".");
-    const match = s.match(/[0-9]+(?:\.[0-9]+)?/);
-    return match ? parseFloat(match[0]) : 0;
-  };
+    const formatPrice = (price: number) => {
+        return `Rp ${price.toLocaleString('id-ID')}`;
+    };
 
-  const computeEstimatedFare = (line: any, from: any, to: any) => {
-    try {
-      if (!line) return line?.price ?? 0;
-      const lineDist = parseDistanceNumber(line.distance);
-      const baseFarePerKm =
-        lineDist > 0 ? line.price / lineDist : line.price || 0;
+    const handlePayment = async () => {
+        if (!selectedPaymentMethodId) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Pilih Metode Pembayaran',
+                text: 'Silakan pilih metode pembayaran terlebih dahulu',
+                confirmButtonText: 'Baik'
+            });
+            return;
+        }
 
-      const cityKey = (from?.city || "").toLowerCase();
-      const cityStations =
-        TrainDataService.getStationsByCity(cityKey).length > 0
-          ? TrainDataService.getStationsByCity(cityKey)
-          : TrainDataService.getAllStations();
+        const selectedPaymentMethod = paymentMethods.find(method => method.id === selectedPaymentMethodId);
+        if (!selectedPaymentMethod) return;
 
-      const sortByName = (a: any, b: any) => a.name.localeCompare(b.name);
-      cityStations.sort(sortByName);
+        setIsProcessing(true);
 
-      const idxFrom = cityStations.findIndex(
-        (s: any) => s.code === from?.code || s.name === from?.name
-      );
-      const idxTo = cityStations.findIndex(
-        (s: any) => s.code === to?.code || s.name === to?.name
-      );
+        const paymentData: PaymentData = {
+            bookingData,
+            selectedPaymentMethod
+        };
 
-      let frac = 0.5;
-      if (idxFrom >= 0 && idxTo >= 0 && cityStations.length > 1) {
-        frac = Math.abs(idxTo - idxFrom) / Math.max(1, cityStations.length - 1);
-      }
+        try {
+            const result = await PaymentService.processPayment(paymentData);
+            
+            if (result.success) {
+                const ticket = PaymentService.createTicketFromPayment(paymentData, result.transactionId!);
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Pembayaran Berhasil!',
+                    text: `Tiket berhasil dibeli dengan kode booking: ${ticket.bookingCode}`,
+                    confirmButtonText: 'Lihat Tiket'
+                }).then(() => {
+                    setActiveTab(NavigationTab.Tickets);
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Pembayaran Gagal',
+                    text: result.message,
+                    confirmButtonText: 'Coba Lagi'
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Terjadi Kesalahan',
+                text: 'Gagal memproses pembayaran. Silakan coba lagi.',
+                confirmButtonText: 'Baik'
+            });
+        } finally {
+            setIsProcessing(false);
+        }
+    };
 
-      const estKm = (lineDist || 1) * frac;
-      const fare = Math.max(2000, Math.round(baseFarePerKm * estKm));
-      return fare;
-    } catch (err) {
-      return line?.price ?? 0;
+    if (showQR) {
+        return (
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+                <div className="bg-gradient-to-r from-pink-500 to-purple-500 text-white p-4 rounded-b-3xl">
+                    <div className="flex items-center justify-between">
+                        <button
+                            onClick={() => setShowQR(false)}
+                            className="p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
+                        >
+                            <ArrowLeftIcon className="w-6 h-6" />
+                        </button>
+                        <h1 className="text-xl font-bold">Pembayaran QR Code</h1>
+                        <div className="w-8 h-8" />
+                    </div>
+                </div>
+
+                <div className="p-4 space-y-6">
+            {}
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-md text-center">
+                        <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-6 mb-8">
+                            <div className="text-gray-400 dark:text-gray-500 text-sm">
+                                QR Code Pembayaran
+                            </div>
+                            <div className="w-48 h-48 bg-gray-200 dark:bg-gray-600 rounded-lg mx-auto mt-4 flex items-center justify-center">
+                                <div className="text-gray-500 dark:text-gray-400">QR Code</div>
+                            </div>
+                        </div>
+                        
+                        <p className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-2">
+                            {formatPrice(bookingData.fare)}
+                        </p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                            Scan untuk membayar
+                        </p>
+                    </div>
+
+            {}
+                    <button
+                        onClick={() => setActiveTab(NavigationTab.Dashboard)}
+                        className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                        Kembali ke Dashboard
+                    </button>
+                </div>
+            </div>
+        );
     }
-  };
 
-  if (!localPayment) {
     return (
-      <div className="p-6">
-        <p className="text-gray-600">Tidak ada pembayaran yang dipilih.</p>
-      </div>
-    );
-  }
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+            {}
+            <div className="bg-gradient-to-r from-pink-500 to-purple-500 text-white p-4 rounded-b-3xl">
+                <div className="flex items-center justify-between">
+                    <button
+                        onClick={() => setActiveTab(NavigationTab.BookingForm)}
+                        className="p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
+                    >
+                        <ArrowLeftIcon className="w-6 h-6" />
+                    </button>
+                    <h1 className="text-xl font-bold">Pembayaran</h1>
+                    <div className="w-8 h-8" />
+                </div>
+            </div>
 
-  const line = localPayment.lineId
-    ? TrainDataService.getCommuterLines().find(
-        (l: any) => l.id === localPayment.lineId
-      )
-    : null;
+            <div className="p-4 space-y-4">
+            {}
+                <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-md">
+                    <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Ringkasan Perjalanan</h3>
+                    
+                    <div className="space-y-3">
+                        <div className="flex justify-between">
+                            <span className="text-gray-600 dark:text-gray-400">Keberangkatan</span>
+                            <span className="font-semibold text-gray-800 dark:text-gray-200">{bookingData.departureStation}</span>
+                        </div>
+                        
+                        <div className="flex justify-between">
+                            <span className="text-gray-600 dark:text-gray-400">Tujuan</span>
+                            <span className="font-semibold text-gray-800 dark:text-gray-200">{bookingData.arrivalStation}</span>
+                        </div>
+                        
+                        <div className="flex justify-between">
+                            <span className="text-gray-600 dark:text-gray-400">Jarak</span>
+                            <span className="font-semibold text-gray-800 dark:text-gray-200">{bookingData.distance} Km</span>
+                        </div>
+                        
+                        <div className="flex justify-between">
+                            <span className="text-gray-600 dark:text-gray-400">Estimasi Waktu</span>
+                            <span className="font-semibold text-gray-800 dark:text-gray-200">{TrainDataService.formatTravelTime(bookingData.travelTime)}</span>
+                        </div>
+                        
+                        <div className="flex justify-between">
+                            <span className="text-gray-600 dark:text-gray-400">Penumpang</span>
+                            <span className="font-semibold text-gray-800 dark:text-gray-200">{bookingData.passengers || 1} orang</span>
+                        </div>
+                        
+                        <div className="border-t pt-3 flex justify-between">
+                            <span className="text-lg font-semibold text-gray-800 dark:text-gray-200">Total Bayar</span>
+                            <span className="text-xl font-bold text-blue-600 dark:text-blue-400">{formatPrice(bookingData.fare)}</span>
+                        </div>
+                    </div>
+                </div>
 
-  const handleDestinationChange = (code: string) => {
-    const dest = TrainDataService.getStationByCode(code) || null;
-    if (!dest) return;
-    const fromStationObj = TrainDataService.getStationByCode(
-      localPayment.fromStation
-    ) || { name: localPayment.fromStation };
-    const fare = line
-      ? computeEstimatedFare(line, line.route.from, {
-          name: dest.name,
-          code: dest.code,
-          city: dest.city,
-        })
-      : localPayment.amount;
-    setLokalPayment({ ...localPayment, toStation: dest.name, amount: fare });
-  };
+            {}
+                <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-md">
+                    <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Metode Pembayaran</h3>
+                    
+                    <div className="space-y-3">
+                        {paymentMethods.map((method) => (
+                            <label 
+                                key={method.id}
+                                className={`flex items-center p-3 rounded-lg border-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+                                    selectedPaymentMethodId === method.id 
+                                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
+                                        : 'border-gray-200 dark:border-gray-600'
+                                }`}
+                            >
+                                <input
+                                    type="radio"
+                                    name="payment"
+                                    value={method.id}
+                                    checked={selectedPaymentMethodId === method.id}
+                                    onChange={(e) => setSelectedPaymentMethodId(e.target.value)}
+                                    className="mr-3"
+                                />
+                                <div className="flex items-center space-x-3">
+                                    <div className={`w-8 h-8 ${PaymentService.getPaymentMethodColor(method)} rounded-lg flex items-center justify-center`}>
+                                        <svg className={`w-5 h-5 ${PaymentService.getPaymentMethodIcon(method as any).className}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={PaymentService.getPaymentMethodIcon(method as any).path} />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p className="font-semibold text-gray-800 dark:text-gray-200">{method.name}</p>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400">{method.details}</p>
+                                        {method.isPrimary && (
+                                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 mt-1">
+                                                Utama
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            </label>
+                        ))}
+                    </div>
+                </div>
 
-  const handlePay = () => {
-    Swal.fire({
-        icon: 'success',
-        title: 'Berhasil!',
-        text: 'Pembayaran berhasil! Terima kasih.',
-        confirmButtonText: 'Baik'
-    });
-    setActiveTab(NavigationTab.Tickets);
-  };
-
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="bg-gradient-to-r from-pink-500 to-red-500 text-white p-4 rounded-b-3xl">
-        <h1 className="text-xl font-bold">Pembayaran</h1>
-      </div>
-
-      <div className="p-4 space-y-4">
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-            Ringkasan Perjalanan
-          </h2>
-          <div className="text-sm text-gray-700 dark:text-gray-300 space-y-1">
-            <p>
-              Service:{" "}
-              <span className="font-medium">{localPayment.serviceName}</span>
-            </p>
-            <p>
-              Dari:{" "}
-              <span className="font-medium">{localPayment.fromStation}</span>
-            </p>
-            {localPayment.toStation ? (
-              <p>
-                Ke:{" "}
-                <span className="font-medium">{localPayment.toStation}</span>
-              </p>
-            ) : line ? (
-              <div className="mt-2">
-                <p className="text-xs text-gray-500 mb-1">
-                  Pilih Stasiun Tujuan
-                </p>
-                <select
-                  className="w-full p-2 rounded-lg border bg-white dark:bg-gray-700"
-                  onChange={(e) => handleDestinationChange(e.target.value)}
+            {}
+                <button
+                    onClick={handlePayment}
+                    disabled={isProcessing || !selectedPaymentMethodId}
+                    className={`w-full py-4 text-white font-semibold rounded-lg text-lg transition-colors ${
+                        isProcessing || !selectedPaymentMethodId
+                            ? 'bg-gray-400 cursor-not-allowed'
+                            : 'bg-blue-600 hover:bg-blue-700'
+                    }`}
                 >
-                  <option value="">-- Pilih Tujuan --</option>
-                  {TrainDataService.getAllStations()
-                    .filter((s) => s.code !== localPayment.fromStation)
-                    .map((s: any) => (
-                      <option key={s.code} value={s.code}>
-                        {s.name} ({s.city})
-                      </option>
-                    ))}
-                </select>
-              </div>
-            ) : (
-              <p>
-                Ke:{" "}
-                <span className="font-medium">
-                  {localPayment.toStation || "N/A"}
-                </span>
-              </p>
-            )}
-            <p>
-              Tanggal: <span className="font-medium">{localPayment.date}</span>
-            </p>
-            <p>
-              Penumpang:{" "}
-              <span className="font-medium">{localPayment.passengers}</span>
-            </p>
-          </div>
-          <div className="mt-3 flex items-center justify-between">
-            <span className="text-gray-600 dark:text-gray-300">Total</span>
-            <span className="text-xl font-bold text-gray-900 dark:text-gray-100">
-              Rp {localPayment.amount.toLocaleString("id-ID")}
-            </span>
-          </div>
+                    {isProcessing ? (
+                        <div className="flex items-center justify-center space-x-2">
+                            <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span>Memproses Pembayaran...</span>
+                        </div>
+                    ) : (
+                        'Bayar Sekarang'
+                    )}
+                </button>
+            </div>
         </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow space-y-3">
-          <h3 className="font-semibold text-gray-900 dark:text-gray-100">
-            Metode Pembayaran
-          </h3>
-          <button className="w-full border rounded-lg p-3 text-left">
-            Virtual Account
-          </button>
-          <button className="w-full border rounded-lg p-3 text-left">
-            Kartu Kredit/Debit
-          </button>
-          <button className="w-full border rounded-lg p-3 text-left">
-            E-Wallet
-          </button>
-        </div>
-
-        <button
-          onClick={handlePay}
-          className="w-full py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700"
-        >
-          Bayar Sekarang
-        </button>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default PaymentScreen;

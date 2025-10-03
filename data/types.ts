@@ -207,6 +207,38 @@ export interface InsuranceService {
   description: string;
 }
 
+export interface LiveTrain {
+  id: string;
+  number: string;
+  route: string;
+  destination: string;
+  departureTime: string;
+  status: string;
+  stationRemaining: string;
+  currentStation: string;
+  lineColor: string;
+}
+
+export interface TrainPositions {
+  currentStations: {
+    [stationCode: string]: Station;
+  };
+  liveTrains: LiveTrain[];
+}
+
+export interface PricingData {
+  commuterLine: {
+    basePrice: number;
+    pricePerKm: number;
+    stationDistances: {
+      [key: string]: number;
+    };
+    travelTimes: {
+      [key: string]: number;
+    };
+  };
+}
+
 export interface TrainServicesData {
   stations: {
     [city: string]: Station[];
@@ -218,6 +250,8 @@ export interface TrainServicesData {
     lrt: ServiceCategory;
     airport: ServiceCategory;
   };
+  pricing: PricingData;
+  trainPositions: TrainPositions;
   hotels: {
     [city: string]: Hotel[];
   };

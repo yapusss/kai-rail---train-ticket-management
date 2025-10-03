@@ -11,9 +11,11 @@ import PlannerScreen from "./screens/PlannerScreen";
 import InterCityBookingScreen from "./screens/InterCityBookingScreen";
 import CommuterLineScreen from "./screens/CommuterLineScreen";
 import BookingFormScreen from "./screens/BookingFormScreen";
+import PaymentScreen from "./screens/PaymentScreen";
 import TicketListScreen from "./screens/TicketListScreen";
 import PassengerFormScreen from "./screens/PassengerFormScreen";
 import TicketsScreen from "./screens/TicketsScreen";
+import TicketCodeScreen from "./screens/TicketCodeScreen";
 import AccountScreen from "./screens/AccountScreen";
 import NotificationsScreen from "./screens/NotificationsScreen";
 import { SunIcon, MoonIcon } from "./components/icons/ThemeIcons";
@@ -339,6 +341,9 @@ const App: React.FC = () => {
       case NavigationTab.Tickets:
         setVoiceCommandContext('tickets');
         break;
+      case NavigationTab.TicketCode:
+        setVoiceCommandContext('ticketcode');
+        break;
       case NavigationTab.Account:
         setVoiceCommandContext('account');
         break;
@@ -347,6 +352,9 @@ const App: React.FC = () => {
         break;
       case NavigationTab.BookingForm:
         setVoiceCommandContext('booking');
+        break;
+      case NavigationTab.Payment:
+        setVoiceCommandContext('payment');
         break;
       case NavigationTab.TicketList:
         setVoiceCommandContext('ticketlist');
@@ -372,12 +380,16 @@ const App: React.FC = () => {
         return <CommuterLineScreen setActiveTab={handleSetActiveTab} setSelectedServiceType={setSelectedServiceType} setBookingFormData={setBookingFormData} />;
       case NavigationTab.BookingForm:
         return <BookingFormScreen setActiveTab={handleSetActiveTab} selectedServiceType={selectedServiceType} setBookingFormData={setBookingFormData} />;
+      case NavigationTab.Payment:
+        return <PaymentScreen bookingData={bookingFormData} setActiveTab={handleSetActiveTab} />;
       case NavigationTab.TicketList:
         return <TicketListScreen setActiveTab={handleSetActiveTab} bookingFormData={bookingFormData} setSelectedTicket={setSelectedTicket} />;
       case NavigationTab.PassengerForm:
         return <PassengerFormScreen setActiveTab={handleSetActiveTab} selectedTicket={selectedTicket} setBookedTicket={setBookedTicket} setShowInterCityTrainList={setShowInterCityTrainList} />;
       case NavigationTab.Tickets:
-        return <TicketsScreen />;
+        return <TicketsScreen setActiveTab={handleSetActiveTab} />;
+      case NavigationTab.TicketCode:
+        return <TicketCodeScreen setActiveTab={handleSetActiveTab} />;
       case NavigationTab.Notifications:
         return <NotificationsScreen setActiveTab={handleSetActiveTab} />;
       case NavigationTab.Promotion:

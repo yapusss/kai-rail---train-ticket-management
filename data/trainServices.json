@@ -8,8 +8,20 @@
         "province": "DKI Jakarta"
       },
       {
+        "code": "PSG",
+        "name": "PESING",
+        "city": "Jakarta",
+        "province": "DKI Jakarta"
+      },
+      {
+        "code": "DRI",
+        "name": "Stasiun DURI",
+        "city": "Jakarta",
+        "province": "DKI Jakarta"
+      },
+      {
         "code": "PSN",
-        "name": "Stasiun Pasar Senen",
+        "name": "PASARSENEN",
         "city": "Jakarta",
         "province": "DKI Jakarta"
       },
@@ -81,7 +93,7 @@
       },
       {
         "code": "LPN",
-        "name": "Stasiun Lempuyangan",
+        "name": "Lempuyangan",
         "city": "Yogyakarta",
         "province": "DI Yogyakarta"
       }
@@ -144,6 +156,32 @@
         "name": "Stasiun Palembang",
         "city": "Palembang",
         "province": "Sumatera Selatan"
+      }
+    ],
+    "tangerang": [
+      {
+        "code": "TGR",
+        "name": "Stasiun Tangerang",
+        "city": "Tangerang",
+        "province": "Banten"
+      },
+      {
+        "code": "BST",
+        "name": "BANDARASOEKARNOHATTA",
+        "city": "Tangerang",
+        "province": "Banten"
+      },
+      {
+        "code": "KDS",
+        "name": "Stasiun KALIDERES",
+        "city": "Jakarta",
+        "province": "DKI Jakarta"
+      },
+      {
+        "code": "THB",
+        "name": "Stasiun TANAH",
+        "city": "Tangerang",
+        "province": "Banten"
       }
     ]
   },
@@ -581,12 +619,12 @@
         },
         {
           "id": "tangerang-line",
-          "name": "Tangerang Line",
+          "name": "COMMUTER LINE TANGERANG",
           "code": "TG",
           "route": {
             "from": {
-              "code": "TNG",
-              "name": "Stasiun Tanjung Priok",
+              "code": "PSG",
+              "name": "PESING",
               "city": "Jakarta"
             },
             "to": {
@@ -609,6 +647,39 @@
               "first": "06:00",
               "last": "21:00",
               "frequency": "20-25 minutes"
+            }
+          }
+        },
+        {
+          "id": "bst-line",
+          "name": "COMMUTER LINE BST",
+          "code": "BST",
+          "route": {
+            "from": {
+              "code": "PSG",
+              "name": "PESING",
+              "city": "Jakarta"
+            },
+            "to": {
+              "code": "BST",
+              "name": "BANDARASOEKARNOHATTA",
+              "city": "Tangerang"
+            }
+          },
+          "duration": "45m",
+          "distance": "38 km",
+          "price": 4500,
+          "facilities": ["AC", "Seat"],
+          "schedule": {
+            "weekdays": {
+              "first": "05:00",
+              "last": "23:00",
+              "frequency": "10-15 minutes"
+            },
+            "weekends": {
+              "first": "05:30",
+              "last": "22:30",
+              "frequency": "15-20 minutes"
             }
           }
         }
@@ -997,5 +1068,87 @@
       "duration": "30 days",
       "description": "Perlindungan untuk seluruh keluarga"
     }
-  ]
+  ],
+  "pricing": {
+    "commuterLine": {
+      "basePrice": 3000,
+      "pricePerKm": 0,
+      "stationDistances": {
+        "PSG-DRI": 5.2,
+        "PSG-PSN": 13.8,
+        "PSN-LPN": 520.0,
+        "DRI-PSN": 8.6,
+        "PSG-MGR": 12.3,
+        "DRI-MGR": 7.1,
+        "PSN-MGR": 3.7,
+        "LPN-PSN": 520.0
+      },
+      "travelTimes": {
+        "PSG-DRI": 8,
+        "PSG-PSN": 18,
+        "PSN-LPN": 420,
+        "DRI-PSN": 12,
+        "PSG-MGR": 16,
+        "DRI-MGR": 10,
+        "PSN-MGR": 5,
+        "LPN-PSN": 420
+      }
+    }
+  },
+  "trainPositions": {
+    "currentStations": {
+      "PSG": {
+        "code": "PSG",
+        "name": "PESING",
+        "city": "Jakarta",
+        "province": "DKI Jakarta"
+      }
+    },
+    "liveTrains": [
+      {
+        "id": "897A-898A",
+        "number": "#897A-898A / SF6",
+        "route": "COMMUTER LINE BST",
+        "destination": "Ke BANDARASOEKARNOHATTA",
+        "departureTime": "17:24",
+        "status": "Berangkat dari DURI",
+        "stationRemaining": "2 Stasiun Lagi",
+        "currentStation": "PSG",
+        "lineColor": "bg-blue-600"
+      },
+      {
+        "id": "1982A",
+        "number": "#1982A / SF8",
+        "route": "COMMUTER LINE TANGERANG",
+        "destination": "Ke TANGERANG",
+        "departureTime": "17:29",
+        "status": "Dijalur5",
+        "stationRemaining": "2 Stasiun Lagi",
+        "currentStation": "PSG",
+        "lineColor": "bg-yellow-600"
+      },
+      {
+        "id": "1983A",
+        "number": "#1983A / SF10",
+        "route": "COMMUTER LINE TANGERANG",
+        "destination": "Ke DURI",
+        "departureTime": "17:31",
+        "status": "Berangkat dari KALIDERES",
+        "stationRemaining": "4 Stasiun Lagi",
+        "currentStation": "PSG",
+        "lineColor": "bg-yellow-600"
+      },
+      {
+        "id": "1985A",
+        "number": "#1985A / SF10",
+        "route": "COMMUTER LINE TANGERANG",
+        "destination": "Ke DURI",
+        "departureTime": "17:40",
+        "status": "Berangkat dari TANAH",
+        "stationRemaining": "7 Stasiun Lagi",
+        "currentStation": "PSG",
+        "lineColor": "bg-yellow-600"
+      }
+    ]
+  }
 }

@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Ticket, TrainClass, BookedTicket } from '../types';
+import { Ticket, TrainClass, BookedTicket, NavigationTab } from '../types';
 import { interpretSearchQuery } from '../services/geminiService';
 import { SearchIcon, MicrophoneIcon, FilterIcon, DownloadIcon, RebookIcon, ArrowRightIcon } from '../components/icons/FeatureIcons';
 import { TrainDataService } from '../services/trainDataService';
@@ -220,7 +220,11 @@ const TicketCard: React.FC<{ ticket: Ticket }> = ({ ticket }) => (
     </div>
 );
 
-const TicketsScreen: React.FC = () => {
+interface TicketsScreenProps {
+    setActiveTab?: (tab: NavigationTab) => void;
+}
+
+const TicketsScreen: React.FC<TicketsScreenProps> = ({ setActiveTab: setParentActiveTab }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [isListening, setIsListening] = useState(false);
     const [filters, setFilters] = useState<{ month?: number; year?: number; text?: string }>({});
@@ -713,6 +717,137 @@ const TicketsScreen: React.FC = () => {
                     </div>
                     )}
                 </form>
+
+            {}
+                <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-md">
+                    <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Cek & Tambah Tiket</h3>
+                    
+            {}
+                    <button 
+                        onClick={() => {
+                            if (setParentActiveTab) {
+                                setParentActiveTab(NavigationTab.TicketCode);
+                            } else {
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: 'Cek Tiket',
+                                    text: 'Fitur untuk menambah tiket dengan scan QR atau input manual',
+                                    confirmButtonText: 'Baik'
+                                });
+                            }
+                        }}
+                        className="w-full p-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all transform hover:scale-105 text-center mb-3"
+                    >
+                        <div className="flex items-center justify-center space-x-3">
+                            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+                                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                                </svg>
+                            </div>
+                            <div className="text-white text-left">
+                                <p className="font-semibold text-lg">Cek Tiket</p>
+                                <p className="text-xs opacity-90">Scan QR atau input manual</p>
+                            </div>
+                        </div>
+                    </button>
+
+                    <div className="grid grid-cols-2 gap-3">
+                        
+                    </div>
+                </div>
+
+            {}
+                <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-md">
+                    <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Layanan Tambahan</h3>
+                    <div className="grid grid-cols-4 gap-4">
+            {}
+                        <button 
+                            onClick={() => {
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: 'Railfood',
+                                    text: 'Layanan pemesanan makanan dan minuman di dalam kereta',
+                                    confirmButtonText: 'Baik'
+                                });
+                            }}
+                            className="flex flex-col items-center space-y-2 p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl transition-colors"
+                        >
+                            <div className="w-14 h-14 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow">
+                                <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M8 13A5 5 0 1 0 8 3a5 5 0 0 0 0 10Zm0-8a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z"/>
+                                    <path d="M2 10a3 3 0 0 1 3-3h6a3 3 0 0 1 3 3v3H2v-3Z"/>
+                                </svg>
+                            </div>
+                            <p className="text-xs font-medium text-gray-800 dark:text-gray-200 text-center">Railfood</p>
+                        </button>
+
+            {}
+                        <button 
+                            onClick={() => {
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: 'Taksi Online',
+                                    text: 'Layanan pemesanan taksi online dari dan ke stasiun',
+                                    confirmButtonText: 'Baik'
+                                });
+                            }}
+                            className="flex flex-col items-center space-y-2 p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl transition-colors"
+                        >
+                            <div className="w-14 h-14 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow">
+                                <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M2 8h12v5H2V8zm0-3h12a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/>
+                                    <circle cx="4" cy="14" r="1.5"/>
+                                    <circle cx="12" cy="14" r="1.5"/>
+                                </svg>
+                            </div>
+                            <p className="text-xs font-medium text-gray-800 dark:text-gray-200 text-center">Taksi</p>
+                        </button>
+
+            {}
+                        <button 
+                            onClick={() => {
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: 'Bus Kota',
+                                    text: 'Informasi dan pemesanan bus kota terintegrasi dengan perjalanan kereta',
+                                    confirmButtonText: 'Baik'
+                                });
+                            }}
+                            className="flex flex-col items-center space-y-2 p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl transition-colors"
+                        >
+                            <div className="w-14 h-14 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow">
+                                <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="M2 7a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7zm2-1a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H4z"/>
+                                    <rect x="3" y="4" width="10" height="2" rx="0.5"/>
+                                    <rect x="4" y="6" width="8" height="4" rx="0.5"/>
+                                    <circle cx="5" cy="13" r="1"/>
+                                    <circle cx="11" cy="13" r="1"/>
+                                </svg>
+                            </div>
+                            <p className="text-xs font-medium text-gray-800 dark:text-gray-200 text-center">Bus</p>
+                        </button>
+
+            {}
+                        <button 
+                            onClick={() => {
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: 'Hotel Booking',
+                                    text: 'Pemesanan hotel dekat stasiun dengan harga khusus untuk penumpang kereta',
+                                    confirmButtonText: 'Baik'
+                                });
+                            }}
+                            className="flex flex-col items-center space-y-2 p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl transition-colors"
+                        >
+                            <div className="w-14 h-14 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow">
+                                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                            </div>
+                            <p className="text-xs font-medium text-gray-800 dark:text-gray-200 text-center">Hotel</p>
+                        </button>
+                    </div>
+                </div>
 
                 <div className="space-y-4">
                     {activeTab === 'active' ? (
