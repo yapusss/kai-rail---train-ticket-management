@@ -150,7 +150,7 @@
   "trainServices": {
     "intercity": {
       "id": "intercity",
-      "name": "Inter City",
+      "name": "Antar Kota",
       "description": "Kereta antarkota untuk perjalanan jarak jauh",
       "icon": "🚄",
       "bgColor": "bg-blue-500",
@@ -334,7 +334,7 @@
     },
     "local": {
       "id": "local",
-      "name": "Local",
+      "name": "Lokal",
       "description": "Kereta lokal untuk perjalanan jarak menengah",
       "icon": "🚂",
       "bgColor": "bg-orange-500",

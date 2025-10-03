@@ -396,7 +396,7 @@ const CommuterLineScreen: React.FC<CommuterLineScreenProps> = ({
                                     detail: {
                                         fromStation: selectedStation.name,
                                         serviceName: "Commuter Line",
-                                        date: new Date().toLocaleDateString("id-ID"),
+                                        date: new Date().toLokaleDateString("id-ID"),
                                         passengers: 1,
                                         amount: line?.price ?? 5000,
                                         lineId: line?.id,

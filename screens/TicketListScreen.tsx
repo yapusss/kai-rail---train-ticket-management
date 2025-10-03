@@ -230,7 +230,7 @@ const TicketListScreen: React.FC<TicketListScreenProps> = ({
         <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">Tiket Tersedia</h2>
         <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
           <p><span className="font-medium">Rute:</span> {bookingFormData.departureStation} → {bookingFormData.arrivalStation}</p>
-          <p><span className="font-medium">Tanggal:</span> {new Date(bookingFormData.departureDate).toLocaleDateString('id-ID')}</p>
+          <p><span className="font-medium">Tanggal:</span> {new Date(bookingFormData.departureDate).toLokaleDateString('id-ID')}</p>
           <p><span className="font-medium">Penumpang:</span> {bookingFormData.passengerCount} orang</p>
         </div>
       </div>

@@ -22,7 +22,7 @@ const NavItem: React.FC<{
   return (
     <button
       onClick={() => onClick(tab)}
-      className="flex flex-col items-center justify-center w-1/6 transition-transform duration-200 ease-in-out transform hover:scale-105"
+      className="flex flex-col items-center justify-center w-1/6 transition-transform duration-200 ease-in-out transform hover:scale-105 p-1"
     >
       <Icon className={`w-6 h-6 mb-1 transition-colors ${isActive ? activeClasses : inactiveClasses}`} />
       <span className={`text-xs font-medium transition-colors ${isActive ? activeClasses : inactiveClasses}`}>
@@ -34,7 +34,7 @@ const NavItem: React.FC<{
 
 const BottomNavBar: React.FC<BottomNavBarProps> = ({ activeTab, setActiveTab }) => {
   return (
-    <div className="absolute bottom-0 left-0 right-0 h-20 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-t border-gray-200 dark:border-gray-700 flex justify-around items-center px-1 rounded-b-3xl">
+    <div className="absolute bottom-0 left-0 right-0 h-20 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-t border-gray-200 dark:border-gray-700 flex justify-around items-center px-2 py-2 rounded-b-3xl">
       <NavItem tab={NavigationTab.Dashboard} activeTab={activeTab} onClick={setActiveTab} Icon={HomeIcon} label="Beranda" />
       <NavItem tab={NavigationTab.Planner} activeTab={activeTab} onClick={setActiveTab} Icon={PlannerIcon} label="Perjalanan" />
       <NavItem tab={NavigationTab.Tickets} activeTab={activeTab} onClick={setActiveTab} Icon={TicketIcon} label="Tiket" />

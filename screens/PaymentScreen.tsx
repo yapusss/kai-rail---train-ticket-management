@@ -12,13 +12,13 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
   setActiveTab,
   payment,
 }) => {
-  const [localPayment, setLocalPayment] = useState<PaymentIntent | null>(
+  const [localPayment, setLokalPayment] = useState<PaymentIntent | null>(
     payment
   );
   const [allStations, setAllStations] = useState<any[]>([]);
 
   useEffect(() => {
-    setLocalPayment(payment);
+    setLokalPayment(payment);
     setAllStations(TrainDataService.getAllStations());
   }, [payment]);
 
@@ -93,7 +93,7 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
           city: dest.city,
         })
       : localPayment.amount;
-    setLocalPayment({ ...localPayment, toStation: dest.name, amount: fare });
+    setLokalPayment({ ...localPayment, toStation: dest.name, amount: fare });
   };
 
   const handlePay = () => {

@@ -4,9 +4,11 @@ import { interpretSearchQuery } from '../services/geminiService';
 import { SearchIcon, MicrophoneIcon, FilterIcon, DownloadIcon, RebookIcon, ArrowRightIcon } from '../components/icons/FeatureIcons';
 import { TrainDataService } from '../services/trainDataService';
 import Swal from 'sweetalert2';
+import { useAccessibility } from '../hooks/useAccessibility';
+import { voiceConflictManager } from '../services/voiceConflictManager';
 
 const generateMockTickets = (): Ticket[] => {
-    const trains = TrainDataService.getInterCityTrains().concat(TrainDataService.getLocalTrains());
+    const trains = TrainDataService.getInterCityTrains().concat(TrainDataService.getLokalTrains());
     return trains.slice(0, 4).map((train, index) => ({
         id: (index + 1).toString(),
         bookingCode: `TIX-${(index + 1)}${String.fromCharCode(65 + index)}${(index + 2)}${String.fromCharCode(66 + index)}`,
@@ -31,7 +33,7 @@ const generateMockTickets = (): Ticket[] => {
 const MOCK_TICKETS: Ticket[] = generateMockTickets();
 
 const generateDummyBookedTickets = (): BookedTicket[] => {
-    const trains = TrainDataService.getInterCityTrains().concat(TrainDataService.getLocalTrains());
+    const trains = TrainDataService.getInterCityTrains().concat(TrainDataService.getLokalTrains());
     const dummyTickets: BookedTicket[] = [];
     
     const activeTickets = [
@@ -192,7 +194,7 @@ const generateDummyBookedTickets = (): BookedTicket[] => {
 const DUMMY_BOOKED_TICKETS: BookedTicket[] = generateDummyBookedTickets();
 
 const TicketCard: React.FC<{ ticket: Ticket }> = ({ ticket }) => (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden transition-transform transform hover:scale-105 hover:shadow-lg">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden transition-transform transform hover:scale-105 hover:shadow-lg p-1">
         <div className="p-4">
             <div className="flex justify-between items-center">
                 <span className="text-sm font-semibold text-red-600 dark:text-red-400">{ticket.bookingCode}</span>
@@ -226,6 +228,10 @@ const TicketsScreen: React.FC = () => {
     const [selectedTicket, setSelectedTicket] = useState<BookedTicket | null>(null);
     const [showTicketDetail, setShowTicketDetail] = useState(false);
     const [activeTab, setActiveTab] = useState<'active' | 'history'>('active');
+    const [showSearchExamples, setShowSearchExamples] = useState(true);
+
+    // Accessibility hook
+    const { announcePage, announceElement, announceAction, announceError, announceSuccess, settings } = useAccessibility();
 
     useEffect(() => {
         const savedTickets = localStorage.getItem('bookedTickets');
@@ -235,7 +241,24 @@ const TicketsScreen: React.FC = () => {
             setBookedTickets(DUMMY_BOOKED_TICKETS);
             localStorage.setItem('bookedTickets', JSON.stringify(DUMMY_BOOKED_TICKETS));
         }
-    }, []);
+
+        // Announce halaman saat pertama kali dibuka
+        if (settings.enabled) {
+            announcePage({
+                pageTitle: "Tiket Saya",
+                pageDescription: "Halaman untuk melihat dan mengelola tiket kereta yang sudah dibeli. Di sini Anda dapat melihat detail tiket, mengunduh tiket, dan melakukan rebooking.",
+                availableActions: [
+                    "mencari tiket berdasarkan bulan, tahun, atau nama kereta",
+                    "menggunakan perintah suara untuk pencarian tiket",
+                    "melihat detail tiket yang sudah dibeli",
+                    "mengunduh tiket dalam format PDF",
+                    "melakukan rebooking tiket",
+                    "mengganti tab antara tiket aktif dan riwayat"
+                ],
+                voiceInstructions: "Anda bisa menggunakan kotak pencarian untuk mencari tiket berdasarkan bulan seperti 'tiket bulan desember', tahun seperti 'tahun 2024', atau nama kereta seperti 'argo bromo'. Klik tombol mikrofon untuk pencarian dengan suara."
+            });
+        }
+    }, [settings.enabled, announcePage]);
 
     const handleTicketClick = (ticket: BookedTicket) => {
         setSelectedTicket(ticket);
@@ -261,8 +284,12 @@ const TicketsScreen: React.FC = () => {
 
     const handleVoiceSearch = () => {
         if (recognition && !isListening) {
+            // Mulai voice command - pause accessibility
+            voiceConflictManager.startVoiceCommand();
+            
             recognition.start();
             setIsListening(true);
+            announceAction("Mendengarkan perintah pencarian tiket", "Silakan sebutkan kriteria pencarian tiket");
         }
     };
 
@@ -273,10 +300,14 @@ const TicketsScreen: React.FC = () => {
             const transcript = event.results[0][0].transcript;
             setSearchQuery(transcript);
             handleAISearch(transcript);
+            announceSuccess(`Pencarian tiket dengan suara: ${transcript}`);
         };
 
         recognition.onend = () => {
             setIsListening(false);
+            announceAction("Pengenalan suara selesai");
+            // Akhiri voice command - resume accessibility
+            voiceConflictManager.endVoiceCommand();
         };
         
         recognition.onerror = (event: any) => {
@@ -286,7 +317,10 @@ const TicketsScreen: React.FC = () => {
               text: 'Terjadi kesalahan saat mengenali suara.',
               confirmButtonText: 'Baik'
             });
+            announceError("Terjadi kesalahan saat mengenali suara", "Silakan coba lagi atau gunakan keyboard");
             setIsListening(false);
+            // Akhiri voice command - resume accessibility
+            voiceConflictManager.endVoiceCommand();
         };
     }, [recognition]);
 
@@ -656,18 +690,33 @@ const TicketsScreen: React.FC = () => {
                     )}
 
             {}
-                    <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
-                        <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">
-                            🔍 Contoh Pencarian:
-                        </h4>
-                        <div className="text-xs text-blue-700 dark:text-blue-400 space-y-1">
-                            <p>• "tiket bulan desember" - Cari tiket di bulan Desember</p>
-                            <p>• "kereta argo bromo" - Cari tiket kereta Argo Bromo</p>
-                            <p>• "jakarta ke yogyakarta" - Cari tiket rute Jakarta-Yogyakarta</p>
-                            <p>• "tahun 2024" - Cari tiket tahun 2024</p>
-                            <p>• "TIX-1234" - Cari dengan kode booking</p>
+                    {showSearchExamples && (
+                    <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg relative">
+                        {/* Close Button */}
+                        <button
+                            onClick={() => setShowSearchExamples(false)}
+                            className="absolute top-2 right-2 p-1 text-blue-600 dark:text-blue-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-white/50 dark:hover:bg-gray-800/50 rounded-full transition-all duration-200 group"
+                            title="Tutup contoh pencarian"
+                        >
+                            <svg className="w-3 h-3 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                        
+                        <div className="pr-6">
+                            <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">
+                                🔍 Contoh Pencarian:
+                            </h4>
+                            <div className="text-xs text-blue-700 dark:text-blue-400 space-y-1">
+                                <p>• "tiket bulan desember" - Cari tiket di bulan Desember</p>
+                                <p>• "kereta argo bromo" - Cari tiket kereta Argo Bromo</p>
+                                <p>• "jakarta ke yogyakarta" - Cari tiket rute Jakarta-Yogyakarta</p>
+                                <p>• "tahun 2024" - Cari tiket tahun 2024</p>
+                                <p>• "TIX-1234" - Cari dengan kode booking</p>
+                            </div>
                         </div>
                     </div>
+                    )}
                 </form>
 
                 <div className="space-y-4">

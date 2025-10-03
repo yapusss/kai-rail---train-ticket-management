@@ -4,6 +4,8 @@ import { generateTripPlan } from '../services/geminiService';
 import type { TripPlan } from '../types';
 import { PlannerIcon, SparklesIcon } from '../components/icons/FeatureIcons';
 import Swal from 'sweetalert2';
+import { useAccessibility } from '../hooks/useAccessibility';
+import { voiceConflictManager } from '../services/voiceConflictManager';
 
 const PlannerScreen: React.FC = () => {
   const [prompt, setPrompt] = useState('');
@@ -15,6 +17,10 @@ const PlannerScreen: React.FC = () => {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [browserSupportsSpeechRecognition, setBrowserSupportsSpeechRecognition] = useState(false);
+  const [showVoiceExamples, setShowVoiceExamples] = useState(true);
+
+  // Accessibility hook
+  const { announcePage, announceElement, announceAction, announceError, announceSuccess, settings } = useAccessibility();
 
   const handleTrainClick = (train: any) => {
     setSelectedTrain(train);
@@ -32,7 +38,22 @@ const PlannerScreen: React.FC = () => {
     if (SpeechRecognition) {
       setBrowserSupportsSpeechRecognition(true);
     }
-  }, []);
+
+    // Announce halaman saat pertama kali dibuka
+    if (settings.enabled) {
+      announcePage({
+        pageTitle: "AI Trip Planner",
+        pageDescription: "Di halaman ini, Anda dapat merencanakan perjalanan dengan bantuan AI yang akan mencari sarana transportasi terbaik untuk Anda.",
+        availableActions: [
+          "mengetik deskripsi perjalanan di kotak teks",
+          "menggunakan perintah suara untuk menjelaskan rencana perjalanan",
+          "melihat contoh perintah suara yang tersedia",
+          "membuat rencana perjalanan dengan AI"
+        ],
+        voiceInstructions: "Anda bisa mengucapkan 'mulai text box' dan ceritakan rencana perjalanan Anda. Nanti kami akan carikan sarana transportasi yang paling cocok dan sesuai untuk Anda. Atau Anda bisa langsung mengetik di kotak teks yang tersedia."
+      });
+    }
+  }, [settings.enabled, announcePage]);
 
   useEffect(() => {
     if (transcript) {
@@ -44,6 +65,9 @@ const PlannerScreen: React.FC = () => {
   const startListening = () => {
     if (!browserSupportsSpeechRecognition) return;
 
+    // Mulai voice command - pause accessibility
+    voiceConflictManager.startVoiceCommand();
+
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
     
@@ -53,16 +77,21 @@ const PlannerScreen: React.FC = () => {
 
     recognition.onstart = () => {
       setIsListening(true);
+      announceAction("Mendengarkan perintah suara", "Silakan ceritakan rencana perjalanan Anda");
     };
 
     recognition.onresult = (event: any) => {
       const current = event.resultIndex;
       const transcriptText = event.results[current][0].transcript;
       setTranscript(transcriptText);
+      announceSuccess(`Perintah suara diterima: ${transcriptText}`);
     };
 
     recognition.onend = () => {
       setIsListening(false);
+      announceAction("Pengenalan suara selesai");
+      // Akhiri voice command - resume accessibility
+      voiceConflictManager.endVoiceCommand();
     };
 
     recognition.onerror = (event: any) => {
@@ -72,7 +101,10 @@ const PlannerScreen: React.FC = () => {
         text: 'Terjadi kesalahan saat mengenali suara.',
         confirmButtonText: 'Baik'
       });
+      announceError("Terjadi kesalahan saat mengenali suara", "Silakan coba lagi atau gunakan keyboard");
       setIsListening(false);
+      // Akhiri voice command - resume accessibility
+      voiceConflictManager.endVoiceCommand();
     };
 
     recognition.start();
@@ -83,6 +115,9 @@ const PlannerScreen: React.FC = () => {
     
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     SpeechRecognition.stopListening();
+    
+    // Akhiri voice command - resume accessibility
+    voiceConflictManager.endVoiceCommand();
   };
 
   const handleGeneratePlan = async () => {
@@ -93,14 +128,19 @@ const PlannerScreen: React.FC = () => {
         text: 'Mohon masukkan deskripsi perjalanan Anda.',
         confirmButtonText: 'Baik'
       });
+      announceError("Deskripsi perjalanan belum diisi", "Silakan ketik atau ucapkan rencana perjalanan Anda terlebih dahulu");
       return;
     }
+    
     setIsLoading(true);
     setPlan(null);
+    announceAction("Memulai pembuatan rencana perjalanan", "AI sedang memproses permintaan Anda");
+    
     try {
       const result = await generateTripPlan(prompt);
       if (result) {
         setPlan(result);
+        announceSuccess(`Rencana perjalanan berhasil dibuat dengan judul: ${result.planTitle}. Total estimasi biaya: ${result.steps.reduce((total, step) => total + step.estimatedPrice, 0).toLocaleString('id-ID')} rupiah`);
       } else {
         Swal.fire({
           icon: 'error',
@@ -108,6 +148,7 @@ const PlannerScreen: React.FC = () => {
           text: 'Gagal membuat rencana. Silakan coba lagi.',
           confirmButtonText: 'Baik'
         });
+        announceError("Gagal membuat rencana perjalanan", "Silakan coba lagi dengan deskripsi yang lebih jelas");
       }
     } catch (e) {
       Swal.fire({
@@ -116,6 +157,7 @@ const PlannerScreen: React.FC = () => {
         text: 'Terjadi kesalahan saat berkomunikasi dengan AI.',
         confirmButtonText: 'Baik'
       });
+      announceError("Terjadi kesalahan saat berkomunikasi dengan AI", "Silakan periksa koneksi internet dan coba lagi");
     } finally {
       setIsLoading(false);
     }
@@ -140,6 +182,7 @@ const PlannerScreen: React.FC = () => {
             <textarea
               value={transcript || prompt}
               onChange={(e) => setPrompt(e.target.value)}
+              onFocus={() => announceElement("Kotak teks untuk deskripsi perjalanan", "Ketik atau paste rencana perjalanan Anda di sini")}
               placeholder={isListening ? "Mendengarkan..." : "Contoh: Saya ingin pergi dari Jakarta ke Yogyakarta untuk liburan akhir pekan depan. Saya berangkat Jumat malam dan kembali Minggu malam. Saya lebih suka kereta eksekutif."}
               className={`w-full p-3 pb-12 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors h-32 resize-none ${isListening ? 'animate-pulse' : ''}`}
               rows={4}
@@ -149,6 +192,14 @@ const PlannerScreen: React.FC = () => {
             <button
               onClick={browserSupportsSpeechRecognition ? (isListening ? stopListening : startListening) : undefined}
               disabled={!browserSupportsSpeechRecognition}
+              onFocus={() => announceElement(
+                browserSupportsSpeechRecognition 
+                  ? (isListening ? "Tombol berhenti mendengarkan" : "Tombol mulai mendengarkan perintah suara")
+                  : "Tombol voice recognition tidak tersedia",
+                browserSupportsSpeechRecognition 
+                  ? (isListening ? "Klik untuk berhenti mendengarkan" : "Klik untuk mulai mendengarkan perintah suara Anda")
+                  : "Browser tidak mendukung voice recognition"
+              )}
               className={`absolute right-3 bottom-3 p-2 rounded-full transition-all duration-300 hover:scale-110 ${
                 browserSupportsSpeechRecognition
                   ? isListening
@@ -182,20 +233,39 @@ const PlannerScreen: React.FC = () => {
           )}
 
           {}
-          <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
-            <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">
-              🎤 Contoh Voice Commands:
-            </h4>
-            <div className="text-xs text-blue-700 dark:text-blue-400 space-y-1">
-              <p>• "Saya ingin pergi dari Jakarta ke Yogyakarta akhir pekan depan"</p>
-              <p>• "Buatkan rencana perjalanan ke Bandung dengan kereta eksekutif"</p>
-              <p>• "Saya berangkat hari Jumat dan kembali hari Minggu"</p>
-              <p>• "Perjalanan ke Surabaya dengan budget lima ratus ribu"</p>
+          {showVoiceExamples && (
+          <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg relative">
+            {/* Close Button */}
+            <button
+              onClick={() => setShowVoiceExamples(false)}
+              className="absolute top-2 right-2 p-1 text-blue-600 dark:text-blue-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-white/50 dark:hover:bg-gray-800/50 rounded-full transition-all duration-200 group"
+              title="Tutup contoh voice commands"
+            >
+              <svg className="w-3 h-3 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            
+            <div className="pr-6">
+              <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">
+                🎤 Contoh Voice Commands:
+              </h4>
+              <div className="text-xs text-blue-700 dark:text-blue-400 space-y-1">
+                <p>• "Saya ingin pergi dari Jakarta ke Yogyakarta akhir pekan depan"</p>
+                <p>• "Buatkan rencana perjalanan ke Bandung dengan kereta eksekutif"</p>
+                <p>• "Saya berangkat hari Jumat dan kembali hari Minggu"</p>
+                <p>• "Perjalanan ke Surabaya dengan budget lima ratus ribu"</p>
+              </div>
             </div>
           </div>
+          )}
           <button
             onClick={handleGeneratePlan}
             disabled={isLoading}
+            onFocus={() => announceElement(
+              isLoading ? "Tombol sedang memproses" : "Tombol buat rencana perjalanan",
+              isLoading ? "Sedang memproses permintaan Anda" : "Klik untuk membuat rencana perjalanan dengan AI"
+            )}
             className="w-full flex items-center justify-center gap-2 bg-gradient-to-tr from-purple-600 to-blue-600 text-white font-bold py-3 px-4 rounded-xl shadow-md hover:bg-red-700 disabled:bg-red-400 dark:disabled:bg-red-800 transition-all transform hover:scale-105 disabled:scale-100"
           >
             {isLoading ? (

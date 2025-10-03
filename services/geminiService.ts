@@ -124,15 +124,22 @@ export const interpretSearchQuery = async (query: string): Promise<{ month?: num
  * Translates natural language voice commands into system actions
  * 
  * @param command - The voice command text from speech recognition
+ * @param currentPage - The current page context (optional)
  * @returns Object containing action, feedback message, and optional parameters
  */
-export const interpretVoiceCommand = async (command: string): Promise<{ action: string; feedback: string; params?: string } | null> => {
+export const interpretVoiceCommand = async (command: string, currentPage?: string): Promise<{ action: string; feedback: string; params?: string } | null> => {
     if (!API_KEY) return null;
     try {
         const response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
             contents: `You are an AI assistant for a train ticket management app called "KAI Access". 
             Analyze the user's voice command and translate it into a system action.
+            
+            IMPORTANT CONTEXT RULES:
+            1. If user asks to go to a page they're already on, respond with appropriate feedback
+            2. Prioritize context-specific actions over general navigation
+            3. Avoid unnecessary navigation if user is already in the correct section
+            4. Be more specific about what the user wants to do rather than just navigate
             
             Available actions and their variations:
             - DASHBOARD: "dashboard", "home", "beranda", "halaman utama", "pulang", "kembali ke awal"
@@ -152,15 +159,19 @@ export const interpretVoiceCommand = async (command: string): Promise<{ action: 
             - VOICE_SEARCH: "cari dengan suara", "voice search", "pencarian suara"
             
             User Command: "${command}"
+            ${currentPage ? `Current Page Context: User is currently on "${currentPage}" page.` : ''}
             
             Determine the most appropriate action and provide a natural feedback message in Indonesian.
             The feedback should be friendly and confirm what action is being taken.
+            Consider the context and avoid redundant navigation.
+            If the user is already on the requested page, provide appropriate feedback instead of navigating.
             
             Examples:
             - "buka dashboard" → action: "DASHBOARD", feedback: "Membuka Dashboard..."
-            - "pilih inter city" → action: "INTERCITY", feedback: "Membuka Inter City Booking..."
+            - "pilih inter city" → action: "INTERCITY", feedback: "Membuka Antar Kota Booking..."
             - "tampilkan kereta" → action: "SHOW_TRAIN_LIST", feedback: "Menampilkan daftar kereta..."
-            - "pesan tiket" → action: "BOOK_TICKET", feedback: "Memproses pemesanan tiket..."`,
+            - "pesan tiket" → action: "BOOK_TICKET", feedback: "Memproses pemesanan tiket..."
+            - "dashboard" (when already on dashboard) → action: "DASHBOARD", feedback: "Anda sudah berada di Dashboard"`,
             config: {
                 responseMimeType: "application/json",
                 responseSchema: {

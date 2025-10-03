@@ -42,7 +42,7 @@ export class TrainDataService {
     return data.trainServices.intercity.trains || [];
   }
 
-  static getLocalTrains(): TrainService[] {
+  static getLokalTrains(): TrainService[] {
     return data.trainServices.local.trains || [];
   }
 

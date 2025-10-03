@@ -36,7 +36,7 @@ const InterCityBookingScreen: React.FC<InterCityBookingScreenProps> = ({
     const handleBookTrain = (trainName: string, route: string) => {
         setSelectedServiceType(trainName);
         setBookingFormData({
-            serviceType: 'Inter City',
+            serviceType: 'Antar Kota',
             trainName,
             route,
             ...bookingForm
@@ -110,7 +110,7 @@ const InterCityBookingScreen: React.FC<InterCityBookingScreenProps> = ({
                         >
                             <ArrowLeftIcon className="w-6 h-6" />
                         </button>
-                        <h1 className="text-xl font-bold">Pemesanan Tiket Inter City</h1>
+                        <h1 className="text-xl font-bold">Pemesanan Tiket Antar Kota</h1>
                         <div></div>
                     </div>
                     <p className="text-sm opacity-90 mt-2 ml-10">{interCityService.description}</p>

@@ -5,6 +5,8 @@ import {
 } from '../components/icons/FeatureIcons';
 import { TrainDataService } from '../services/trainDataService';
 import Swal from 'sweetalert2';
+import { useAccessibility } from '../hooks/useAccessibility';
+import { voiceConflictManager } from '../services/voiceConflictManager';
 
 declare global {
     interface Window {
@@ -31,7 +33,7 @@ const ServiceButton: React.FC<{
 }> = ({ Icon, label, onClick, bgColor, iconColor = "white" }) => (
     <button 
         onClick={onClick}
-        className="flex flex-col items-center justify-center space-y-2 text-center group transition-all hover:scale-105"
+        className="flex flex-col items-center justify-center space-y-2 text-center group transition-all hover:scale-105 p-2"
     >
         <div className={`w-16 h-16 ${bgColor} rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow`}>
             <Icon className={`w-8 h-8 text-${iconColor}`} />
@@ -54,15 +56,36 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
     const [transcript, setTranscript] = useState('');
     const [browserSupportsSpeechRecognition, setBrowserSupportsSpeechRecognition] = useState(false);
 
+    // Accessibility hook
+    const { announcePage, announceElement, announceAction, announceError, announceSuccess, settings } = useAccessibility();
+
     useEffect(() => {
         const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
         if (SpeechRecognition) {
             setBrowserSupportsSpeechRecognition(true);
         }
+
+        // Announce halaman saat pertama kali dibuka
+        if (settings.enabled) {
+            announcePage({
+                pageTitle: "Dashboard",
+                pageDescription: "Halaman utama aplikasi KAI Access. Di sini Anda dapat melihat ringkasan perjalanan, mencari layanan, dan mengakses fitur-fitur utama.",
+                availableActions: [
+                    "mencari hotel, tiket kereta, atau rental mobil menggunakan kotak pencarian",
+                    "menggunakan perintah suara untuk pencarian",
+                    "mengakses layanan Antar Kota untuk kereta jarak jauh",
+                    "mengakses layanan Commuter Line untuk kereta lokal",
+                    "melihat tiket yang sudah dibeli",
+                    "mengakses AI Trip Planner untuk merencanakan perjalanan",
+                    "mengelola akun dan pengaturan"
+                ],
+                voiceInstructions: "Anda bisa menggunakan kotak pencarian untuk mencari layanan yang diinginkan, atau klik tombol mikrofon untuk pencarian dengan suara. Gunakan tombol layanan untuk mengakses fitur-fitur utama."
+            });
+        }
         
         console.log('Testing search functionality...');
         TrainDataService.testSearch();
-    }, []);
+    }, [settings.enabled, announcePage]);
 
     const startListening = () => {
         if (!browserSupportsSpeechRecognition) {
@@ -75,6 +98,9 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
             return;
         }
 
+        // Mulai voice command - pause accessibility
+        voiceConflictManager.startVoiceCommand();
+
         const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
         const recognition = new SpeechRecognition();
         
@@ -85,6 +111,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
         recognition.onstart = () => {
             setIsListening(true);
             setTranscript('');
+            announceAction("Mendengarkan perintah pencarian", "Silakan sebutkan apa yang ingin Anda cari");
         };
 
         recognition.onresult = (event) => {
@@ -92,6 +119,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
             setTranscript(currentTranscript);
             setSearchQuery(currentTranscript);
             handleSearchInput(currentTranscript);
+            announceSuccess(`Pencarian dengan suara: ${currentTranscript}`);
         };
 
         recognition.onerror = (event) => {
@@ -101,11 +129,17 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
               text: 'Terjadi kesalahan saat mengenali suara.',
               confirmButtonText: 'Baik'
             });
+            announceError("Terjadi kesalahan saat mengenali suara", "Silakan coba lagi atau gunakan keyboard");
             setIsListening(false);
+            // Akhiri voice command - resume accessibility
+            voiceConflictManager.endVoiceCommand();
         };
 
         recognition.onend = () => {
             setIsListening(false);
+            announceAction("Pengenalan suara selesai");
+            // Akhiri voice command - resume accessibility
+            voiceConflictManager.endVoiceCommand();
         };
 
         recognition.start();
@@ -438,8 +472,8 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                         console.log('Should show results:', shouldShow);
                         return shouldShow;
                     })() && (
-                        <div className="mt-4 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 max-h-80 overflow-y-auto">
-                            <div className="sticky top-0 bg-white/60 backdrop-blur-sm rounded-t-2xl px-4 py-3 border-b border-white/20">
+                        <div className="mt-4 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20">
+                            <div className="bg-white/10 backdrop-blur-sm rounded-t-2xl px-4 py-3 border-b border-white/20">
                                 <div className="flex justify-between items-center">
                                     <h3 className="text-lg font-semibold text-white">
                                         Hasil Pencarian ({searchResults.length})
@@ -453,7 +487,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                                 </div>
                             </div>
                             
-                            <div className="px-4 pb-4">
+                            <div className="px-4 pb-4 max-h-64 overflow-y-auto">
                                 <div className="pt-4">
                                     <SearchResults />
                                 </div>
@@ -509,17 +543,17 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                 <div className="space-y-4">
                     <div className="space-y-2">
                         <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Layanan Kereta</h3>
-                        <div className="flex space-x-4 overflow-x-auto pb-2 scrollbar-hide">
-                            <div className="flex space-x-4 min-w-max">
+                        <div className="flex space-x-2 overflow-x-auto pb-2 pt-1 scrollbar-hide">
+                            <div className="flex space-x-2 min-w-max">
                                 <ServiceButton 
                                     Icon={TrainIcon} 
-                                    label="Inter City" 
+                                    label="Antar Kota" 
                                     onClick={() => setActiveTab(NavigationTab.InterCityBooking)}
                                     bgColor="bg-blue-500"
                                 />
                                 <ServiceButton 
                                     Icon={TrainIcon} 
-                                    label="Local" 
+                                    label="Lokal" 
                                     onClick={() => setActiveTab(NavigationTab.InterCityBooking)}
                                     bgColor="bg-orange-500"
                                 />
@@ -547,8 +581,8 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
 
                     <div className="space-y-2">
                         <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Layanan Lainnya</h3>
-                        <div className="flex space-x-4 overflow-x-auto pb-2 scrollbar-hide">
-                            <div className="flex space-x-4 min-w-max">
+                        <div className="flex space-x-2 overflow-x-auto pb-1 scrollbar-hide">
+                            <div className="flex space-x-2 min-w-max">
                                 <ServiceButton 
                                     Icon={BuildingIcon} 
                                     label="Hotel" 
