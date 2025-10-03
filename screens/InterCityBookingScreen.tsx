@@ -48,7 +48,7 @@ const InterCityBookingScreen: React.FC<InterCityBookingScreenProps> = ({
                 icon: 'warning',
                 title: 'Perhatian!',
                 text: 'Mohon lengkapi semua field terlebih dahulu',
-                confirmButtonText: 'OK'
+                confirmButtonText: 'Baik'
             });
         }
     };

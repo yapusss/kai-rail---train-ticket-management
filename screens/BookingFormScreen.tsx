@@ -46,9 +46,9 @@ const BookingFormScreen: React.FC<BookingFormScreenProps> = ({
     if (formData.departureStation === formData.arrivalStation) {
       Swal.fire({
         icon: 'error',
-        title: 'Error!',
+        title: 'Kesalahan!',
         text: 'Stasiun asal dan tujuan tidak boleh sama',
-        confirmButtonText: 'OK'
+        confirmButtonText: 'Baik'
       });
       return;
     }

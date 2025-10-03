@@ -17,9 +17,9 @@ const MOCK_NOTIFICATION_COUNT = 52;
 
 const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return "Good Morning";
-    if (hour < 18) return "Good Afternoon";
-    return "Good Evening";
+    if (hour < 12) return "Selamat Pagi";
+    if (hour < 18) return "Selamat Siang";
+    return "Selamat Malam";
 };
 
 const ServiceButton: React.FC<{ 
@@ -68,9 +68,9 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
         if (!browserSupportsSpeechRecognition) {
             Swal.fire({
                 icon: 'error',
-                title: 'Error!',
+                title: 'Kesalahan!',
                 text: 'Browser Anda tidak mendukung voice recognition',
-                confirmButtonText: 'OK'
+                confirmButtonText: 'Baik'
             });
             return;
         }
@@ -322,7 +322,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                                     <p>Harga: ${result.displayPrice || TrainDataService.formatPrice(result.price || 0)}</p>
                                     <p class="mt-3 text-gray-600">Fitur booking akan segera tersedia.</p>
                                 </div>`,
-                                confirmButtonText: 'OK'
+                                confirmButtonText: 'Baik'
                             })}
                             className={`w-full py-2 text-white font-semibold rounded-lg transition-colors ${
                                 result.type === 'hotel' ? 'bg-blue-500 hover:bg-blue-600' :
@@ -341,13 +341,11 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        {}
+        <div className="bg-gray-50 dark:bg-gray-900">
             <div className="relative bg-gradient-to-br from-purple-600 to-blue-600 text-white p-6 rounded-b-3xl">
                 <div className="relative z-10">
-                    {}
-                    <div className="flex items-center justify-between mb-6">
-                    {}                        <div className="flex items-center space-x-4">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center space-x-4">
                       
                             <div>
                                 <h1 className="text-2xl font-bold text-white">{getGreeting()}</h1>
@@ -355,9 +353,8 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                             </div>
                         </div>
 
-                        {}                        <div className="flex items-center space-x-3">
-                        {}                        
-                            {}                            <button 
+                        <div className="flex items-center space-x-3">
+                            <button 
                                 onClick={handleNotificationClick}
                                 className="relative p-3 bg-white/20 rounded-full hover:bg-white/30 transition-colors"
                             >
@@ -371,7 +368,6 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                         </div>
                     </div>
                     
-        {}
                     <div className="relative">
                         <div className="relative">
                             <input
@@ -391,7 +387,6 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                                 )}
                             </div>
                             <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
-        {}
                                 <button
                                     onClick={isListening ? stopListening : startListening}
                                     className={`p-2 rounded-full transition-colors ${
@@ -400,8 +395,8 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                                             : 'text-white/70 hover:text-white hover:bg-white/20'
                                     } ${!browserSupportsSpeechRecognition ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     title={browserSupportsSpeechRecognition 
-                                        ? (isListening ? 'Stop listening' : 'Start voice search')
-                                        : 'Voice recognition not supported'
+                                        ? (isListening ? 'Berhenti mendengarkan' : 'Mulai pencarian suara')
+                                        : 'Pengenalan suara tidak didukung'
                                     }
                                     disabled={!browserSupportsSpeechRecognition}
                                 >
@@ -427,7 +422,6 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                         </div>
                     </div>
 
-        {}
                     {(() => {
                         console.log('Rendering search results section - showSearchResults:', showSearchResults, 'searchResults.length:', searchResults.length);
                         const shouldShow = searchResults.length > 0;
@@ -435,7 +429,6 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                         return shouldShow;
                     })() && (
                         <div className="mt-4 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 max-h-80 overflow-y-auto">
-        {}
                             <div className="sticky top-0 bg-white/60 backdrop-blur-sm rounded-t-2xl px-4 py-3 border-b border-white/20">
                                 <div className="flex justify-between items-center">
                                     <h3 className="text-lg font-semibold text-white">
@@ -450,7 +443,6 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                                 </div>
                             </div>
                             
-        {}
                             <div className="px-4 pb-4">
                                 <div className="pt-4">
                                     <SearchResults />
@@ -459,7 +451,6 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                         </div>
                     )}
 
-        {}
                     {searchQuery && !isSearching && searchResults.length === 0 && (
                         <div className="mt-4 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/20 p-6">
                             <div className="text-center">
@@ -498,22 +489,16 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                         </div>
                     )}
                     
-                          {}
 
                     
-        {}
-                            {}
 
                 </div>
             </div>
 
-        {}
-            <div className="p-4 space-y-6">
-        {}
+            <div className="p-4 space-y-4">
                 <div className="space-y-4">
-        {}
                     <div className="space-y-2">
-                        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Train Services</h3>
+                        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Layanan Kereta</h3>
                         <div className="flex space-x-4 overflow-x-auto pb-2 scrollbar-hide">
                             <div className="flex space-x-4 min-w-max">
                                 <ServiceButton 
@@ -550,41 +535,40 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                         </div>
                     </div>
 
-        {}
                     <div className="space-y-2">
-                        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Other Services</h3>
+                        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Layanan Lainnya</h3>
                         <div className="flex space-x-4 overflow-x-auto pb-2 scrollbar-hide">
                             <div className="flex space-x-4 min-w-max">
                                 <ServiceButton 
                                     Icon={BuildingIcon} 
-                                    label="Hotels" 
+                                    label="Hotel" 
                                     onClick={() => Swal.fire({
                                         icon: 'info',
-                                        title: '🏨 Hotel Services',
-                                        text: 'Coming Soon',
-                                        confirmButtonText: 'OK'
+                                        title: '🏨 Layanan Hotel',
+                                        text: 'Segera Hadir',
+                                        confirmButtonText: 'Baik'
                                     })}
                                     bgColor="bg-green-500"
                                 />
                                 <ServiceButton 
                                     Icon={PackageIcon} 
-                                    label="Logistics" 
+                                    label="Logistik" 
                                     onClick={() => Swal.fire({
                                         icon: 'info',
-                                        title: '📦 Logistics Services',
-                                        text: 'Coming Soon',
-                                        confirmButtonText: 'OK'
+                                        title: '📦 Layanan Logistik',
+                                        text: 'Segera Hadir',
+                                        confirmButtonText: 'Baik'
                                     })}
                                     bgColor="bg-yellow-500"
                                 />
                                 <ServiceButton 
                                     Icon={MoreIcon} 
-                                    label="More" 
+                                    label="Lainnya" 
                                     onClick={() => Swal.fire({
                                         icon: 'info',
-                                        title: '🔧 More Services',
-                                        text: 'Coming Soon',
-                                        confirmButtonText: 'OK'
+                                        title: '🔧 Layanan Lainnya',
+                                        text: 'Segera Hadir',
+                                        confirmButtonText: 'Baik'
                                     })}
                                     bgColor="bg-gray-500"
                                 />
@@ -593,11 +577,10 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                     </div>
                 </div>
 
-        {}
-                <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl p-6 text-white">
+                <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl p-4 text-white">
                     <div className="flex items-center justify-between mb-4">
                         <div>
-                            <h3 className="text-xl font-bold mb-2">AI Trip Planner</h3>
+                            <h3 className="text-xl font-bold mb-2">Perencana Perjalanan AI</h3>
                             <p className="text-white/80 text-sm">Rencanakan perjalanan Anda dengan AI</p>
                         </div>
                         <SparklesIcon className="w-8 h-8 text-white/80" />
@@ -606,15 +589,14 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                         onClick={() => setActiveTab(NavigationTab.Planner)}
                         className="w-full py-3 bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl text-white font-semibold hover:bg-white/30 transition-colors"
                     >
-                        CREATE Plan
+                        BUAT RENCANA
                     </button>
             </div>
 
-        {}
-                <div className="bg-gradient-to-r from-orange-400 to-red-500 rounded-2xl p-6 text-white">
+                <div className="bg-gradient-to-r from-orange-400 to-red-500 rounded-2xl p-4 text-white">
                     <div className="flex items-center justify-between">
             <div>
-                            <h3 className="text-xl font-bold mb-2">Special Offer</h3>
+                            <h3 className="text-xl font-bold mb-2">Penawaran Spesial</h3>
                             <p className="text-white/80 text-sm">Diskon hingga 50% untuk perjalanan liburan</p>
                         </div>
                         <TrophyIcon className="w-8 h-8 text-white/80" />
@@ -624,6 +606,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                     </button>
                 </div>
             </div>
+            <div className="pb-2"></div>
         </div>
     );
 };

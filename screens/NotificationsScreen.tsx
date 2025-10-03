@@ -59,7 +59,6 @@ const NotificationsScreen: React.FC<NotificationsScreenProps> = ({ setActiveTab 
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-            {}
             <div className="bg-gradient-to-br from-purple-600 to-blue-600 text-white p-4 rounded-b-3xl">
                 <div className="flex items-center justify-between">
                     <button
@@ -73,7 +72,6 @@ const NotificationsScreen: React.FC<NotificationsScreenProps> = ({ setActiveTab 
                 </div>
             </div>
 
-            {}
             <div className="p-4 space-y-4">
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
@@ -130,7 +128,6 @@ const NotificationsScreen: React.FC<NotificationsScreenProps> = ({ setActiveTab 
                     ))}
                 </div>
 
-                {}
                 <div className="text-center pt-4">
                     <button className="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
                         Muat Lebih Banyak

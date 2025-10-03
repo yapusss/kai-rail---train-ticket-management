@@ -101,7 +101,7 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
         icon: 'success',
         title: 'Berhasil!',
         text: 'Pembayaran berhasil! Terima kasih.',
-        confirmButtonText: 'OK'
+        confirmButtonText: 'Baik'
     });
     setActiveTab(NavigationTab.Tickets);
   };

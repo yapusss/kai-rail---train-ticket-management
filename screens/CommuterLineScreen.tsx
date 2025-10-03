@@ -232,7 +232,7 @@ const CommuterLineScreen: React.FC<CommuterLineScreenProps> = ({
                                         icon: 'warning',
                                         title: 'Perhatian!',
                                         text: 'Mohon pilih stasiun keberangkatan dan tujuan',
-                                        confirmButtonText: 'OK'
+                                        confirmButtonText: 'Baik'
                                     });
                                 }
                             }}

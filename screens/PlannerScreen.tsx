@@ -297,9 +297,9 @@ const PlannerScreen: React.FC = () => {
                     onClick={() => {
                       Swal.fire({
                           icon: 'info',
-                          title: 'Info',
+                          title: 'Informasi',
                           text: 'Fitur booking akan segera tersedia!',
-                          confirmButtonText: 'OK'
+                          confirmButtonText: 'Baik'
                       });
                       closeModal();
                     }}

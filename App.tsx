@@ -157,12 +157,9 @@ const App: React.FC = () => {
   return (
     <div className="bg-gray-200 dark:bg-black min-h-screen flex items-center justify-center p-4 font-sans">
       <div className="w-full max-w-sm h-[800px] max-h-[90vh] bg-white dark:bg-gray-900 rounded-3xl shadow-2xl overflow-hidden flex flex-col relative">
-        {}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-gray-900 dark:bg-black rounded-b-xl z-20"></div>
 
-        {}
         <header className="relative flex items-center justify-between p-4 pt-8 bg-gradient-to-tr from-purple-600 to-blue-600 backdrop-blur-sm z-10">
-        {}
           <div className="absolute inset-0 bg-gradient-to-tr from-purple-600 to-blue-600"></div>
           <div className="absolute top-0 left-0 w-full h-full opacity-20">
             <div className="absolute top-4 left-4 w-2 h-2 bg-white rounded-full"></div>
@@ -186,7 +183,6 @@ const App: React.FC = () => {
           </div>
           
           <div className="relative z-10 flex items-center space-x-3">
-        {}
             <button
               onClick={browserSupportsSpeechRecognition ? () => {
                 if (listening) {
@@ -204,11 +200,10 @@ const App: React.FC = () => {
                   : 'bg-gray-400 cursor-not-allowed'
               }`}
               title={browserSupportsSpeechRecognition 
-                ? (listening ? 'Stop Voice Command' : 'Start Voice Command')
-                : 'Voice recognition not supported'
+                ? (listening ? 'Berhenti Perintah Suara' : 'Mulai Perintah Suara')
+                : 'Pengenalan suara tidak didukung'
               }
             >
-        {}
               {listening && (
                 <>
                   <div className="absolute inset-0 rounded-full border-2 border-green-400 animate-ping"></div>
@@ -228,7 +223,6 @@ const App: React.FC = () => {
               )}
             </button>
             
-            {}
             <button
               onClick={toggleTheme}
               className="p-3 rounded-full bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 transition-all duration-300 hover:scale-110 shadow-lg"
@@ -242,7 +236,6 @@ const App: React.FC = () => {
           </div>
         </header>
 
-        {}
         {voiceCommandFeedback && (
           <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg animate-pulse">
             <div className="flex items-center gap-2">
@@ -254,12 +247,10 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {}
         <main className="flex-grow overflow-y-auto pb-20">
           {renderScreen()}
         </main>
 
-        {}
         {activeTab !== NavigationTab.Notifications && (
           <BottomNavBar activeTab={activeTab} setActiveTab={setActiveTab} />
         )}
