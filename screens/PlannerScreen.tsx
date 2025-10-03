@@ -9,7 +9,6 @@ const PlannerScreen: React.FC = () => {
   const [prompt, setPrompt] = useState('');
   const [plan, setPlan] = useState<TripPlan | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [selectedTrain, setSelectedTrain] = useState<any>(null);
   const [showModal, setShowModal] = useState(false);
   
@@ -67,7 +66,12 @@ const PlannerScreen: React.FC = () => {
     };
 
     recognition.onerror = (event: any) => {
-      console.error('Speech recognition error:', event.error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Kesalahan Suara',
+        text: 'Terjadi kesalahan saat mengenali suara.',
+        confirmButtonText: 'Baik'
+      });
       setIsListening(false);
     };
 
@@ -83,119 +87,135 @@ const PlannerScreen: React.FC = () => {
 
   const handleGeneratePlan = async () => {
     if (!prompt) {
-      setError("Mohon masukkan deskripsi perjalanan Anda.");
+      Swal.fire({
+        icon: 'warning',
+        title: 'Perhatian',
+        text: 'Mohon masukkan deskripsi perjalanan Anda.',
+        confirmButtonText: 'Baik'
+      });
       return;
     }
     setIsLoading(true);
-    setError(null);
     setPlan(null);
     try {
       const result = await generateTripPlan(prompt);
       if (result) {
         setPlan(result);
       } else {
-        setError("Gagal membuat rencana. Silakan coba lagi.");
+        Swal.fire({
+          icon: 'error',
+          title: 'Gagal',
+          text: 'Gagal membuat rencana. Silakan coba lagi.',
+          confirmButtonText: 'Baik'
+        });
       }
     } catch (e) {
-      setError("Terjadi kesalahan saat berkomunikasi dengan AI.");
+      Swal.fire({
+        icon: 'error',
+        title: 'Kesalahan',
+        text: 'Terjadi kesalahan saat berkomunikasi dengan AI.',
+        confirmButtonText: 'Baik'
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="p-4 space-y-6">
-      <div className="text-center">
-        <div className="flex justify-center items-center gap-2">
-            <PlannerIcon className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-            <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">AI Trip Planner</h2>
+    <div className="space-y-6">
+      <div className="bg-gradient-to-br from-purple-600 to-blue-600 text-white p-4 rounded-b-3xl">
+        <div className="flex items-center justify-start">
+          <div className="p-2">
+            <PlannerIcon className="w-6 h-6" />
+          </div>
+          <h1 className="text-xl font-bold">AI Trip Planner</h1>
+          <div></div>
         </div>
-        <p className="text-gray-600 dark:text-gray-400 mt-1">
-          Deskripsikan perjalanan impian Anda, dan biarkan AI merancangnya.
-        </p>
+        <p className="text-sm opacity-90 mt-2 ml-10">Deskripsikan perjalanan impian Anda, dan biarkan AI merancangnya</p>
       </div>
 
-      <div className="space-y-4">
-        <div className="relative">
-          <textarea
-            value={transcript || prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder={isListening ? "Mendengarkan..." : "Contoh: Saya ingin pergi dari Jakarta ke Yogyakarta untuk liburan akhir pekan depan. Saya berangkat Jumat malam dan kembali Minggu malam. Saya lebih suka kereta eksekutif."}
-            className={`w-full p-3 pb-12 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors h-32 resize-none ${isListening ? 'animate-pulse' : ''}`}
-            rows={4}
-          />
-          
-        {}
+      <div className="p-4 space-y-6">
+        <div className="space-y-4">
+          <div className="relative">
+            <textarea
+              value={transcript || prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder={isListening ? "Mendengarkan..." : "Contoh: Saya ingin pergi dari Jakarta ke Yogyakarta untuk liburan akhir pekan depan. Saya berangkat Jumat malam dan kembali Minggu malam. Saya lebih suka kereta eksekutif."}
+              className={`w-full p-3 pb-12 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors h-32 resize-none ${isListening ? 'animate-pulse' : ''}`}
+              rows={4}
+            />
+            
+          {}
+            <button
+              onClick={browserSupportsSpeechRecognition ? (isListening ? stopListening : startListening) : undefined}
+              disabled={!browserSupportsSpeechRecognition}
+              className={`absolute right-3 bottom-3 p-2 rounded-full transition-all duration-300 hover:scale-110 ${
+                browserSupportsSpeechRecognition
+                  ? isListening
+                    ? 'bg-red-500 hover:bg-red-600 text-white'
+                    : 'bg-blue-500 hover:bg-blue-600 text-white'
+                  : 'bg-gray-400 cursor-not-allowed text-white'
+              }`}
+              title={browserSupportsSpeechRecognition 
+                ? (isListening ? 'Stop Voice Input' : 'Start Voice Input')
+                : 'Voice recognition not supported'
+              }
+            >
+              {isListening ? (
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+              ) : (
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" />
+                </svg>
+              )}
+            </button>
+          </div>
+
+          {}
+          {isListening && (
+            <div className="flex items-center justify-center gap-2 text-sm text-blue-600 dark:text-blue-400">
+              <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+              <span>Mendengarkan... Bicaralah sekarang</span>
+            </div>
+          )}
+
+          {}
+          <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+            <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">
+              🎤 Contoh Voice Commands:
+            </h4>
+            <div className="text-xs text-blue-700 dark:text-blue-400 space-y-1">
+              <p>• "Saya ingin pergi dari Jakarta ke Yogyakarta akhir pekan depan"</p>
+              <p>• "Buatkan rencana perjalanan ke Bandung dengan kereta eksekutif"</p>
+              <p>• "Saya berangkat hari Jumat dan kembali hari Minggu"</p>
+              <p>• "Perjalanan ke Surabaya dengan budget lima ratus ribu"</p>
+            </div>
+          </div>
           <button
-            onClick={browserSupportsSpeechRecognition ? (isListening ? stopListening : startListening) : undefined}
-            disabled={!browserSupportsSpeechRecognition}
-            className={`absolute right-3 bottom-3 p-2 rounded-full transition-all duration-300 hover:scale-110 ${
-              browserSupportsSpeechRecognition
-                ? isListening
-                  ? 'bg-red-500 hover:bg-red-600 text-white'
-                  : 'bg-blue-500 hover:bg-blue-600 text-white'
-                : 'bg-gray-400 cursor-not-allowed text-white'
-            }`}
-            title={browserSupportsSpeechRecognition 
-              ? (isListening ? 'Stop Voice Input' : 'Start Voice Input')
-              : 'Voice recognition not supported'
-            }
+            onClick={handleGeneratePlan}
+            disabled={isLoading}
+            className="w-full flex items-center justify-center gap-2 bg-gradient-to-tr from-purple-600 to-blue-600 text-white font-bold py-3 px-4 rounded-xl shadow-md hover:bg-red-700 disabled:bg-red-400 dark:disabled:bg-red-800 transition-all transform hover:scale-105 disabled:scale-100"
           >
-            {isListening ? (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
+            {isLoading ? (
+              <>
+                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Merancang...</span>
+              </>
             ) : (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" />
-              </svg>
+              <>
+                <SparklesIcon className="w-5 h-5" />
+                <span>Buat Rencana</span>
+              </>
             )}
           </button>
         </div>
-
-        {}
-        {isListening && (
-          <div className="flex items-center justify-center gap-2 text-sm text-blue-600 dark:text-blue-400">
-            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-            <span>Mendengarkan... Bicaralah sekarang</span>
-          </div>
-        )}
-
-        {}
-        <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
-          <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">
-            🎤 Contoh Voice Commands:
-          </h4>
-          <div className="text-xs text-blue-700 dark:text-blue-400 space-y-1">
-            <p>• "Saya ingin pergi dari Jakarta ke Yogyakarta akhir pekan depan"</p>
-            <p>• "Buatkan rencana perjalanan ke Bandung dengan kereta eksekutif"</p>
-            <p>• "Saya berangkat hari Jumat dan kembali hari Minggu"</p>
-            <p>• "Perjalanan ke Surabaya dengan budget lima ratus ribu"</p>
-          </div>
-        </div>
-        <button
-          onClick={handleGeneratePlan}
-          disabled={isLoading}
-          className="w-full flex items-center justify-center gap-2 bg-gradient-to-tr from-purple-600 to-blue-600 text-white font-bold py-3 px-4 rounded-xl shadow-md hover:bg-red-700 disabled:bg-red-400 dark:disabled:bg-red-800 transition-all transform hover:scale-105 disabled:scale-100"
-        >
-          {isLoading ? (
-            <>
-              <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              <span>Merancang...</span>
-            </>
-          ) : (
-            <>
-              <SparklesIcon className="w-5 h-5" />
-              <span>Buat Rencana</span>
-            </>
-          )}
-        </button>
       </div>
-      
-      {error && <p className="text-center text-red-500">{error}</p>}
+
 
       {plan && (
         <div className="space-y-4 bg-gray-50 dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700">

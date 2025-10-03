@@ -9,6 +9,7 @@ import {
   LogisticsService,
   InsuranceService
 } from '../data/types';
+import Swal from 'sweetalert2';
 
 const data = trainServicesData as unknown as TrainServicesData;
 
@@ -160,7 +161,12 @@ export class TrainDataService {
       console.log('All hotels:', hotels);
       return hotels;
     } catch (error) {
-      console.error('Error getting hotels:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Kesalahan Data',
+        text: 'Terjadi kesalahan saat mengambil data hotel.',
+        confirmButtonText: 'Baik'
+      });
       return [];
     }
   }
@@ -185,7 +191,12 @@ export class TrainDataService {
       console.log('All car rentals:', carRentals);
       return carRentals;
     } catch (error) {
-      console.error('Error getting car rentals:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Kesalahan Data',
+        text: 'Terjadi kesalahan saat mengambil data rental mobil.',
+        confirmButtonText: 'Baik'
+      });
       return [];
     }
   }
@@ -291,7 +302,12 @@ export class TrainDataService {
         insurance
       };
     } catch (error) {
-      console.error('Error in searchAllServices:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Kesalahan Pencarian',
+        text: 'Terjadi kesalahan saat melakukan pencarian.',
+        confirmButtonText: 'Baik'
+      });
       return {
         trains: [],
         hotels: [],

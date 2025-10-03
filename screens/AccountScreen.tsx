@@ -70,7 +70,6 @@ const AccountScreen: React.FC = () => {
 
   const handleMenuClick = (option: MenuOption) => {
     if (option === 'bahasa') {
-      // Toggle language directly, no separate screen
       setLanguage(language === 'IN' ? 'EN' : 'IN');
       return;
     }
@@ -568,7 +567,7 @@ const AccountScreen: React.FC = () => {
 
   return (
     <div className="p-4 space-y-6">
-      {/* Header */}
+      {}
       <div className="flex flex-col items-center space-y-3">
         <div className="w-20 h-20 rounded-full border-4 border-blue-500 shadow-lg overflow-hidden">
           <img
@@ -583,7 +582,7 @@ const AccountScreen: React.FC = () => {
         </div>
       </div>
 
-      {/* Menu Options */}
+      {}
       <div className="space-y-3">
         <MenuItem 
           icon={

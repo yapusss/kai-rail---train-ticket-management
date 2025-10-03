@@ -95,7 +95,12 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
         };
 
         recognition.onerror = (event) => {
-            console.error('Speech recognition error:', event.error);
+            Swal.fire({
+              icon: 'error',
+              title: 'Kesalahan Suara',
+              text: 'Terjadi kesalahan saat mengenali suara.',
+              confirmButtonText: 'Baik'
+            });
             setIsListening(false);
         };
 
@@ -216,7 +221,12 @@ const DashboardScreen: React.FC<DashboardScreenProps> = ({ setActiveTab }) => {
                     console.log('After state update - showSearchResults should be true, results length:', allResults.length);
                 }, 100);
             } catch (error) {
-                console.error('Search error:', error);
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Kesalahan Pencarian',
+                  text: 'Terjadi kesalahan saat melakukan pencarian.',
+                  confirmButtonText: 'Baik'
+                });
                 setSearchResults([]);
                 setShowSearchResults(false);
                 setIsSearching(false);

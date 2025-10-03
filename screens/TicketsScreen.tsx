@@ -280,7 +280,12 @@ const TicketsScreen: React.FC = () => {
         };
         
         recognition.onerror = (event: any) => {
-            console.error('Speech recognition error', event.error);
+            Swal.fire({
+              icon: 'error',
+              title: 'Kesalahan Suara',
+              text: 'Terjadi kesalahan saat mengenali suara.',
+              confirmButtonText: 'Baik'
+            });
             setIsListening(false);
         };
     }, [recognition]);
@@ -446,258 +451,280 @@ const TicketsScreen: React.FC = () => {
 
     if (showTicketDetail && selectedTicket) {
         return (
-            <div className="p-4">
-                <div className="flex items-center mb-6">
-                    <button
-                        onClick={closeTicketDetail}
-                        className="mr-4 p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"
-                    >
-                        <svg className="w-6 h-6 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </button>
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">Detail Tiket</h2>
+            <div>
+                <div className="bg-gradient-to-br from-purple-600 to-blue-600 text-white p-4 rounded-b-3xl mb-6">
+                    <div className="flex items-center justify-start">
+                        <button
+                            onClick={closeTicketDetail}
+                            className="p-2 hover:bg-white/10 rounded-full transition-colors"
+                        >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        <div className="ml-4">
+                            <h1 className="text-xl font-bold">Detail Tiket</h1>
+                            <p className="text-sm opacity-90">Informasi lengkap tiket Anda</p>
+                        </div>
+                    </div>
                 </div>
                 
-                <div className="space-y-4">
-                    <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-                        <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">Kode Booking</h4>
-                        <p className="text-2xl font-bold text-blue-900 dark:text-blue-200">{selectedTicket.bookingCode}</p>
-                    </div>
+                <div className="p-4">
+                    <div className="space-y-4">
+                        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                            <h4 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">Kode Booking</h4>
+                            <p className="text-2xl font-bold text-blue-900 dark:text-blue-200">{selectedTicket.bookingCode}</p>
+                        </div>
 
-                    <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                        <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-3">Informasi Perjalanan</h4>
-                        <div className="space-y-2 text-sm">
-                            <div className="flex justify-between">
-                                <span className="text-gray-600 dark:text-gray-300">Kereta:</span>
-                                <span className="font-medium text-gray-900 dark:text-white">{selectedTicket.trainName}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-600 dark:text-gray-300">Kelas:</span>
-                                <span className="font-medium text-gray-900 dark:text-white">{selectedTicket.trainClass}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-600 dark:text-gray-300">Rute:</span>
-                                <span className="font-medium text-gray-900 dark:text-white">{selectedTicket.departure.station} → {selectedTicket.arrival.station}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-600 dark:text-gray-300">Keberangkatan:</span>
-                                <span className="font-medium text-gray-900 dark:text-white">
-                                    {(() => {
-                                        const date = new Date(selectedTicket.departure.time);
-                                        return isNaN(date.getTime()) ? 'Invalid Date' : date.toLocaleString('id-ID');
-                                    })()}
-                                </span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-600 dark:text-gray-300">Kedatangan:</span>
-                                <span className="font-medium text-gray-900 dark:text-white">
-                                    {(() => {
-                                        const date = new Date(selectedTicket.arrival.time);
-                                        return isNaN(date.getTime()) ? 'Invalid Date' : date.toLocaleString('id-ID');
-                                    })()}
-                                </span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-600 dark:text-gray-300">Harga:</span>
-                                <span className="font-bold text-green-600 dark:text-green-400">Rp {selectedTicket.price.toLocaleString('id-ID')}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-gray-600 dark:text-gray-300">Status:</span>
-                                <span className={`px-2 py-1 text-xs rounded-full ${
-                                    selectedTicket.status === 'active' ? 'bg-green-100 text-green-800' :
-                                    selectedTicket.status === 'completed' ? 'bg-blue-100 text-blue-800' :
-                                    'bg-red-100 text-red-800'
-                                }`}>
-                                    {selectedTicket.status === 'active' ? 'Aktif' :
-                                     selectedTicket.status === 'completed' ? 'Selesai' : 'Dibatalkan'}
-                                </span>
+                        <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-3">Informasi Perjalanan</h4>
+                            <div className="space-y-2 text-sm">
+                                <div className="flex justify-between">
+                                    <span className="text-gray-600 dark:text-gray-300">Kereta:</span>
+                                    <span className="font-medium text-gray-900 dark:text-white">{selectedTicket.trainName}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-600 dark:text-gray-300">Kelas:</span>
+                                    <span className="font-medium text-gray-900 dark:text-white">{selectedTicket.trainClass}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-600 dark:text-gray-300">Rute:</span>
+                                    <span className="font-medium text-gray-900 dark:text-white">{selectedTicket.departure.station} → {selectedTicket.arrival.station}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-600 dark:text-gray-300">Keberangkatan:</span>
+                                    <span className="font-medium text-gray-900 dark:text-white">
+                                        {(() => {
+                                            const date = new Date(selectedTicket.departure.time);
+                                            return isNaN(date.getTime()) ? 'Invalid Date' : date.toLocaleString('id-ID');
+                                        })()}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-600 dark:text-gray-300">Kedatangan:</span>
+                                    <span className="font-medium text-gray-900 dark:text-white">
+                                        {(() => {
+                                            const date = new Date(selectedTicket.arrival.time);
+                                            return isNaN(date.getTime()) ? 'Invalid Date' : date.toLocaleString('id-ID');
+                                        })()}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-600 dark:text-gray-300">Harga:</span>
+                                    <span className="font-bold text-green-600 dark:text-green-400">Rp {selectedTicket.price.toLocaleString('id-ID')}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-gray-600 dark:text-gray-300">Status:</span>
+                                    <span className={`px-2 py-1 text-xs rounded-full ${
+                                        selectedTicket.status === 'active' ? 'bg-green-100 text-green-800' :
+                                        selectedTicket.status === 'completed' ? 'bg-blue-100 text-blue-800' :
+                                        'bg-red-100 text-red-800'
+                                    }`}>
+                                        {selectedTicket.status === 'active' ? 'Aktif' :
+                                        selectedTicket.status === 'completed' ? 'Selesai' : 'Dibatalkan'}
+                                    </span>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
-                        <h4 className="font-semibold text-green-800 dark:text-green-300 mb-3">Data Penumpang</h4>
-                        <div className="space-y-2 text-sm">
-                            <div className="flex justify-between">
-                                <span className="text-green-600 dark:text-green-400">Nama:</span>
-                                <span className="font-medium text-green-900 dark:text-green-200">{selectedTicket.passengerData.name}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-green-600 dark:text-green-400">NIK:</span>
-                                <span className="font-medium text-green-900 dark:text-green-200">{selectedTicket.passengerData.nik}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-green-600 dark:text-green-400">Telepon:</span>
-                                <span className="font-medium text-green-900 dark:text-green-200">{selectedTicket.passengerData.phone}</span>
+                        <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                            <h4 className="font-semibold text-green-800 dark:text-green-300 mb-3">Data Penumpang</h4>
+                            <div className="space-y-2 text-sm">
+                                <div className="flex justify-between">
+                                    <span className="text-green-600 dark:text-green-400">Nama:</span>
+                                    <span className="font-medium text-green-900 dark:text-green-200">{selectedTicket.passengerData.name}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-green-600 dark:text-green-400">NIK:</span>
+                                    <span className="font-medium text-green-900 dark:text-green-200">{selectedTicket.passengerData.nik}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-green-600 dark:text-green-400">Telepon:</span>
+                                    <span className="font-medium text-green-900 dark:text-green-200">{selectedTicket.passengerData.phone}</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <button 
-                        onClick={() => {
-                            Swal.fire({
-                                icon: 'info',
-                                title: 'Informasi',
-                                text: 'Fitur download akan segera tersedia!',
-                                confirmButtonText: 'Baik'
-                            });
-                        }}
-                        className="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                        Download Tiket
-                    </button>
+                        <button 
+                            onClick={() => {
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: 'Informasi',
+                                    text: 'Fitur download akan segera tersedia!',
+                                    confirmButtonText: 'Baik'
+                                });
+                            }}
+                            className="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                            Download Tiket
+                        </button>
+                    </div>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="p-4 space-y-4">
-            <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">Tiket Saya</h2>
-            
-        {}
-            <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
-                <button
-                    onClick={() => setActiveTab('active')}
-                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                        activeTab === 'active'
-                            ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
-                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
-                    }`}
-                >
-                    Tiket Aktif ({activeTickets.length})
-                </button>
-                <button
-                    onClick={() => setActiveTab('history')}
-                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                        activeTab === 'history'
-                            ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
-                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
-                    }`}
-                >
-                    Riwayat ({historyTickets.length})
-                </button>
+        <div className="space-y-4">
+            <div className="bg-gradient-to-br from-purple-600 to-blue-600 text-white p-4 rounded-b-3xl">
+                <div className="flex items-center justify-start">
+                    <div className="p-2">
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                        </svg>
+                    </div>
+                    <h1 className="text-xl font-bold">Tiket Saya</h1>
+                    <div></div>
+                </div>
+                <p className="text-sm opacity-90 mt-2 ml-10">Kelola tiket aktif dan riwayat perjalanan Anda</p>
             </div>
-            
-            <form onSubmit={handleSearchSubmit} className="space-y-3">
-                <div className="relative flex items-center">
-                    <input
-                        type="text"
-                        placeholder="Cari tiket..."
-                        value={searchQuery}
-                        onChange={handleSearchChange}
-                        className="w-full pl-10 pr-20 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
-                    />
-                    <SearchIcon className="absolute left-3 w-5 h-5 text-gray-400" />
-                    <div className="absolute right-3 flex items-center space-x-1">
-        {}
-                        {searchQuery && (
-                            <button 
-                                type="button" 
-                                onClick={() => {
-                                    setSearchQuery('');
-                                    setFilters({});
-                                }}
-                                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
-                                title="Clear search"
-                            >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
+
+            <div className="p-4 space-y-6">
+            {}
+                <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+                    <button
+                        onClick={() => setActiveTab('active')}
+                        className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                            activeTab === 'active'
+                                ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                                : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+                        }`}
+                    >
+                        Tiket Aktif ({activeTickets.length})
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('history')}
+                        className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                            activeTab === 'history'
+                                ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                                : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+                        }`}
+                    >
+                        Riwayat ({historyTickets.length})
+                    </button>
+                </div>
+                
+                <form onSubmit={handleSearchSubmit} className="space-y-3">
+                    <div className="relative flex items-center">
+                        <input
+                            type="text"
+                            placeholder="Cari tiket..."
+                            value={searchQuery}
+                            onChange={handleSearchChange}
+                            className="w-full pl-10 pr-20 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-800 focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
+                        />
+                        <SearchIcon className="absolute left-3 w-5 h-5 text-gray-400" />
+                        <div className="absolute right-3 flex items-center space-x-1">
+            {}
+                            {searchQuery && (
+                                <button 
+                                    type="button" 
+                                    onClick={() => {
+                                        setSearchQuery('');
+                                        setFilters({});
+                                    }}
+                                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
+                                    title="Clear search"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            )}
+                            <button type="button" onClick={handleVoiceSearch} className={`p-2 rounded-full ${isListening ? 'bg-red-500 text-white animate-pulse' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'}`}>
+                                <MicrophoneIcon className="w-5 h-5" />
                             </button>
-                        )}
-                        <button type="button" onClick={handleVoiceSearch} className={`p-2 rounded-full ${isListening ? 'bg-red-500 text-white animate-pulse' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'}`}>
-                            <MicrophoneIcon className="w-5 h-5" />
-                        </button>
-                        <button type="button" className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full">
-                            <FilterIcon className="w-5 h-5" />
-                        </button>
+                            <button type="button" className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full">
+                                <FilterIcon className="w-5 h-5" />
+                            </button>
+                        </div>
                     </div>
-                </div>
 
-        {}
-                {recognition && (
-                    <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center space-x-2">
-                        <span>Voice Search:</span>
-                        <span className={isListening ? "text-green-600" : "text-red-600"}>
-                            {isListening ? "Mendengarkan..." : "Tidak aktif"}
-                        </span>
-                        {searchQuery && (
-                            <span className="text-gray-400">
-                                "{searchQuery}"
+            {}
+                    {recognition && (
+                        <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center space-x-2">
+                            <span>Voice Search:</span>
+                            <span className={isListening ? "text-green-600" : "text-red-600"}>
+                                {isListening ? "Mendengarkan..." : "Tidak aktif"}
                             </span>
-                        )}
-                    </div>
-                )}
+                            {searchQuery && (
+                                <span className="text-gray-400">
+                                    "{searchQuery}"
+                                </span>
+                            )}
+                        </div>
+                    )}
 
-        {}
-                <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
-                    <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">
-                        🔍 Contoh Pencarian Natural Language:
-                    </h4>
-                    <div className="text-xs text-blue-700 dark:text-blue-400 space-y-1">
-                        <p>• "tiket bulan desember" - Cari tiket di bulan Desember</p>
-                        <p>• "kereta argo bromo" - Cari tiket kereta Argo Bromo</p>
-                        <p>• "jakarta ke yogyakarta" - Cari tiket rute Jakarta-Yogyakarta</p>
-                        <p>• "tahun 2024" - Cari tiket tahun 2024</p>
-                        <p>• "TIX-1234" - Cari dengan kode booking</p>
+            {}
+                    <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+                        <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">
+                            🔍 Contoh Pencarian:
+                        </h4>
+                        <div className="text-xs text-blue-700 dark:text-blue-400 space-y-1">
+                            <p>• "tiket bulan desember" - Cari tiket di bulan Desember</p>
+                            <p>• "kereta argo bromo" - Cari tiket kereta Argo Bromo</p>
+                            <p>• "jakarta ke yogyakarta" - Cari tiket rute Jakarta-Yogyakarta</p>
+                            <p>• "tahun 2024" - Cari tiket tahun 2024</p>
+                            <p>• "TIX-1234" - Cari dengan kode booking</p>
+                        </div>
                     </div>
+                </form>
+
+                <div className="space-y-4">
+                    {activeTab === 'active' ? (
+                        activeTickets.length > 0 ? (
+                            activeTickets.map(ticket => (
+                                <div key={ticket.id} onClick={() => handleTicketClick(ticket)} className="cursor-pointer">
+                                    <BookedTicketCard ticket={ticket} />
+                                </div>
+                            ))
+                        ) : (
+                            <div className="text-center py-8">
+                                <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                </svg>
+                                <p className="text-gray-500 dark:text-gray-400">Belum ada tiket aktif</p>
+                                <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Pesan tiket kereta untuk melihatnya di sini</p>
+                            </div>
+                        )
+                    ) : (
+                        historyTickets.length > 0 ? (
+                            historyTickets.map(ticket => (
+                                <div key={ticket.id} onClick={() => handleTicketClick(ticket)} className="cursor-pointer">
+                                    <BookedTicketCard ticket={ticket} />
+                                </div>
+                            ))
+                        ) : (
+                            <div className="text-center py-8">
+                                <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                </svg>
+                                <p className="text-gray-500 dark:text-gray-400">Belum ada riwayat tiket</p>
+                                <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Riwayat perjalanan akan muncul di sini</p>
+                            </div>
+                        )
+                    )}
                 </div>
-            </form>
-
-            <div className="space-y-4">
-                {activeTab === 'active' ? (
-                    activeTickets.length > 0 ? (
-                        activeTickets.map(ticket => (
-                            <div key={ticket.id} onClick={() => handleTicketClick(ticket)} className="cursor-pointer">
-                                <BookedTicketCard ticket={ticket} />
-                            </div>
-                        ))
-                    ) : (
-                        <div className="text-center py-8">
-                            <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                            </svg>
-                            <p className="text-gray-500 dark:text-gray-400">Belum ada tiket aktif</p>
-                            <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Pesan tiket kereta untuk melihatnya di sini</p>
-                        </div>
-                    )
-                ) : (
-                    historyTickets.length > 0 ? (
-                        historyTickets.map(ticket => (
-                            <div key={ticket.id} onClick={() => handleTicketClick(ticket)} className="cursor-pointer">
-                                <BookedTicketCard ticket={ticket} />
-                            </div>
-                        ))
-                    ) : (
-                        <div className="text-center py-8">
-                            <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                            </svg>
-                            <p className="text-gray-500 dark:text-gray-400">Belum ada riwayat tiket</p>
-                            <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Riwayat perjalanan akan muncul di sini</p>
-                        </div>
-                    )
-                )}
             </div>
-
         </div>
     );
 };
 
 const BookedTicketCard: React.FC<{ ticket: BookedTicket }> = ({ ticket }) => {
     const formatTime = (dateTime: string | Date | undefined) => {
-        // Handle undefined or null values
         if (!dateTime) {
-            console.error('Date is undefined or null');
+            Swal.fire({
+              icon: 'warning',
+              title: 'Data Tidak Valid',
+              text: 'Tanggal tidak tersedia.',
+              confirmButtonText: 'Baik'
+            });
             return 'Invalid Date';
         }
         
         let date: Date;
         
         if (typeof dateTime === 'string') {
-            // Handle different string formats
             if (dateTime.includes('T')) {
                 date = new Date(dateTime);
             } else if (dateTime.includes('-')) {
@@ -710,7 +737,12 @@ const BookedTicketCard: React.FC<{ ticket: BookedTicket }> = ({ ticket }) => {
         }
         
         if (isNaN(date.getTime())) {
-            console.error('Invalid date:', dateTime);
+            Swal.fire({
+              icon: 'warning',
+              title: 'Data Tidak Valid',
+              text: 'Format tanggal tidak valid.',
+              confirmButtonText: 'Baik'
+            });
             return 'Invalid Date';
         }
         

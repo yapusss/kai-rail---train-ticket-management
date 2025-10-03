@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NavigationTab } from '../types';
+import { NavigationTab, AvailableTicket } from '../types';
 import { ArrowLeftIcon } from '../components/icons/FeatureIcons';
 import { TrainDataService } from '../services/trainDataService';
 import Swal from 'sweetalert2';
@@ -8,12 +8,16 @@ interface InterCityBookingScreenProps {
     setActiveTab: (tab: NavigationTab) => void;
     setSelectedServiceType: (serviceType: string) => void;
     setBookingFormData: (data: any) => void;
+    setSelectedTicket: (ticket: AvailableTicket) => void;
+    showTrainListDirectly?: boolean;
 }
 
 const InterCityBookingScreen: React.FC<InterCityBookingScreenProps> = ({ 
     setActiveTab, 
     setSelectedServiceType, 
-    setBookingFormData 
+    setBookingFormData,
+    setSelectedTicket,
+    showTrainListDirectly = false
 }) => {
     const interCityService = TrainDataService.getTrainServiceById('intercity');
     const [showTrainList, setShowTrainList] = useState<boolean>(false);
@@ -40,6 +44,37 @@ const InterCityBookingScreen: React.FC<InterCityBookingScreenProps> = ({
         setActiveTab(NavigationTab.BookingForm);
     };
 
+    const handleBookTicket = (train: any) => {
+        const today = new Date();
+        const departureDate = new Date(today.getTime() + (Math.floor(Math.random() * 30) + 1) * 24 * 60 * 60 * 1000);
+        const arrivalDate = new Date(departureDate.getTime() + 8 * 60 * 60 * 1000);
+        
+        const departureTimeStr = train.schedule?.[0]?.departure || '08:00';
+        const arrivalTimeStr = train.schedule?.[0]?.arrival || '16:00';
+        
+        const [depHour, depMin] = departureTimeStr.split(':').map(Number);
+        const [arrHour, arrMin] = arrivalTimeStr.split(':').map(Number);
+        
+        departureDate.setHours(depHour || 8, depMin || 0, 0, 0);
+        arrivalDate.setHours(arrHour || 16, arrMin || 0, 0, 0);
+        
+        const availableTicket: AvailableTicket = {
+            id: `ticket-${train.id}-${Date.now()}`,
+            trainName: train.name,
+            trainClass: train.classes[0]?.name || 'Economy',
+            departureStation: train.route?.from?.name || 'Unknown',
+            departureTime: departureDate.toISOString(),
+            arrivalStation: train.route?.to?.name || 'Unknown',
+            arrivalTime: arrivalDate.toISOString(),
+            price: train.classes?.[0]?.price || 100000,
+            availableSeats: Math.floor(Math.random() * 50) + 10,
+            duration: train.schedule?.[0]?.duration || '8 jam'
+        };
+
+        setSelectedTicket(availableTicket);
+        setActiveTab(NavigationTab.PassengerForm);
+    };
+
     const handleSearchTrains = () => {
         if (bookingForm.departureStation && bookingForm.arrivalStation && bookingForm.departureDate) {
             setShowTrainList(true);
@@ -63,7 +98,7 @@ const InterCityBookingScreen: React.FC<InterCityBookingScreenProps> = ({
         );
     }
 
-    if (!showTrainList) {
+    if (!showTrainList && !showTrainListDirectly) {
         return (
             <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         {}
@@ -181,7 +216,12 @@ const InterCityBookingScreen: React.FC<InterCityBookingScreenProps> = ({
                     <div></div>
                 </div>
                 <p className="text-sm opacity-90 mt-2 ml-10">
-                    {bookingForm.departureStation} → {bookingForm.arrivalStation}
+                    {showTrainListDirectly 
+                        ? (bookingForm.departureStation && bookingForm.arrivalStation 
+                            ? `${bookingForm.departureStation} → ${bookingForm.arrivalStation}`
+                            : 'Pilih Kereta yang Tersedia')
+                        : `${bookingForm.departureStation} → ${bookingForm.arrivalStation}`
+                    }
                 </p>
             </div>
 
@@ -190,13 +230,13 @@ const InterCityBookingScreen: React.FC<InterCityBookingScreenProps> = ({
                 <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Kereta Tersedia</h2>
                 <div className="space-y-3">
                     {interCityService.trains?.map((train: any, index: number) => (
-                        <div key={train.id} className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md">
+                        <div key={train.id} className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md border border-gray-200 dark:border-gray-700">
                             <div className="flex justify-between items-start mb-3">
                                 <div>
                                     <h3 className="text-lg font-bold text-gray-900 dark:text-white">{train.name}</h3>
                                     <p className="text-sm text-gray-600 dark:text-gray-400">
                                         {train.route?.from?.city && train.route?.to?.city 
-                                            ? `${train.route.from.city} - ${train.route.to.city}`
+                                            ? `${train.route.from.city} → ${train.route.to.city}`
                                             : train.route || 'N/A'
                                         }
                                     </p>
@@ -260,7 +300,7 @@ const InterCityBookingScreen: React.FC<InterCityBookingScreenProps> = ({
                             )}
 
                             <button 
-                                onClick={() => handleBookTrain(train.name, `${train.route?.from?.city} - ${train.route?.to?.city}`)}
+                                onClick={() => handleBookTicket(train)}
                                 className={`w-full py-3 ${interCityService.bgColor} text-white font-semibold rounded-lg hover:opacity-90 transition-opacity`}
                             >
                                 Pesan Tiket

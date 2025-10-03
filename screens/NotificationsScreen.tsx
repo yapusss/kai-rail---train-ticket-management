@@ -127,12 +127,6 @@ const NotificationsScreen: React.FC<NotificationsScreenProps> = ({ setActiveTab 
                         </div>
                     ))}
                 </div>
-
-                <div className="text-center pt-4">
-                    <button className="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
-                        Muat Lebih Banyak
-                    </button>
-                </div>
             </div>
         </div>
     );

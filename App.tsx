@@ -3,6 +3,7 @@ import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
 import { NavigationTab } from "./types";
+import { interpretVoiceCommand } from "./services/geminiService";
 import BottomNavBar from "./components/BottomNavBar";
 import DashboardScreen from "./screens/DashboardScreen";
 import PlannerScreen from "./screens/PlannerScreen";
@@ -15,6 +16,7 @@ import TicketsScreen from "./screens/TicketsScreen";
 import AccountScreen from "./screens/AccountScreen";
 import NotificationsScreen from "./screens/NotificationsScreen";
 import { SunIcon, MoonIcon } from "./components/icons/ThemeIcons";
+import Swal from 'sweetalert2';
 
 const App: React.FC = () => {
   const [theme, setTheme] = useState<"light" | "dark">("light");
@@ -26,6 +28,9 @@ const App: React.FC = () => {
   const [bookingFormData, setBookingFormData] = useState<any>(null);
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
   const [bookedTicket, setBookedTicket] = useState<any>(null);
+  const [showInterCityTrainList, setShowInterCityTrainList] = useState<boolean>(false);
+  const [isProcessingAI, setIsProcessingAI] = useState<boolean>(false);
+  const [voiceCommandContext, setVoiceCommandContext] = useState<string>('dashboard');
   
   const [voiceCommandFeedback, setVoiceCommandFeedback] = useState<string>('');
 
@@ -44,58 +49,158 @@ const App: React.FC = () => {
     showFeedback(`Mengubah ke tema ${theme === 'light' ? 'gelap' : 'terang'}...`);
   };
 
+  const handleVoiceCommand = async (transcript: string): Promise<void> => {
+    setIsProcessingAI(true);
+    showFeedback("AI sedang memproses perintah...");
+    
+    try {
+      const commandResult = await interpretVoiceCommand(transcript);
+      if (commandResult) {
+        executeCommand(commandResult);
+      } else {
+        executeSimpleCommand(transcript);
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Kesalahan',
+        text: 'Terjadi kesalahan saat memproses perintah suara.',
+        confirmButtonText: 'Baik'
+      });
+      executeSimpleCommand(transcript);
+    } finally {
+      setIsProcessingAI(false);
+    }
+  };
+
+  const executeCommand = (commandResult: any) => {
+    if (!commandResult) {
+      showFeedback("Maaf, tidak dapat memproses perintah. Silakan coba lagi.");
+      return;
+    }
+
+    switch (commandResult.action) {
+      case 'DASHBOARD':
+        navigateWithFeedback(NavigationTab.Dashboard, commandResult.feedback || "Membuka Dashboard...");
+        setVoiceCommandContext('dashboard');
+        break;
+      case 'PLANNER':
+        navigateWithFeedback(NavigationTab.Planner, commandResult.feedback || "Membuka AI Trip Planner...");
+        setVoiceCommandContext('planner');
+        break;
+      case 'INTERCITY':
+        navigateWithFeedback(NavigationTab.InterCityBooking, commandResult.feedback || "Membuka Inter City Booking...");
+        setVoiceCommandContext('intercity');
+        break;
+      case 'COMMUTER':
+        navigateWithFeedback(NavigationTab.CommuterLine, commandResult.feedback || "Membuka Commuter Line...");
+        setVoiceCommandContext('commuter');
+        break;
+      case 'TICKETS':
+        navigateWithFeedback(NavigationTab.Tickets, commandResult.feedback || "Membuka Tiket Saya...");
+        setVoiceCommandContext('tickets');
+        break;
+      case 'ACCOUNT':
+        navigateWithFeedback(NavigationTab.Account, commandResult.feedback || "Membuka Akun...");
+        setVoiceCommandContext('account');
+        break;
+      case 'BOOKING_FORM':
+        navigateWithFeedback(NavigationTab.BookingForm, commandResult.feedback || "Membuka Form Pemesanan...");
+        setVoiceCommandContext('booking');
+        break;
+      case 'TICKET_LIST':
+        navigateWithFeedback(NavigationTab.TicketList, commandResult.feedback || "Membuka Daftar Tiket...");
+        setVoiceCommandContext('ticketlist');
+        break;
+      case 'THEME_TOGGLE':
+        toggleThemeWithFeedback();
+        break;
+      case 'SHOW_TRAIN_LIST':
+        if (voiceCommandContext === 'intercity') {
+          setShowInterCityTrainList(true);
+          showFeedback(commandResult.feedback || "Menampilkan daftar kereta...");
+        } else {
+          navigateWithFeedback(NavigationTab.InterCityBooking, "Membuka Inter City untuk melihat kereta...");
+          setShowInterCityTrainList(true);
+          setVoiceCommandContext('intercity');
+        }
+        break;
+      case 'BOOK_TICKET':
+        if (voiceCommandContext === 'intercity') {
+          showFeedback(commandResult.feedback || "Memproses pemesanan tiket...");
+        } else {
+          navigateWithFeedback(NavigationTab.InterCityBooking, "Membuka Inter City untuk pemesanan...");
+          setVoiceCommandContext('intercity');
+        }
+        break;
+      case 'SEARCH_TRAIN':
+        showFeedback(commandResult.feedback || "Memulai pencarian kereta...");
+        break;
+      case 'FILTER_TICKETS':
+        showFeedback(commandResult.feedback || "Memfilter tiket...");
+        break;
+      case 'NAVIGATE_BACK':
+        handleBackNavigation();
+        break;
+      case 'VOICE_SEARCH':
+        showFeedback(commandResult.feedback || "Memulai pencarian dengan suara...");
+        break;
+      default:
+        showFeedback(commandResult.feedback || "Perintah tidak dikenali. Silakan coba lagi.");
+    }
+  };
+
+  const executeSimpleCommand = (transcript: string) => {
+    const lowerTranscript = transcript.toLowerCase();
+    
+    if (lowerTranscript.includes('dashboard') || lowerTranscript.includes('beranda') || lowerTranscript.includes('home')) {
+      navigateWithFeedback(NavigationTab.Dashboard, "Membuka Dashboard...");
+      setVoiceCommandContext('dashboard');
+    } else if (lowerTranscript.includes('inter city') || lowerTranscript.includes('intercity')) {
+      navigateWithFeedback(NavigationTab.InterCityBooking, "Membuka Inter City...");
+      setVoiceCommandContext('intercity');
+    } else if (lowerTranscript.includes('commuter')) {
+      navigateWithFeedback(NavigationTab.CommuterLine, "Membuka Commuter Line...");
+      setVoiceCommandContext('commuter');
+    } else if (lowerTranscript.includes('tiket') || lowerTranscript.includes('ticket')) {
+      navigateWithFeedback(NavigationTab.Tickets, "Membuka Tiket Saya...");
+      setVoiceCommandContext('tickets');
+    } else if (lowerTranscript.includes('akun') || lowerTranscript.includes('account')) {
+      navigateWithFeedback(NavigationTab.Account, "Membuka Akun...");
+      setVoiceCommandContext('account');
+    } else if (lowerTranscript.includes('planner') || lowerTranscript.includes('rencana')) {
+      navigateWithFeedback(NavigationTab.Planner, "Membuka AI Trip Planner...");
+      setVoiceCommandContext('planner');
+    } else if (lowerTranscript.includes('tema') || lowerTranscript.includes('theme')) {
+      toggleThemeWithFeedback();
+    } else {
+      showFeedback("Perintah tidak dikenali. Silakan coba lagi.");
+    }
+  };
+
+  const handleBackNavigation = () => {
+    switch (voiceCommandContext) {
+      case 'intercity':
+        if (showInterCityTrainList) {
+          setShowInterCityTrainList(false);
+          showFeedback("Kembali ke form pencarian...");
+        } else {
+          navigateWithFeedback(NavigationTab.Dashboard, "Kembali ke Dashboard...");
+          setVoiceCommandContext('dashboard');
+        }
+        break;
+      default:
+        navigateWithFeedback(NavigationTab.Dashboard, "Kembali ke Dashboard...");
+        setVoiceCommandContext('dashboard');
+    }
+  };
+
   const commands = [
     {
-      command: ["buka dashboard", "dashboard"],
-      callback: () => navigateWithFeedback(NavigationTab.Dashboard, "Membuka Dashboard..."),
-    },
-    {
-      command: ["buka planner", "planner"],
-      callback: () => navigateWithFeedback(NavigationTab.Planner, "Membuka Planner..."),
-    },
-    {
-      command: ["buka inter city", "inter city", "intercity"],
-      callback: () => navigateWithFeedback(NavigationTab.InterCityBooking, "Membuka Inter City..."),
-    },
-    {
-      command: ["buka commuter line", "commuter line", "commuter"],
-      callback: () => navigateWithFeedback(NavigationTab.CommuterLine, "Membuka Commuter Line..."),
-    },
-    {
-      command: ["buka tiket", "tiket", "tickets"],
-      callback: () => navigateWithFeedback(NavigationTab.Tickets, "Membuka Tiket Saya..."),
-    },
-    {
-      command: ["buka akun", "akun", "account"],
-      callback: () => navigateWithFeedback(NavigationTab.Account, "Membuka Akun..."),
-    },
-    {
-      command: ["buka promo", "promo", "promotion"],
-      callback: () => navigateWithFeedback(NavigationTab.Promotion, "Membuka Promosi..."),
-    },
-    {
-      command: ["buka trip planner", "trip planner", "ai trip planner", "buka trip", "trip", "perencanaan perjalanan", "rencana perjalanan"],
-      callback: () => navigateWithFeedback(NavigationTab.Planner, "Membuka AI Trip Planner..."),
-    },
-    {
-      command: ["kembali ke dashboard", "buka dashboard", "dashboard", "home", "beranda"],
-      callback: () => navigateWithFeedback(NavigationTab.Dashboard, "Kembali ke Dashboard..."),
-    },
-    {
-      command: ["ganti tema", "ubah tema", "toggle theme"],
-      callback: toggleThemeWithFeedback,
-    },
-    {
-      command: ["buat rencana perjalanan", "buat trip", "buat perjalanan", "rencana baru"],
-      callback: () => navigateWithFeedback(NavigationTab.Planner, "Membuka Trip Planner untuk rencana baru..."),
-    },
-    {
-      command: ["buka booking form", "booking form", "form pemesanan"],
-      callback: () => navigateWithFeedback(NavigationTab.BookingForm, "Membuka Form Pemesanan..."),
-    },
-    {
-      command: ["lihat daftar tiket", "daftar tiket", "list tiket"],
-      callback: () => navigateWithFeedback(NavigationTab.TicketList, "Membuka Daftar Tiket..."),
+      command: ["*"],
+      callback: (spokenText: string) => {
+        handleVoiceCommand(spokenText);
+      },
     },
   ];
 
@@ -105,6 +210,12 @@ const App: React.FC = () => {
     resetTranscript,
     browserSupportsSpeechRecognition,
   } = useSpeechRecognition({ commands });
+
+  useEffect(() => {
+    if (transcript && transcript.trim()) {
+      handleVoiceCommand(transcript);
+    }
+  }, [transcript]);
 
   useEffect(() => {
   }, [browserSupportsSpeechRecognition]);
@@ -121,26 +232,63 @@ const App: React.FC = () => {
     setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
   };
 
+  const handleSetActiveTab = (tab: NavigationTab) => {
+    setActiveTab(tab);
+    
+    switch (tab) {
+      case NavigationTab.Dashboard:
+        setVoiceCommandContext('dashboard');
+        break;
+      case NavigationTab.InterCityBooking:
+        setVoiceCommandContext('intercity');
+        break;
+      case NavigationTab.CommuterLine:
+        setVoiceCommandContext('commuter');
+        break;
+      case NavigationTab.Tickets:
+        setVoiceCommandContext('tickets');
+        break;
+      case NavigationTab.Account:
+        setVoiceCommandContext('account');
+        break;
+      case NavigationTab.Planner:
+        setVoiceCommandContext('planner');
+        break;
+      case NavigationTab.BookingForm:
+        setVoiceCommandContext('booking');
+        break;
+      case NavigationTab.TicketList:
+        setVoiceCommandContext('ticketlist');
+        break;
+      default:
+        setVoiceCommandContext('dashboard');
+    }
+    
+    if (tab !== NavigationTab.InterCityBooking) {
+      setShowInterCityTrainList(false);
+    }
+  };
+
   const renderScreen = () => {
     switch (activeTab) {
       case NavigationTab.Dashboard:
-        return <DashboardScreen setActiveTab={setActiveTab} />;
+        return <DashboardScreen setActiveTab={handleSetActiveTab} />;
       case NavigationTab.Planner:
         return <PlannerScreen />;
       case NavigationTab.InterCityBooking:
-        return <InterCityBookingScreen setActiveTab={setActiveTab} setSelectedServiceType={setSelectedServiceType} setBookingFormData={setBookingFormData} />;
+        return <InterCityBookingScreen setActiveTab={handleSetActiveTab} setSelectedServiceType={setSelectedServiceType} setBookingFormData={setBookingFormData} setSelectedTicket={setSelectedTicket} showTrainListDirectly={showInterCityTrainList} />;
       case NavigationTab.CommuterLine:
-        return <CommuterLineScreen setActiveTab={setActiveTab} setSelectedServiceType={setSelectedServiceType} setBookingFormData={setBookingFormData} />;
+        return <CommuterLineScreen setActiveTab={handleSetActiveTab} setSelectedServiceType={setSelectedServiceType} setBookingFormData={setBookingFormData} />;
       case NavigationTab.BookingForm:
-        return <BookingFormScreen setActiveTab={setActiveTab} selectedServiceType={selectedServiceType} setBookingFormData={setBookingFormData} />;
+        return <BookingFormScreen setActiveTab={handleSetActiveTab} selectedServiceType={selectedServiceType} setBookingFormData={setBookingFormData} />;
       case NavigationTab.TicketList:
-        return <TicketListScreen setActiveTab={setActiveTab} bookingFormData={bookingFormData} setSelectedTicket={setSelectedTicket} />;
+        return <TicketListScreen setActiveTab={handleSetActiveTab} bookingFormData={bookingFormData} setSelectedTicket={setSelectedTicket} />;
       case NavigationTab.PassengerForm:
-        return <PassengerFormScreen setActiveTab={setActiveTab} selectedTicket={selectedTicket} setBookedTicket={setBookedTicket} />;
+        return <PassengerFormScreen setActiveTab={handleSetActiveTab} selectedTicket={selectedTicket} setBookedTicket={setBookedTicket} setShowInterCityTrainList={setShowInterCityTrainList} />;
       case NavigationTab.Tickets:
         return <TicketsScreen />;
       case NavigationTab.Notifications:
-        return <NotificationsScreen setActiveTab={setActiveTab} />;
+        return <NotificationsScreen setActiveTab={handleSetActiveTab} />;
       case NavigationTab.Promotion:
         return (
           <div className="p-4 text-center text-gray-600 dark:text-gray-400">
@@ -150,7 +298,7 @@ const App: React.FC = () => {
       case NavigationTab.Account:
         return <AccountScreen />;
       default:
-        return <DashboardScreen setActiveTab={setActiveTab} />;
+        return <DashboardScreen setActiveTab={handleSetActiveTab} />;
     }
   };
 
@@ -237,11 +385,22 @@ const App: React.FC = () => {
         </header>
 
         {voiceCommandFeedback && (
-          <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg animate-pulse">
+          <div className={`fixed top-20 left-1/2 transform -translate-x-1/2 z-50 px-4 py-2 rounded-lg shadow-lg animate-pulse ${
+            isProcessingAI 
+              ? 'bg-blue-500 text-white' 
+              : 'bg-green-500 text-white'
+          }`}>
             <div className="flex items-center gap-2">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
+              {isProcessingAI ? (
+                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              ) : (
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+              )}
               <span className="text-sm font-medium">{voiceCommandFeedback}</span>
             </div>
           </div>
@@ -252,7 +411,7 @@ const App: React.FC = () => {
         </main>
 
         {activeTab !== NavigationTab.Notifications && (
-          <BottomNavBar activeTab={activeTab} setActiveTab={setActiveTab} />
+          <BottomNavBar activeTab={activeTab} setActiveTab={handleSetActiveTab} />
         )}
       </div>
     </div>

@@ -1,13 +1,19 @@
 
 import { GoogleGenAI, Type, GenerateContentResponse } from "@google/genai";
 import type { TripPlan } from '../types';
+import Swal from 'sweetalert2';
 
 // IMPORTANT: Do not expose this key in a real-world application.
 // This should be handled securely, e.g., via a backend proxy.
 const API_KEY = process.env.API_KEY;
 
 if (!API_KEY) {
-  console.warn("API_KEY is not set. AI features will be disabled.");
+  Swal.fire({
+    icon: 'warning',
+    title: 'AI Tidak Tersedia',
+    text: 'API Key tidak ditemukan. Fitur AI akan dinonaktifkan.',
+    confirmButtonText: 'Baik'
+  });
 }
 
 const ai = new GoogleGenAI({ apiKey: API_KEY! });
@@ -67,7 +73,12 @@ export const generateTripPlan = async (prompt: string): Promise<TripPlan | null>
     const jsonText = response.text.trim();
     return JSON.parse(jsonText) as TripPlan;
   } catch (error) {
-    console.error("Error generating trip plan:", error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Kesalahan AI',
+      text: 'Terjadi kesalahan saat membuat rencana perjalanan.',
+      confirmButtonText: 'Baik'
+    });
     return null;
   }
 };
@@ -98,7 +109,90 @@ export const interpretSearchQuery = async (query: string): Promise<{ month?: num
         const jsonText = response.text.trim();
         return JSON.parse(jsonText);
     } catch (error) {
-        console.error("Error interpreting search query:", error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Kesalahan AI',
+          text: 'Terjadi kesalahan saat memproses pencarian.',
+          confirmButtonText: 'Baik'
+        });
+        return null;
+    }
+};
+
+/**
+ * AI-powered voice command interpreter
+ * Translates natural language voice commands into system actions
+ * 
+ * @param command - The voice command text from speech recognition
+ * @returns Object containing action, feedback message, and optional parameters
+ */
+export const interpretVoiceCommand = async (command: string): Promise<{ action: string; feedback: string; params?: string } | null> => {
+    if (!API_KEY) return null;
+    try {
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: `You are an AI assistant for a train ticket management app called "KAI Access". 
+            Analyze the user's voice command and translate it into a system action.
+            
+            Available actions and their variations:
+            - DASHBOARD: "dashboard", "home", "beranda", "halaman utama", "pulang", "kembali ke awal"
+            - PLANNER: "planner", "trip planner", "ai trip planner", "perencanaan", "rencana perjalanan", "buat perjalanan", "buat trip"
+            - INTERCITY: "inter city", "intercity", "kereta jarak jauh", "kereta antar kota", "tiket jarak jauh", "pilih inter city", "buka inter city"
+            - COMMUTER: "commuter line", "commuter", "kereta commuter", "KRL", "kereta lokal", "pilih commuter", "buka commuter"
+            - TICKETS: "tiket", "tickets", "tiket saya", "riwayat tiket", "daftar tiket", "lihat tiket", "pilih tiket", "buka tiket"
+            - ACCOUNT: "akun", "account", "profil", "profile", "pengaturan", "settings", "pilih akun", "buka akun"
+            - BOOKING_FORM: "booking form", "form pemesanan", "pesan tiket", "beli tiket"
+            - TICKET_LIST: "daftar tiket", "list tiket", "lihat daftar tiket"
+            - THEME_TOGGLE: "ganti tema", "ubah tema", "toggle theme", "dark mode", "light mode", "mode gelap", "mode terang"
+            - SHOW_TRAIN_LIST: "tampilkan kereta", "lihat kereta", "daftar kereta", "pilih kereta", "tampilkan daftar kereta"
+            - BOOK_TICKET: "pesan tiket", "beli tiket", "booking tiket", "pesan sekarang"
+            - SEARCH_TRAIN: "cari kereta", "search", "cari", "find"
+            - FILTER_TICKETS: "filter tiket", "saring tiket", "urutkan tiket"
+            - NAVIGATE_BACK: "kembali", "back", "mundur", "sebelumnya"
+            - VOICE_SEARCH: "cari dengan suara", "voice search", "pencarian suara"
+            
+            User Command: "${command}"
+            
+            Determine the most appropriate action and provide a natural feedback message in Indonesian.
+            The feedback should be friendly and confirm what action is being taken.
+            
+            Examples:
+            - "buka dashboard" → action: "DASHBOARD", feedback: "Membuka Dashboard..."
+            - "pilih inter city" → action: "INTERCITY", feedback: "Membuka Inter City Booking..."
+            - "tampilkan kereta" → action: "SHOW_TRAIN_LIST", feedback: "Menampilkan daftar kereta..."
+            - "pesan tiket" → action: "BOOK_TICKET", feedback: "Memproses pemesanan tiket..."`,
+            config: {
+                responseMimeType: "application/json",
+                responseSchema: {
+                    type: Type.OBJECT,
+                    properties: {
+                        action: { 
+                            type: Type.STRING, 
+                            description: "The system action to perform. Must be one of: DASHBOARD, PLANNER, INTERCITY, COMMUTER, TICKETS, ACCOUNT, BOOKING_FORM, TICKET_LIST, THEME_TOGGLE, SHOW_TRAIN_LIST, BOOK_TICKET, SEARCH_TRAIN, FILTER_TICKETS, NAVIGATE_BACK, VOICE_SEARCH" 
+                        },
+                        feedback: { 
+                            type: Type.STRING, 
+                            description: "A friendly feedback message in Indonesian to show the user what action is being performed" 
+                        },
+                        params: { 
+                            type: Type.STRING, 
+                            description: "Optional parameters for the action as JSON string (e.g., search query, filter options, etc.)" 
+                        }
+                    },
+                    required: ["action", "feedback"]
+                }
+            }
+        });
+
+        const jsonText = response.text.trim();
+        return JSON.parse(jsonText);
+    } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Kesalahan AI',
+          text: 'Terjadi kesalahan saat memproses perintah suara.',
+          confirmButtonText: 'Baik'
+        });
         return null;
     }
 };

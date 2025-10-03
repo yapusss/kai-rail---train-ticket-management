@@ -39,7 +39,12 @@ const BookingFormScreen: React.FC<BookingFormScreenProps> = ({
 
   const handleSearchTickets = () => {
     if (!formData.departureStation || !formData.arrivalStation || !formData.departureDate) {
-      alert('Mohon lengkapi semua field yang diperlukan');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Perhatian',
+        text: 'Mohon lengkapi semua field yang diperlukan',
+        confirmButtonText: 'Baik'
+      });
       return;
     }
 
