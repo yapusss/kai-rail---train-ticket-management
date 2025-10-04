@@ -582,7 +582,7 @@ const TicketsScreen: React.FC<TicketsScreenProps> = ({ setActiveTab: setParentAc
                             </div>
                         </div>
 
-                        {/* Rating & Feedback Section */}
+                        {}
                         {selectedTicket.status === 'completed' && (
                             <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg">
                                 <h4 className="font-semibold text-yellow-800 dark:text-yellow-300 mb-3">Beri Rating & Feedback</h4>
@@ -650,7 +650,6 @@ const TicketsScreen: React.FC<TicketsScreenProps> = ({ setActiveTab: setParentAc
                                                 `,
                                                 confirmButtonText: 'Baik'
                                             }).then(() => {
-                                                // Reset form
                                                 setRating(0);
                                                 setFeedback('');
                                             });

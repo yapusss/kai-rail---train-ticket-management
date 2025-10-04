@@ -14,7 +14,7 @@ export const TrainIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
       alt="Train Icon" 
       className="w-8 h-8 object-contain"
       style={{ 
-        filter: 'brightness(0) invert(1)', // Makes image white
+        filter: 'brightness(0) invert(1)',
         ...props.style 
       }}
     />
