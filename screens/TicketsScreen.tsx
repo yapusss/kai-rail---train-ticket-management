@@ -233,6 +233,8 @@ const TicketsScreen: React.FC<TicketsScreenProps> = ({ setActiveTab: setParentAc
     const [showTicketDetail, setShowTicketDetail] = useState(false);
     const [activeTab, setActiveTab] = useState<'active' | 'history'>('active');
     const [showSearchExamples, setShowSearchExamples] = useState(true);
+    const [rating, setRating] = useState<number>(0);
+    const [feedback, setFeedback] = useState<string>('');
 
     const { announcePage, announceElement, announceAction, announceError, announceSuccess, settings } = useAccessibility();
 
@@ -270,6 +272,8 @@ const TicketsScreen: React.FC<TicketsScreenProps> = ({ setActiveTab: setParentAc
     const closeTicketDetail = () => {
         setShowTicketDetail(false);
         setSelectedTicket(null);
+        setRating(0);
+        setFeedback('');
     };
 
     const recognition = useMemo(() => {
@@ -577,6 +581,88 @@ const TicketsScreen: React.FC<TicketsScreenProps> = ({ setActiveTab: setParentAc
                                 </div>
                             </div>
                         </div>
+
+                        {/* Rating & Feedback Section */}
+                        {selectedTicket.status === 'completed' && (
+                            <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg">
+                                <h4 className="font-semibold text-yellow-800 dark:text-yellow-300 mb-3">Beri Rating & Feedback</h4>
+                                <div className="space-y-4">
+                                    <div>
+                                        <p className="text-sm text-yellow-700 dark:text-yellow-400 mb-2">Bagaimana pengalaman perjalanan Anda?</p>
+                                        <div className="flex space-x-2">
+                                            {[1, 2, 3, 4, 5].map((star) => (
+                                                <button
+                                                    key={star}
+                                                    onClick={() => setRating(star)}
+                                                    className={`transition-colors ${
+                                                        star <= rating 
+                                                            ? 'text-yellow-500' 
+                                                            : 'text-gray-300 hover:text-yellow-400'
+                                                    }`}
+                                                >
+                                                    <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                    </svg>
+                                                </button>
+                                            ))}
+                                        </div>
+                                        {rating > 0 && (
+                                            <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
+                                                Rating: {rating} bintang
+                                            </p>
+                                        )}
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-yellow-700 dark:text-yellow-400 mb-2">
+                                            Feedback (opsional)
+                                        </label>
+                                        <textarea
+                                            value={feedback}
+                                            onChange={(e) => setFeedback(e.target.value)}
+                                            placeholder="Bagikan pengalaman perjalanan Anda..."
+                                            className="w-full p-3 border border-yellow-300 dark:border-yellow-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 resize-none"
+                                            rows={3}
+                                        />
+                                    </div>
+                                    
+                                    <button 
+                                        onClick={() => {
+                                            if (rating === 0) {
+                                                Swal.fire({
+                                                    icon: 'warning',
+                                                    title: 'Pilih Rating',
+                                                    text: 'Silakan berikan rating terlebih dahulu',
+                                                    confirmButtonText: 'Baik'
+                                                });
+                                                return;
+                                            }
+                                            
+                                            Swal.fire({
+                                                icon: 'success',
+                                                title: 'Feedback Terkirim!',
+                                                html: `
+                                                    <div class="text-left">
+                                                        <p><strong>Rating:</strong> ${rating} bintang</p>
+                                                        ${feedback ? `<p><strong>Feedback:</strong> ${feedback}</p>` : ''}
+                                                        <p class="mt-2">Terima kasih atas feedback Anda. Ini akan membantu kami meningkatkan layanan.</p>
+                                                    </div>
+                                                `,
+                                                confirmButtonText: 'Baik'
+                                            }).then(() => {
+                                                // Reset form
+                                                setRating(0);
+                                                setFeedback('');
+                                            });
+                                        }}
+                                        className="w-full bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-yellow-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                        disabled={rating === 0}
+                                    >
+                                        Kirim Feedback
+                                    </button>
+                                </div>
+                            </div>
+                        )}
 
                         <button 
                             onClick={() => {
